@@ -9,21 +9,19 @@ import org.apache.spark.sql.SparkSession
 
 object ACLs extends Serializable {
 
-  def modifyTableACLs(db: String, tableName: String, newPermission: FSPermission)(implicit spark: SparkSession, confEx: Configuration): Int = {
+  def modifyTableACLs(db: String, tableName: String, newPermission: FSPermission, partitionCount: Int = 30)(implicit spark: SparkSession, confEx: Configuration): Int = {
     import collection.JavaConverters._
 
     val sdConf = new ConfigSerDeser(confEx)
-    //sdConf.get.set("fs.azure.account.key.***REMOVED***.dfs.core.windows.net","xxx")
-    val loc = getTableLocation(db, tableName)(spark)
-    val files = getListOfTableFiles(db, tableName)(spark)
+    val loc = getTableLocation(db, tableName)
+    val files = getListOfTableFiles(db, tableName)
 
-    //first, set up default privs on a folder which table was defined on top of
     getFileSystem(confEx, loc).modifyAclEntries(new Path(getRelativePath(loc)), Seq(ACLs.getAclEntry(newPermission.getDefaultLevelPerm())).asJava)
 
     println(files(0))
     println("Files to process: " + files.length)
 
-    spark.sparkContext.parallelize(files, 30).mapPartitions(part => {
+    spark.sparkContext.parallelize(files, partitionCount).mapPartitions(part => {
       val eeeeeeee = sdConf.get()
       val y = ACLs.getAclEntry(newPermission)
       val fs = getFileSystem(eeeeeeee, loc)

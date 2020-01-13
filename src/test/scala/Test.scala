@@ -1,7 +1,7 @@
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 object Test extends App {
-  implicit val spark: SparkSession = SparkSession.builder().
+ implicit val spark: SparkSession = SparkSession.builder().
     appName("NAS_").
     master("local").
     getOrCreate()

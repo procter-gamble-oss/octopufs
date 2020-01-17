@@ -2,7 +2,7 @@ package com.pg.bigdata.utils
 
 
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{FileSystem, Path}
+import org.apache.hadoop.fs.{FileSystem, LocatedFileStatus, Path, RemoteIterator}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.catalyst.catalog.CatalogTable
@@ -65,6 +65,7 @@ object Assistant {
     getTableL1PartitionsPaths(db,tableName).filter(x => partitionsToKeepLike.exists(y => x.contains(y)))
   }
 
+  //returns relative paths of partitions
   def getTableL1PartitionsPaths(db: String, tableName: String)(implicit spark: SparkSession): Array[String] = {
     val m = getTableMetadata(db,tableName).partitionColumnNames
     if(m.isEmpty) throw new Exception("Table " + db + "." + tableName + " is not partitioned")
@@ -72,7 +73,7 @@ object Assistant {
     val tblLoc = getRelativePath(absTblLoc)
     val fs = getFileSystem(spark.sparkContext.hadoopConfiguration, absTblLoc)
     val partList = fs.listStatus(new Path(tblLoc))
-    partList.filter(_.isDirectory).map(tblLoc + _.getPath.getName)
+    partList.filter(_.isDirectory).map(absTblLoc + _.getPath.getName)
   }
 
   def getFileSystem(hadoopConf: Configuration, absoluteTargetLocation: String): FileSystem = {
@@ -84,5 +85,16 @@ object Assistant {
     if(!uri.contains(magicPrefix))
       throw new Exception("MagicPrefix not found")
     uri.substring(0,uri.indexOf(magicPrefix)+magicPrefix.length)
+  }
+
+  def listFilesRecursively(srcFs: FileSystem, sourceFolderUri: String): List[String] = {
+    val files = srcFs.listFiles(new Path(sourceFolderUri), true)
+
+    def buildList(f: RemoteIterator[LocatedFileStatus], l: List[String]): List[String] = {
+      if (files.hasNext) buildList(files, files.next().getPath().toString :: l)
+      else l
+    }
+    buildList(files, List()).map(getRelativePath(_))
+
   }
 }

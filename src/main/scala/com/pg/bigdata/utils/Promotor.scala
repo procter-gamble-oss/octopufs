@@ -11,7 +11,7 @@ import scala.concurrent.{Await, Future}
 
 //val magicPrefix = ".dfs.core.windows.net"
 case class Paths(sourcePath: String, targetPath: String) {
-  def toString() = sourcePath + " -->> " + targetPath
+  override def toString() = sourcePath + " -->> " + targetPath
 }
 
 case class FSOperationResult(path: String, success: Boolean)
@@ -69,7 +69,7 @@ object Promotor extends Serializable {
   }
 
   def moveFilesBetweenTables(sourceTableName: String, targetTableName: String, partitionCnt: Int)
-                            (implicit spark: SparkSession, conf1: Configuration): Boolean = {
+                            (implicit spark: SparkSession, conf1: Configuration): Dataset[FSOperationResult] = {
     val db = spark.catalog.currentDatabase
     moveFilesBetweenTables(db, sourceTableName, db, targetTableName, partitionCnt)
   }
@@ -176,7 +176,8 @@ object Promotor extends Serializable {
       val conf = sdConf.get()
       val fs = getFileSystem(confEx, sourceFolderUri)
       pathsPart.map(path => {
-        val x = fs.delete(new Path(path), true)
+       //todo change this to rename
+         val x = fs.delete(new Path(path.sourcePath), true)
         if (x) println(path + " deleted")
         else println("Could not delete " + path)
         x

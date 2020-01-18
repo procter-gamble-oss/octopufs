@@ -94,7 +94,7 @@ object Assistant {
       if (files.hasNext) buildList(files, files.next().getPath().toString :: l)
       else l
     }
-    buildList(files, List()).map(getRelativePath(_))
+    buildList(files, List()).map(x => getRelativePath(x))
 
   }
 }

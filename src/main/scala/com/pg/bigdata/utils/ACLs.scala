@@ -43,7 +43,7 @@ object ACLs extends Serializable {
     if (perm == null)
       throw new Exception("Provided permission " + p.permission + " is not valid for FsAction")
     val level = AclEntryScope.valueOf(p.level)
-    var x = new AclEntry.Builder()
+    val x = new AclEntry.Builder()
     val y = x.
       setType(ptype).
       setPermission(perm).

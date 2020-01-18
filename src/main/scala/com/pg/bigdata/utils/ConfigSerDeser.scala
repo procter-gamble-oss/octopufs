@@ -6,7 +6,7 @@ import org.apache.hadoop.conf.Configuration
   * `Writeable` operations to do this.
   * Note: this only serializes the explicitly set values, not any set
   * in site/default or other XML resources.
-  * @param conf
+  * @param conf - hadoop configuration
   */
 class ConfigSerDeser(var conf: Configuration) extends Serializable {
 

@@ -10,9 +10,9 @@ unmanagedBase := file("/Users/jacektokar/miniconda3/lib/python3.7/site-packages/
 
 libraryDependencies ++= Seq(
 
- // "org.apache.spark" % "spark-sql_2.11" % "2.4.4" % "provided",
- // "org.apache.spark" % "spark-core_2.11" % "2.4.4" % "provided",
- // "org.apache.spark" %% "spark-mllib" % "2.4.4" % "provided",
+ "org.apache.spark" % "spark-sql_2.11" % sparkVersion % "provided",
+ "org.apache.spark" % "spark-core_2.11" % sparkVersion % "provided",
+ "org.apache.spark" %% "spark-mllib" % sparkVersion % "provided",
 
 
   //  "org.slf4j" % "slf4j-api" % "1.7.5",

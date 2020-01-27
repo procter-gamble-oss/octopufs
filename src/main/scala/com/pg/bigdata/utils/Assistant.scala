@@ -6,6 +6,10 @@ import org.apache.hadoop.fs.{FileSystem, LocatedFileStatus, Path, RemoteIterator
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.catalyst.catalog.CatalogTable
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 
 object Assistant {
   val magicPrefix = ".dfs.core.windows.net"
@@ -87,8 +91,8 @@ object Assistant {
     uri.substring(0,uri.indexOf(magicPrefix)+magicPrefix.length)
   }
 
-  def listFilesRecursively(srcFs: FileSystem, sourceFolderUri: String): List[String] = {
-    val files = srcFs.listFiles(new Path(sourceFolderUri), true)
+  def listFilesRecursively(fs: FileSystem, sourceFolderUri: String): List[String] = {
+    val files = fs.listFiles(new Path(sourceFolderUri), true)
 
     def buildList(f: RemoteIterator[LocatedFileStatus], l: List[String]): List[String] = {
       if (files.hasNext) buildList(files, files.next().getPath().toString :: l)
@@ -97,4 +101,14 @@ object Assistant {
     buildList(files, List()).map(x => getRelativePath(x))
 
   }
+
+  def listRecursively(fs: FileSystem, sourceFolder: Path): Array[FSElement] = {
+    val elements = fs.listStatus(sourceFolder)
+    val folders = elements.filter(_.isDirectory)
+    if(folders.isEmpty) elements.filter(!_.isDirectory).map(x => FSElement(x.getPath.toString, false))
+    else folders.map(folder => Future{listRecursively(fs, folder.getPath)}).flatMap(x => Await.result(x, 10.minutes)) ++
+      folders.map(x => FSElement(x.getPath.toString, true))
+  }
+
+  case class FSElement (path: String, isDirectory: Boolean)
 }

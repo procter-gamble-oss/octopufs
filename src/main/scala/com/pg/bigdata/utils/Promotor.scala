@@ -38,7 +38,7 @@ object Promotor extends Serializable {
 
   def copyFolder(sourceFolderUri: String, targetLocationUri: String, partitionCount: Int = 192)(implicit spark: SparkSession, confEx: Configuration): Dataset[FSOperationResult] = {
     val srcFs = getFileSystem(confEx, sourceFolderUri)
-    val sourceFileList = listFilesRecursively(srcFs,sourceFolderUri)
+    val sourceFileList = listRecursively(srcFs,new Path(sourceFolderUri)).map(_.path)
     val rspath = getRelativePath(sourceFolderUri)
     val rtpath = getRelativePath(targetLocationUri)
     val targetFileList = sourceFileList.map(_.replaceAll(rspath, rtpath))
@@ -58,7 +58,7 @@ object Promotor extends Serializable {
     //delete target folder
     if(trgFs.exists(new Path(targetLocationUri))) //todo test if it works
       trgFs.delete(new Path(targetLocationUri), true)
-    val sourceFileList = listFilesRecursively(srcFs,sourceFolderUri)
+    val sourceFileList = listRecursively(srcFs,new Path(sourceFolderUri)).map(_.path)
     val rspath = getRelativePath(sourceFolderUri)
     val rtpath = getRelativePath(targetLocationUri)
     val targetFileList = sourceFileList.map(_.replaceAll(rspath, rtpath))

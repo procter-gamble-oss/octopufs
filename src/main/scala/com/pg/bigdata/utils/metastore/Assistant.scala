@@ -1,24 +1,19 @@
-package com.pg.bigdata.utils
+package com.pg.bigdata.utils.metastore
 
-
-import java.util.concurrent.Executors
-
-import com.pg.bigdata.utils.fs.Paths
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{FileSystem, LocatedFileStatus, Path, RemoteIterator}
+import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.catalyst.catalog.CatalogTable
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor, Future}
+import scala.concurrent.{Await, ExecutionContextExecutor, Future}
+
+import com.pg.bigdata.utils.Promotor.Paths
 
 object Assistant {
   var magicPrefix = ".dfs.core.windows.net"
 
-  def getTableLocation(tableName: String)(implicit spark: SparkSession): String = {
-    getTableLocation(spark.catalog.currentDatabase,tableName)
-  }
 
   def getContainerName(uri: String): String = {
     uri.substring(uri.indexOf("//")+2,uri.indexOf("@"))

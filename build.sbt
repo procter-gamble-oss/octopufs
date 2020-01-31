@@ -4,9 +4,9 @@ version := "0.1"
 
 scalaVersion := "2.11.12"
 
-val sparkVersion = "2.4.4"
+val sparkVersion = "2.3.4"
 
-unmanagedBase := file("/Users/jacektokar/miniconda3/lib/python3.7/site-packages/pyspark/jars")
+//unmanagedBase := file("/Users/jacektokar/miniconda3/lib/python3.7/site-packages/pyspark/jars")
 
 libraryDependencies ++= Seq(
 

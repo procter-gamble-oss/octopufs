@@ -1,21 +1,17 @@
 package com.pg.bigdata.utils
 
 import com.pg.bigdata.utils.Assistant._
+import com.pg.bigdata.utils.fs.{FSOperationResult, Paths}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, LocatedFileStatus, Path, RemoteIterator}
 import org.apache.spark.sql.{Dataset, SparkSession}
+import org.apache.spark.sql.functions.col
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
 //val magicPrefix = ".dfs.core.windows.net"
-case class Paths(sourcePath: String, targetPath: String) {
-  override def toString(): String = sourcePath + " -->> " + targetPath
-}
-
-case class FSOperationResult(path: String, success: Boolean)
-
 
 object Promotor extends Serializable {
 
@@ -69,8 +65,15 @@ object Promotor extends Serializable {
     moveFiles(paths, sourceFolderUri, partitionCount)
   }
 
-  def copyTablePartitions(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, matchStringPartitions: Seq[String] = Seq(),
+
+  def copyTablePartitions(sourceTableName: String, targetTableName: String, matchStringPartitions: Seq[String],
                           partitionCount: Int = 192)
+                         (implicit spark: SparkSession, confEx: Configuration): Dataset[FSOperationResult] = {
+    copyTablePartitions(spark.catalog.currentDatabase, sourceTableName, spark.catalog.currentDatabase,
+      targetTableName, matchStringPartitions,partitionCount)
+  }
+  def copyTablePartitions(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, matchStringPartitions: Seq[String],
+                          partitionCount: Int)
                          (implicit spark: SparkSession, confEx: Configuration): Dataset[FSOperationResult] = {
     val paths = filterPartitions(sourceDbName, sourceTableName, matchStringPartitions)
     val sourceAbsTblLoc = getTableLocation(sourceDbName, sourceTableName)
@@ -79,7 +82,9 @@ object Promotor extends Serializable {
     println("Partitions of table " + sourceDbName + "." + sourceTableName + " which are going to be copied to "+targetDbName+"."+targetTableName+":")
     sourceTargetPaths.foreach(x => println(x))
     val resultDfs = sourceTargetPaths.map(p => copyFolder(p.sourcePath, p.targetPath,partitionCount))
-    resultDfs.reduce(_ union _)
+    val out = resultDfs.reduce(_ union _) //todo add verification if all files were copied coprrectly
+    Assistant.refreshMetadata(targetDbName, targetAbsTblLoc)
+    out
   }
 
   def moveTablePartitions(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, matchStringPartitions: Seq[String] = Seq(),
@@ -129,6 +134,7 @@ object Promotor extends Serializable {
     paths.foreach(println)
     val r = deletePaths(paths, absTblLoc)
     if (!r.filter(!_.success).isEmpty) throw new Exception("Deleting of some partitions failed")
+    refreshMetadata(db, tableName)
   }
 
   private def copySingleFile(hadoopConf: Configuration, sourcePath: String, targetPath: String, sourceFileSystem: FileSystem, targetFileSystem: FileSystem,
@@ -162,17 +168,22 @@ object Promotor extends Serializable {
   private def deletePaths(relativePaths: Seq[String], absFolderUri: String, partitionCount: Int = 32)
                          (implicit spark: SparkSession, confEx: Configuration) = {
     val sdConf = new ConfigSerDeser(confEx)
+    println("absFolderUri: "+absFolderUri)
+    println("deleting paths count:"+relativePaths.size)
+    relativePaths.foreach(println)
     val res = spark.sparkContext.parallelize(relativePaths, partitionCount).mapPartitions(pathsPart => {
       val conf = sdConf.get()
       val fs = getFileSystem(conf, absFolderUri)
       pathsPart.map(path => Future {
-        (path, fs.delete(new Path(path), true))
+        FSOperationResult(path, fs.delete(new Path(path), true))
       }).map(x => Await.result(x, 10.seconds))
     })
-    println("Number of paths deleted properly: " + res.filter(_._2).count)
-    println("Files with errors: " + res.filter(!_._2).count)
     import spark.implicits._
-    spark.createDataset(res).toDF("path","success").as[FSOperationResult]
+   //println("This is just a test: "+res.filter(_.success).count())
+    val out = res.collect() //spark.createDataset(res).toDF("path","success").as[FSOperationResult]
+    println("Number of paths deleted properly: " + out.filter(_.success == true).size)
+    println("Files with errors: " + out.filter(_.success == false).size)
+    out
   }
 
   //function assumes that move is being done within single FS. Higher level functions should check that

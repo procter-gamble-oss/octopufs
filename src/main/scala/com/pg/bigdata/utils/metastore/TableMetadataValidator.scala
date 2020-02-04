@@ -1,14 +1,9 @@
-package com.pg.bigdata.utils
+package com.pg.bigdata.utils.metastore
 
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.catalog.CatalogTable
 
 object TableMetadataValidator {
-
-  def getTableMetadata(databaseName: String, tableName: String)(implicit spark: SparkSession): CatalogTable = {
-    import org.apache.spark.sql.catalyst.TableIdentifier
-    spark.sessionState.catalog.getTableMetadata(new TableIdentifier(tableName, Option(databaseName)))
-  }
 
   def validate(tableName1: String, tableName2: String)(implicit spark: SparkSession): Unit =
     validate(spark.catalog.currentDatabase, tableName1, spark.catalog.currentDatabase, tableName2)
@@ -32,5 +27,10 @@ object TableMetadataValidator {
 
     if(t1.storage.outputFormat.getOrElse("") != t2.storage.outputFormat.getOrElse(""))
       throw new Exception("OutputFormats in tables "+t1s+" and "+t2s+" are different")
+  }
+
+  def getTableMetadata(databaseName: String, tableName: String)(implicit spark: SparkSession): CatalogTable = {
+    import org.apache.spark.sql.catalyst.TableIdentifier
+    spark.sessionState.catalog.getTableMetadata(new TableIdentifier(tableName, Option(databaseName)))
   }
 }

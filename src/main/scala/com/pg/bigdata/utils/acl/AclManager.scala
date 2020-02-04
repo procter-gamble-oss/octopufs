@@ -2,15 +2,19 @@ package com.pg.bigdata.utils.acl
 
 import java.util.concurrent.Executors
 
-import com.pg.bigdata.utils.Assistant._
-import com.pg.bigdata.utils.{ConfigSerDeser, FSOperationResult}
+import com.pg.bigdata.utils.fs._
+import com.pg.bigdata.utils.metastore._
+import com.pg.bigdata.utils.fs.FSOperationResult
+import com.pg.bigdata.utils.helpers.ConfigSerDeser
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.fs.permission.{AclEntry, AclEntryScope, AclEntryType, FsAction}
 import org.apache.spark.sql.functions.lit
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 
+import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
+import collection.JavaConverters._
 import scala.util.Try
 
 object AclManager extends Serializable {
@@ -32,7 +36,7 @@ object AclManager extends Serializable {
   }
 
   def modifyACL(paths: List[String], parentFolderURI: String, partitionCount: Int, sdConf: ConfigSerDeser, newFsPermission: FSPermission)
-               (implicit spark: SparkSession) = {
+               (implicit spark: SparkSession): Dataset[FSOperationResult] = {
     import scala.concurrent.ExecutionContext.Implicits.global
     val res = spark.sparkContext.parallelize(paths, partitionCount).mapPartitions(part => {
       val eeeeeeee = sdConf.get()

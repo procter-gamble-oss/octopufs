@@ -1,4 +1,5 @@
-package com.pg.bigdata.utils
+package com.pg.bigdata.utils.helpers
+
 import org.apache.hadoop.conf.Configuration
 
 /**

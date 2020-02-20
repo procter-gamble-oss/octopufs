@@ -9,7 +9,7 @@ object AclTest extends App{
     master("local").
     getOrCreate()
   DataMockup.prepareData()
-  val acl = AclManager.FSPermission("user", "rwx","ACCESS","11f1d713-3b19-49ec-bade-cca9a2e2a3ba")
+  val acl = AclManager.FSPermission("user", "r-x","ACCESS","11f1d713-3b19-49ec-bade-cca9a2e2a3ba")
   //implicit val s = spark
   implicit val c = spark.sparkContext.hadoopConfiguration
   c.set("fs.azure.account.key.***REMOVED***.dfs.core.windows.net","YOURKEY")

@@ -39,14 +39,14 @@ object AclManager extends Serializable {
                (implicit spark: SparkSession): Dataset[FSOperationResult] = {
     import scala.concurrent.ExecutionContext.Implicits.global
     val res = spark.sparkContext.parallelize(paths, partitionCount).mapPartitions(part => {
-      val eeeeeeee = sdConf.get()
+      val conf = sdConf.get()
       val y = AclManager.getAclEntry(newFsPermission)
-      val fs = getFileSystem(eeeeeeee, parentFolderURI)
+      val fs = getFileSystem(conf, parentFolderURI)
       part.map(x => Future {
         Try({
           fs.modifyAclEntries(new Path(x), Seq(y).asJava)
           (x, true)
-        }).getOrElse((x, false))
+        }).getOrElse((x, false)) //todo make sure it executes only once
       }).map(x => Await.result(x, 1.minute))
     }
     )

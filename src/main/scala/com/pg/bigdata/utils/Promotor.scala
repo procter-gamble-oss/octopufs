@@ -49,6 +49,8 @@ object Promotor extends Serializable {
 
   }
  //if target folder exists, it will be deleted first
+
+  //todo zobaczyc jak sie zachowa gdy docelowy folder/pliki juz istnieje
   def moveFolder(sourceFolderUri: String, targetLocationUri: String, partitionCount: Int = 192)(implicit spark: SparkSession, confEx: Configuration): Dataset[FSOperationResult] = {
     println("Moving folders content: "+sourceFolderUri+"  ==>>  "+targetLocationUri)
     if (getFileSystemPrefix(targetLocationUri) + getContainerName(targetLocationUri) != getFileSystemPrefix(sourceFolderUri) + getContainerName(sourceFolderUri))
@@ -67,7 +69,6 @@ println("ALL TO BE MOVED:")
     relativePaths.foreach(println)
     moveFiles(relativePaths, sourceFolderUri, partitionCount)
   }
-
 
   def copyTablePartitions(sourceTableName: String, targetTableName: String, matchStringPartitions: Seq[String],
                           partitionCount: Int = 192)
@@ -95,7 +96,7 @@ println("ALL TO BE MOVED:")
                              (implicit spark: SparkSession, confEx: Configuration): Dataset[FSOperationResult] = {
     val db = spark.catalog.currentDatabase
     deleteTablePartitions(db, targetTableName,matchStringPartitions) //todo error handling or exception
-    copyTablePartitions(db, sourceTableName, db, targetTableName, matchStringPartitions, 192) //todo rethink approach to partition count
+    copyTablePartitions(db, sourceTableName, db, targetTableName, matchStringPartitions, partitionCount) //todo rethink approach to partition count
   }
 
   def copyOverwritePartitions(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, matchStringPartitions: Seq[String],
@@ -122,7 +123,6 @@ println("ALL TO BE MOVED:")
     println("Partitions of table " + sourceDbName + "." + sourceTableName + " which are going to be moved to "+targetDbName+"."+targetTableName+":")
     sourceTargetPaths.foreach(x => println(x))
     val resultDfs = sourceTargetPaths.map(p => {
-      println("To jest zewnętrzna pętla "+p)
       moveFolder(p.sourcePath, p.targetPath,partitionCount)
     }).reduce(_ union _)
 
@@ -191,7 +191,7 @@ println("ALL TO BE MOVED:")
         requestProcessed.add(1)
         (paths.sourcePath, Promotor.copySingleFile(conf, paths.sourcePath, paths.targetPath, srcFs, trgFs))
       })
-    })
+    }).cache()
     println("Number of files copied properly: " + res.filter(_._2).count)
     println("Files with errors: " + res.filter(!_._2).count)
     import spark.implicits._
@@ -235,7 +235,7 @@ println("ALL TO BE MOVED:")
         println("Executor paths: "+paths)
         Future(paths, srcFs.rename(new Path(paths.sourcePath), new Path(paths.targetPath)))
       })
-    }).map(x => Await.result(x, 10.seconds)).cache //cache is required to avoid reevaluation of dataframe
+    }).map(x => Await.result(x, 10.seconds)).cache //todo change to collect // cache is required to avoid reevaluation of dataframe
     println("Number of files moved properly: " + res.filter(_._2).count)
     println("Files with errors: " + res.filter(!_._2).count)
     import spark.implicits._

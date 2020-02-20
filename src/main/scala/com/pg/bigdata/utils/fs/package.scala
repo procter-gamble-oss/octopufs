@@ -25,7 +25,7 @@ package object fs {
   }
 
   def getFileSystem(hadoopConf: Configuration, absoluteTargetLocation: String): FileSystem = {
-    //hadoopConf.set("fs.defaultFS", getFileSystemPrefix(absoluteTargetLocation))
+    hadoopConf.set("fs.defaultFS", getFileSystemPrefix(absoluteTargetLocation))
     FileSystem.get(hadoopConf)
   }
 

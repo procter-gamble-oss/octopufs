@@ -19,13 +19,13 @@ import scala.concurrent.{Await, Future}
 object Promotor extends Serializable {
 
   def copyFilesBetweenTables(sourceTableName: String, targetTableName: String, partitionCnt: Int)
-                            (implicit spark: SparkSession, confEx: Configuration): Dataset[FSOperationResult] = {
+                            (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult]  = {
     val db = spark.catalog.currentDatabase
     copyFilesBetweenTables(db, sourceTableName, db, targetTableName, partitionCnt)
   }
 
   def copyFilesBetweenTables(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, partitionCount: Int = 192)
-                            (implicit spark: SparkSession, confEx: Configuration): Dataset[FSOperationResult] = {
+                            (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
     val paths = getTablesPathsList(sourceDbName, sourceTableName, targetDbName, targetTableName) //.take(5)
     if (paths.isEmpty)
       throw new Exception("No files to be copied")
@@ -35,9 +35,39 @@ object Promotor extends Serializable {
     copyFolder(srcLoc, trgLoc,partitionCount)
   }
 
-  def copyFolder(sourceFolderUri: String, targetLocationUri: String, partitionCount: Int = 192)(implicit spark: SparkSession, confEx: Configuration): Dataset[FSOperationResult] = {
+  def copyTablePartitions(sourceTableName: String, targetTableName: String, matchStringPartitions: Seq[String],
+                          partitionCount: Int = 192)
+                         (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
+    copyTablePartitions(spark.catalog.currentDatabase, sourceTableName, spark.catalog.currentDatabase,
+      targetTableName, matchStringPartitions,partitionCount)
+  }
+ //if target folder exists, it will be deleted first
+
+  def copyOverwritePartitions(sourceTableName: String, targetTableName: String, matchStringPartitions: Seq[String], partitionCount: Int)
+                             (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult]  = {
+    val db = spark.catalog.currentDatabase
+    deleteTablePartitions(db, targetTableName,matchStringPartitions) //todo error handling or exception
+    copyTablePartitions(db, sourceTableName, db, targetTableName, matchStringPartitions, partitionCount) //todo rethink approach to partition count
+  }
+
+  def copyTablePartitions(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, matchStringPartitions: Seq[String],
+                          partitionCount: Int)
+                         (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult]  = {
+    val paths = filterPartitions(sourceDbName, sourceTableName, matchStringPartitions)
+    val sourceAbsTblLoc = getTableLocation(sourceDbName, sourceTableName)
+    val targetAbsTblLoc = getTableLocation(targetDbName, targetTableName)
+    val sourceTargetPaths = paths.map(x => Paths(x,x.replace(sourceAbsTblLoc, targetAbsTblLoc)))
+    println("Partitions of table " + sourceDbName + "." + sourceTableName + " which are going to be copied to "+targetDbName+"."+targetTableName+":")
+    sourceTargetPaths.foreach(x => println(x))
+    val resultDfs = sourceTargetPaths.map(p => copyFolder(p.sourcePath, p.targetPath,partitionCount))
+    val out = resultDfs.reduce(_ union _) //todo add verification if all files were copied correctly
+    refreshMetadata(targetDbName, targetTableName)
+    out
+  }
+
+  def copyFolder(sourceFolderUri: String, targetLocationUri: String, partitionCount: Int = 192)(implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
     val srcFs = getFileSystem(confEx, sourceFolderUri)
-    val sourceFileList = listRecursively(srcFs,new Path(sourceFolderUri)).map(_.path)
+    val sourceFileList = listRecursively(srcFs,new Path(sourceFolderUri)).filter(!_.isDirectory).map(_.path) //filter is to avoid copying folders (folders will get created where copying files). Caveat: empty folders will not be copied
     val rspath = getRelativePath(sourceFolderUri)
     val rtpath = getRelativePath(targetLocationUri)
     val targetFileList = sourceFileList.map(_.replaceAll(rspath, rtpath))
@@ -48,10 +78,61 @@ object Promotor extends Serializable {
     copyFiles(sourceFolderUri, targetLocationUri, paths, partitionCount)
 
   }
- //if target folder exists, it will be deleted first
+
+  private def copyFiles(sourceFolderUri: String, targetLocationUri: String, p: Seq[Paths],
+                                partitionCount: Int)
+                               (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
+    val confsd = new ConfigSerDeser(confEx)
+    val requestProcessed = spark.sparkContext.longAccumulator("CopyFilesProcessedCount")
+    val res = spark.sparkContext.parallelize(p, partitionCount).mapPartitions(x => {
+      val conf = confsd.get()
+      val srcFs = getFileSystem(conf, sourceFolderUri)
+      val trgFs = getFileSystem(conf, targetLocationUri)
+      x.map(paths => {
+        requestProcessed.add(1)
+        FSOperationResult(paths.sourcePath, Promotor.copySingleFile(conf, paths.sourcePath, paths.targetPath, srcFs, trgFs))
+      })
+    }).collect()
+    println("Number of files copied properly: " + res.filter(_.success).length)
+    println("Files with errors: " + res.filter(!_.success).length)
+    res
+  }
+
+  def copyOverwritePartitions(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, matchStringPartitions: Seq[String],
+                              partitionCount: Int = 192)
+                             (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
+    deleteTablePartitions(targetDbName, targetTableName,matchStringPartitions) //todo error handling or exception
+    copyTablePartitions(sourceDbName, sourceTableName, targetDbName, targetTableName, matchStringPartitions, partitionCount)
+  }
+
+  def moveTablePartitions(sourceTableName: String, targetTableName: String, matchStringPartitions: Seq[String],
+                              partitionCount: Int)
+                             (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
+    val db = spark.catalog.currentDatabase
+    moveTablePartitions(db, sourceTableName, db, targetTableName, matchStringPartitions, partitionCount)
+  }
+
+  def moveTablePartitions(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, matchStringPartitions: Seq[String] = Seq(),
+                          partitionCount: Int)
+                         (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
+    val paths = filterPartitions(sourceDbName, sourceTableName, matchStringPartitions)
+    val sourceAbsTblLoc = getTableLocation(sourceDbName, sourceTableName)
+    val targetAbsTblLoc = getTableLocation(targetDbName, targetTableName)
+    val sourceTargetPaths = paths.map(x => Paths(x,x.replace(sourceAbsTblLoc, targetAbsTblLoc)))
+    println("Partitions of table " + sourceDbName + "." + sourceTableName + " which are going to be moved to "+targetDbName+"."+targetTableName+":")
+    sourceTargetPaths.foreach(x => println(x))
+    val resultDfs = sourceTargetPaths.map(p => {
+      moveFolder(p.sourcePath, p.targetPath,partitionCount)
+    }).reduce(_ union _)
+
+    refreshMetadata(sourceDbName,sourceTableName)
+    refreshMetadata(targetDbName,targetTableName)
+
+    resultDfs
+  }
 
   //todo zobaczyc jak sie zachowa gdy docelowy folder/pliki juz istnieje
-  def moveFolder(sourceFolderUri: String, targetLocationUri: String, partitionCount: Int = 192)(implicit spark: SparkSession, confEx: Configuration): Dataset[FSOperationResult] = {
+  def moveFolder(sourceFolderUri: String, targetLocationUri: String, partitionCount: Int = 192)(implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
     println("Moving folders content: "+sourceFolderUri+"  ==>>  "+targetLocationUri)
     if (getFileSystemPrefix(targetLocationUri) + getContainerName(targetLocationUri) != getFileSystemPrefix(sourceFolderUri) + getContainerName(sourceFolderUri))
       throw new Exception("Cannot move files between 2 different filesystems. Use copy instead")
@@ -70,84 +151,24 @@ println("ALL TO BE MOVED:")
     moveFiles(relativePaths, sourceFolderUri, partitionCount)
   }
 
-  def copyTablePartitions(sourceTableName: String, targetTableName: String, matchStringPartitions: Seq[String],
-                          partitionCount: Int = 192)
-                         (implicit spark: SparkSession, confEx: Configuration): Dataset[FSOperationResult] = {
-    copyTablePartitions(spark.catalog.currentDatabase, sourceTableName, spark.catalog.currentDatabase,
-      targetTableName, matchStringPartitions,partitionCount)
-  }
+  private def moveFiles(relativePaths: Seq[Paths], sourceFolderUri: String, partitionCount: Int = 32)
+                       (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
+    println("Starting moveFiles. Paths to be moved: "+relativePaths.size)
 
-  def copyTablePartitions(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, matchStringPartitions: Seq[String],
-                          partitionCount: Int)
-                         (implicit spark: SparkSession, confEx: Configuration): Dataset[FSOperationResult] = {
-    val paths = filterPartitions(sourceDbName, sourceTableName, matchStringPartitions)
-    val sourceAbsTblLoc = getTableLocation(sourceDbName, sourceTableName)
-    val targetAbsTblLoc = getTableLocation(targetDbName, targetTableName)
-    val sourceTargetPaths = paths.map(x => Paths(x,x.replace(sourceAbsTblLoc, targetAbsTblLoc)))
-    println("Partitions of table " + sourceDbName + "." + sourceTableName + " which are going to be copied to "+targetDbName+"."+targetTableName+":")
-    sourceTargetPaths.foreach(x => println(x))
-    val resultDfs = sourceTargetPaths.map(p => copyFolder(p.sourcePath, p.targetPath,partitionCount))
-    val out = resultDfs.reduce(_ union _) //todo add verification if all files were copied correctly
-    refreshMetadata(targetDbName, targetTableName)
-    out
-  }
-
-  def copyOverwritePartitions(sourceTableName: String, targetTableName: String, matchStringPartitions: Seq[String], partitionCount: Int)
-                             (implicit spark: SparkSession, confEx: Configuration): Dataset[FSOperationResult] = {
-    val db = spark.catalog.currentDatabase
-    deleteTablePartitions(db, targetTableName,matchStringPartitions) //todo error handling or exception
-    copyTablePartitions(db, sourceTableName, db, targetTableName, matchStringPartitions, partitionCount) //todo rethink approach to partition count
-  }
-
-  def copyOverwritePartitions(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, matchStringPartitions: Seq[String],
-                              partitionCount: Int = 192)
-                             (implicit spark: SparkSession, confEx: Configuration): Dataset[FSOperationResult] = {
-    deleteTablePartitions(targetDbName, targetTableName,matchStringPartitions) //todo error handling or exception
-    copyTablePartitions(sourceDbName, sourceTableName, targetDbName, targetTableName, matchStringPartitions, partitionCount)
-  }
-
-  def moveTablePartitions(sourceTableName: String, targetTableName: String, matchStringPartitions: Seq[String],
-                              partitionCount: Int)
-                             (implicit spark: SparkSession, confEx: Configuration): Dataset[FSOperationResult] = {
-    val db = spark.catalog.currentDatabase
-    moveTablePartitions(db, sourceTableName, db, targetTableName, matchStringPartitions, partitionCount)
-  }
-
-  def moveTablePartitions(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, matchStringPartitions: Seq[String] = Seq(),
-                          partitionCount: Int)
-                         (implicit spark: SparkSession, confEx: Configuration): Dataset[FSOperationResult] = {
-    val paths = filterPartitions(sourceDbName, sourceTableName, matchStringPartitions)
-    val sourceAbsTblLoc = getTableLocation(sourceDbName, sourceTableName)
-    val targetAbsTblLoc = getTableLocation(targetDbName, targetTableName)
-    val sourceTargetPaths = paths.map(x => Paths(x,x.replace(sourceAbsTblLoc, targetAbsTblLoc)))
-    println("Partitions of table " + sourceDbName + "." + sourceTableName + " which are going to be moved to "+targetDbName+"."+targetTableName+":")
-    sourceTargetPaths.foreach(x => println(x))
-    val resultDfs = sourceTargetPaths.map(p => {
-      moveFolder(p.sourcePath, p.targetPath,partitionCount)
-    }).reduce(_ union _)
-
-    refreshMetadata(sourceDbName,sourceTableName)
-    refreshMetadata(targetDbName,targetTableName)
-
-    resultDfs
-  }
-
-  def moveFilesBetweenTables(sourceTableName: String, targetTableName: String, partitionCnt: Int)
-                            (implicit spark: SparkSession, conf1: Configuration): Dataset[FSOperationResult] = {
-    val db = spark.catalog.currentDatabase
-    moveFilesBetweenTables(db, sourceTableName, db, targetTableName, partitionCnt)
-  }
-
-  def moveFilesBetweenTables(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, partitionCount: Int = 192)
-                            (implicit spark: SparkSession, confEx: Configuration): Dataset[FSOperationResult] = {
-    val srcLoc = getTableLocation(sourceDbName, sourceTableName)
-    val paths = getTablesPathsList(sourceDbName, sourceTableName, targetDbName, targetTableName) //.take(5)
-    if (paths.isEmpty)
-      throw new Exception("No files to be moved for path "+srcLoc)
-    println(paths(0))
-    println("Files to be moved: " + paths.length)
-    val relativePaths = paths.map(x => Paths(getRelativePath(x.sourcePath),getRelativePath(x.targetPath)))
-    moveFiles(relativePaths, srcLoc, partitionCount)
+    val requestProcessed = spark.sparkContext.longAccumulator("MoveFilesProcessedCount")
+    val sdConf = new ConfigSerDeser(confEx)
+    val res = spark.sparkContext.parallelize(relativePaths, partitionCount).mapPartitions(x => {
+      val conf = sdConf.get()
+      val srcFs = getFileSystem(conf, sourceFolderUri) //move can be done only within single fs, which makes sense :)
+      x.map(paths => {
+        requestProcessed.add(1)
+        println("Executor paths: "+paths)
+        Future(paths, srcFs.rename(new Path(paths.sourcePath), new Path(paths.targetPath)))
+      })
+    }).map(x => Await.result(x, 10.seconds)).map(x => FSOperationResult(x._1.sourcePath, x._2 )).collect() //todo change to collect // cache is required to avoid reevaluation of dataframe
+    println("Number of files moved properly: " + res.filter(_.success).length)
+    println("Files with errors: " + res.filter(!_.success).length)
+    res
   }
 
   def deleteAllChildObjects(folderAbsPath: String)(implicit spark: SparkSession, confEx: Configuration): Unit = {
@@ -178,24 +199,10 @@ println("ALL TO BE MOVED:")
     org.apache.hadoop.fs.FileUtil.copy(sourceFileSystem, srcPath, targetFileSystem, destPath, deleteSource, overwrite, hadoopConf)
   }
 
-  private def copyFiles(sourceFolderUri: String, targetLocationUri: String, p: Seq[Paths],
-                                partitionCount: Int)
-                               (implicit spark: SparkSession, confEx: Configuration): Dataset[FSOperationResult] = {
-    val confsd = new ConfigSerDeser(confEx)
-    val requestProcessed = spark.sparkContext.longAccumulator("CopyFilesProcessedCount")
-    val res = spark.sparkContext.parallelize(p, partitionCount).mapPartitions(x => {
-      val conf = confsd.get()
-      val srcFs = getFileSystem(conf, sourceFolderUri)
-      val trgFs = getFileSystem(conf, targetLocationUri)
-      x.map(paths => {
-        requestProcessed.add(1)
-        (paths.sourcePath, Promotor.copySingleFile(conf, paths.sourcePath, paths.targetPath, srcFs, trgFs))
-      })
-    }).cache()
-    println("Number of files copied properly: " + res.filter(_._2).count)
-    println("Files with errors: " + res.filter(!_._2).count)
-    import spark.implicits._
-    spark.createDataset(res).toDF("path","success").as[FSOperationResult]
+  def moveFilesBetweenTables(sourceTableName: String, targetTableName: String, partitionCnt: Int)
+                            (implicit spark: SparkSession, conf1: Configuration): Array[FSOperationResult] = {
+    val db = spark.catalog.currentDatabase
+    moveFilesBetweenTables(db, sourceTableName, db, targetTableName, partitionCnt)
   }
 
   private def deletePaths(relativePaths: Seq[String], absFolderUri: String, partitionCount: Int = 32)
@@ -221,25 +228,16 @@ println("ALL TO BE MOVED:")
 
   //function assumes that move is being done within single FS. Higher level functions should check that
 
-  private def moveFiles(relativePaths: Seq[Paths], sourceFolderUri: String, partitionCount: Int = 32)
-                       (implicit spark: SparkSession, confEx: Configuration) = {
-    println("Starting moveFiles. Paths to be moved: "+relativePaths.size)
-
-    val requestProcessed = spark.sparkContext.longAccumulator("MoveFilesProcessedCount")
-    val sdConf = new ConfigSerDeser(confEx)
-    val res = spark.sparkContext.parallelize(relativePaths, partitionCount).mapPartitions(x => {
-      val conf = sdConf.get()
-      val srcFs = getFileSystem(conf, sourceFolderUri) //move can be done only within single fs, which makes sense :)
-      x.map(paths => {
-        requestProcessed.add(1)
-        println("Executor paths: "+paths)
-        Future(paths, srcFs.rename(new Path(paths.sourcePath), new Path(paths.targetPath)))
-      })
-    }).map(x => Await.result(x, 10.seconds)).cache //todo change to collect // cache is required to avoid reevaluation of dataframe
-    println("Number of files moved properly: " + res.filter(_._2).count)
-    println("Files with errors: " + res.filter(!_._2).count)
-    import spark.implicits._
-    spark.createDataset(res).toDF("path","success").as[FSOperationResult]
+  def moveFilesBetweenTables(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, partitionCount: Int = 192)
+                            (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
+    val srcLoc = getTableLocation(sourceDbName, sourceTableName)
+    val paths = getTablesPathsList(sourceDbName, sourceTableName, targetDbName, targetTableName) //.take(5)
+    if (paths.isEmpty)
+      throw new Exception("No files to be moved for path "+srcLoc)
+    println(paths(0))
+    println("Files to be moved: " + paths.length)
+    val relativePaths = paths.map(x => Paths(getRelativePath(x.sourcePath),getRelativePath(x.targetPath)))
+    moveFiles(relativePaths, srcLoc, partitionCount)
   }
 
 }

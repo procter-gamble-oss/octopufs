@@ -25,7 +25,8 @@ package object fs {
   }
 
   def getFileSystem(hadoopConf: Configuration, absoluteTargetLocation: String): FileSystem = {
-    hadoopConf.set("fs.defaultFS", getFileSystemPrefix(absoluteTargetLocation))
+    if(getFileSystemPrefix(absoluteTargetLocation).startsWith("file:/")) //this is to avoid failuers on local fs
+      hadoopConf.set("fs.defaultFS", getFileSystemPrefix(absoluteTargetLocation))
     FileSystem.get(hadoopConf)
   }
 

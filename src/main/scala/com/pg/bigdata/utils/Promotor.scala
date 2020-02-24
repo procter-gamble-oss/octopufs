@@ -120,6 +120,7 @@ object Promotor extends Serializable {
     val targetAbsTblLoc = getTableLocation(targetDbName, targetTableName)
     val sourceTargetPaths = paths.map(x => Paths(x,x.replace(sourceAbsTblLoc, targetAbsTblLoc)))
     println("Partitions of table " + sourceDbName + "." + sourceTableName + " which are going to be moved to "+targetDbName+"."+targetTableName+":")
+    //todo add check for empty list
     sourceTargetPaths.foreach(x => println(x))
     val resultDfs = sourceTargetPaths.map(p => {
       moveFolder(p.sourcePath, p.targetPath,partitionCount)
@@ -139,9 +140,13 @@ object Promotor extends Serializable {
     val srcFs = getFileSystem(confEx, sourceFolderUri)
     val trgFs = getFileSystem(confEx, targetLocationUri)
     //delete target folder
-    if(trgFs.exists(new Path(targetLocationUri))) //todo test if it works
-      trgFs.delete(new Path(targetLocationUri), true)
-    val sourceFileList = listRecursively(srcFs,new Path(sourceFolderUri)).map(_.path)
+
+    if(trgFs.exists(new Path(getRelativePath(targetLocationUri)))) //todo test if it works
+      deleteAllChildObjects(targetLocationUri)
+    else
+      trgFs.mkdirs(new Path(targetLocationUri))
+
+    val sourceFileList = srcFs.listStatus(new Path(sourceFolderUri)).map(x => x.getPath.toString)
     val targetFileList = sourceFileList.map(_.replaceAll(sourceFolderUri, targetLocationUri))
      val paths = sourceFileList.zip(targetFileList).map(x => Paths(x._1, x._2))
 
@@ -163,7 +168,7 @@ println("ALL TO BE MOVED:")
       x.map(paths => {
         requestProcessed.add(1)
         println("Executor paths: "+paths)
-        Future(paths, srcFs.rename(new Path(paths.sourcePath), new Path(paths.targetPath)))
+        Future(paths, srcFs.rename(new Path(paths.sourcePath), new Path(paths.targetPath))) //todo this failes if folder structure for the file does not exist
       })
     }).map(x => Await.result(x, 10.seconds)).map(x => FSOperationResult(x._1.sourcePath, x._2 )).collect() //todo change to collect // cache is required to avoid reevaluation of dataframe
     println("Number of files moved properly: " + res.filter(_.success).length)
@@ -175,7 +180,7 @@ println("ALL TO BE MOVED:")
     val relPath = getRelativePath(folderAbsPath)
     val fs = getFileSystem(spark.sparkContext.hadoopConfiguration, folderAbsPath)
     val objectList = fs.listStatus(new Path(relPath))
-    val paths = objectList.map(relPath + _.getPath.getName)
+    val paths = objectList.map(relPath + "/" + _.getPath.getName)
 
     val r = deletePaths(paths, folderAbsPath)
     if (!r.filter(!_.success).isEmpty) throw new Exception("Deleting of some objects failed")
@@ -218,9 +223,8 @@ println("ALL TO BE MOVED:")
         FSOperationResult(path, fs.delete(new Path(path), true))
       }).map(x => Await.result(x, 10.seconds))
     })
-    import spark.implicits._
-   //println("This is just a test: "+res.filter(_.success).count())
-    val out = res.collect() //spark.createDataset(res).toDF("path","success").as[FSOperationResult]
+
+    val out = res.collect()
     println("Number of paths deleted properly: " + out.filter(_.success == true).size)
     println("Files with errors: " + out.filter(_.success == false).size)
     out

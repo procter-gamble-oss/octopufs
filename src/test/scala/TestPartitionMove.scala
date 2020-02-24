@@ -22,7 +22,7 @@ object TestPartitionMove extends App {
   println("Partitions in SFCT")
   spark.table("STORE_SALES_SFCT").select("mm_time_perd_end_date").distinct.show()
 
-  Promotor.moveTablePartitions("STORE_SALES_DLT","STORE_SALES_SFCT",Seq("2019-10-31","2019-12-31"), 1)
+  Promotor.moveTablePartitions("STORE_SALES_DLT","STORE_SALES_SFCT",Seq("2019-10-31","2019-12-31"), false, 1)
 
   println("SFCT partitions after promotion:")
   spark.table("STORE_SALES_SFCT").select("mm_time_perd_end_date").distinct.show()

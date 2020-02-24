@@ -106,13 +106,14 @@ object Promotor extends Serializable {
   }
 
   def moveTablePartitions(sourceTableName: String, targetTableName: String, matchStringPartitions: Seq[String],
-                              partitionCount: Int)
+                          moveContentOnly: Boolean, partitionCount: Int)
                              (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
     val db = spark.catalog.currentDatabase
-    moveTablePartitions(db, sourceTableName, db, targetTableName, matchStringPartitions, partitionCount)
+    moveTablePartitions(db, sourceTableName, db, targetTableName, matchStringPartitions, moveContentOnly, partitionCount)
   }
 
-  def moveTablePartitions(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, matchStringPartitions: Seq[String] = Seq(),
+  def moveTablePartitions(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String,
+                          matchStringPartitions: Seq[String] = Seq(), moveContentOnly: Boolean = false,
                           partitionCount: Int)
                          (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
     val paths = filterPartitions(sourceDbName, sourceTableName, matchStringPartitions)
@@ -123,7 +124,7 @@ object Promotor extends Serializable {
     //todo add check for empty list
     sourceTargetPaths.foreach(x => println(x))
     val resultDfs = sourceTargetPaths.map(p => {
-      moveFolder(p.sourcePath, p.targetPath,partitionCount)
+      moveFolder(p.sourcePath, p.targetPath, moveContentOnly, partitionCount)
     }).reduce(_ union _)
 
     refreshMetadata(sourceDbName,sourceTableName)
@@ -133,7 +134,8 @@ object Promotor extends Serializable {
   }
 
   //todo zobaczyc jak sie zachowa gdy docelowy folder/pliki juz istnieje
-  def moveFolder(sourceFolderUri: String, targetLocationUri: String, partitionCount: Int = 192)(implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
+  def moveFolder(sourceFolderUri: String, targetLocationUri: String, moveContentOnly: Boolean = false, partitionCount: Int = 192)
+                (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
     println("Moving folders content: "+sourceFolderUri+"  ==>>  "+targetLocationUri)
     if (getFileSystemPrefix(targetLocationUri) + getContainerName(targetLocationUri) != getFileSystemPrefix(sourceFolderUri) + getContainerName(sourceFolderUri))
       throw new Exception("Cannot move files between 2 different filesystems. Use copy instead")
@@ -153,7 +155,16 @@ object Promotor extends Serializable {
     val relativePaths = paths.map(x => Paths(getRelativePath(x.sourcePath),getRelativePath(x.targetPath)))
 println("ALL TO BE MOVED:")
     relativePaths.foreach(println)
-    moveFiles(relativePaths, sourceFolderUri, partitionCount)
+    val res = moveFiles(relativePaths, sourceFolderUri, partitionCount)
+    if(!res.filter(!_.success).isEmpty)
+      throw new Exception("Move operation was not successful. There are "+res.filter(!_.success).length+" of objects which was not moved... " +
+        "The list of first 100 which was not moved is below...\n"+
+        res.map(_.path).slice(0,99).mkString("\n"))
+
+    if(!moveContentOnly)
+      if(srcFs.delete(new Path(getRelativePath(sourceFolderUri)), true))
+        println("WARNING: Folder " + sourceFolderUri + "could not be deleted and was left on storage device")
+    res
   }
 
   private def moveFiles(relativePaths: Seq[Paths], sourceFolderUri: String, partitionCount: Int = 32)

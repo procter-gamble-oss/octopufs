@@ -14,15 +14,24 @@ object TestUtils {
     spark.read.parquet("data/sfct").where("mm_time_perd_end_date != '2019-12-31'").
       write.partitionBy("mm_time_perd_end_date").
       option("path","data/testfield/STORE_SALES_FCT").saveAsTable("STORE_SALES_FCT")
+    println("Creation of STORE_SALES_FCT - done")
     spark.read.parquet("data/sfct").where("mm_time_perd_end_date != '2019-12-31'").
       write.partitionBy("mm_time_perd_end_date").
       option("path","data/testfield/STORE_SALES_SFCT").saveAsTable("STORE_SALES_SFCT")
+    println("Creation of STORE_SALES_SFCT - done")
     spark.read.parquet("data/sfct").where("mm_time_perd_end_date > '2019-07-31'").
       write.partitionBy("mm_time_perd_end_date").
       option("path","data/testfield/STORE_SALES_DLT").saveAsTable("STORE_SALES_DLT")
+    println("Creation of STORE_SALES_DLT - done")
     spark.read.parquet("data/sfct").where("mm_time_perd_end_date < '2019-10-31'").
       write.partitionBy("mm_time_perd_end_date").
       option("path","data/testfield/STORE_SALES_PREV").saveAsTable("STORE_SALES_FCT_PREV")
+    println("Creation of STORE_SALES_PREV - done")
+    spark.read.parquet("data/prod_dim").write.option("path","data/testfield/PROD_DIM").saveAsTable("PROD_DIM")
+    println("Creation of PROD_DIM - done")
+    spark.read.parquet("data/prod_dim").withColumn("pg_categ_txt",lit("updated")).limit(200).
+      write.option("path","data/testfield/PROD_SDIM").saveAsTable("PROD_SDIM")
+    println("Creation of PROD_SDIM - done")
 
     println("***********************************")
     println("*** HIVE TABLES SETUP COMPLETE   **")

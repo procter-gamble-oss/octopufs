@@ -177,7 +177,7 @@ object Promotor extends Serializable {
     println("ALL TO BE MOVED:")
     relativePaths.foreach(println)
     val res = moveFiles(relativePaths, sourceFolderUri, partitionCount)
-    if (!res.exists(!_.success))
+    if (res.exists(!_.success))
       throw new Exception("Move operation was not successful. There are " + res.count(!_.success) + " of objects which was not moved... " +
         "The list of first 100 which was not moved is below...\n" +
         res.map(_.path).slice(0, 99).mkString("\n"))
@@ -267,8 +267,6 @@ object Promotor extends Serializable {
     out
   }
 
-  //function assumes that move is being done within single FS. Higher level functions should check that
-
   def moveFilesBetweenTables(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, partitionCount: Int = 192)
                             (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
     val srcLoc = getTableLocation(sourceDbName, sourceTableName)
@@ -282,9 +280,7 @@ object Promotor extends Serializable {
     println("Files to be moved: " + paths.length)
     val relativePaths = paths.map(x => Paths(x.sourcePath, x.targetPath))
     val res = moveFolder(srcLoc,trgLoc, moveContentOnly = true)
-    //println("Deleting content of target")
-    //deletePaths(targetFilesToBeDeleted,trgLoc,partitionCount)
-    //val res = moveFiles(relativePaths, srcLoc, partitionCount)
+    refreshMetadata(sourceDbName, sourceTableName)
     refreshMetadata(targetDbName, targetTableName)
     res
   }

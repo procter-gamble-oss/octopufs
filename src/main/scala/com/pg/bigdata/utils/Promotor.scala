@@ -25,8 +25,11 @@ object Promotor extends Serializable {
   def copyFilesBetweenTables(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, partitionCount: Int = 192)
                             (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
     val paths = getTablesPathsList(sourceDbName, sourceTableName, targetDbName, targetTableName) //.take(5)
-    if (paths.isEmpty)
-      throw new Exception("No files to be copied")
+    if (paths.isEmpty) {
+      //throw new Exception("No files to be copied")
+      println("No files to be copied for table  " + sourceDbName+"."+sourceTableName)
+      Array[FSOperationResult]()
+    }
 
     val srcLoc = getTableLocation(sourceDbName, sourceTableName)
     val trgLoc = getTableLocation(targetDbName, targetTableName)
@@ -274,8 +277,11 @@ object Promotor extends Serializable {
     checkIfFsIsTheSame(srcLoc, trgLoc)
     val paths = getTablesPathsList(sourceDbName, sourceTableName, targetDbName, targetTableName) //.take(5)
     val targetFilesToBeDeleted = getListOfTableFiles(targetDbName, targetTableName)
-    if (paths.isEmpty)
-      throw new Exception("No files to be moved for path " + srcLoc)
+    if (paths.isEmpty) {
+      //throw new Exception("No files to be moved for path " + srcLoc)
+      println("No files to be moved from path " + srcLoc)
+      Array[FSOperationResult]()
+    }
     println(paths(0))
     println("Files to be moved: " + paths.length)
     val relativePaths = paths.map(x => Paths(x.sourcePath, x.targetPath))

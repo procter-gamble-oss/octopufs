@@ -253,7 +253,7 @@ object Promotor extends Serializable {
     println("absFolderUri: " + absFolderUri)
     println("deleting paths count:" + relativePaths.size)
     println("First 20 files for deletion:")
-    relativePaths.slice(0,20).foreach(println)
+    relativePaths.slice(0, 20).foreach(println)
     val res = spark.sparkContext.parallelize(relativePaths, partitionCount).mapPartitions(pathsPart => {
       val conf = sdConf.get()
       val fs = getFileSystem(conf, absFolderUri)
@@ -265,10 +265,11 @@ object Promotor extends Serializable {
     val out = res.collect()
     println("Number of paths deleted properly: " + out.count(_.success == true))
     println("Files with errors: " + out.count(!_.success))
-    if(out.exists(!_.success))
+    if (out.exists(!_.success))
       throw new Exception("Delete did not work for some files. Please check the reason or try rerunning the task")
     out
   }
+
 
   def moveFilesBetweenTables(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, partitionCount: Int = 192)
                             (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {

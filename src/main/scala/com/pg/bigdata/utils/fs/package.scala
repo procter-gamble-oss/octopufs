@@ -3,10 +3,13 @@ package com.pg.bigdata.utils
 import java.util.concurrent.Executors
 
 import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.permission.{AclEntry, AclEntryScope, AclStatus}
 import org.apache.hadoop.fs.{FileSystem, Path}
 
+import scala.collection.immutable.HashMap
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor, Future}
+import scala.collection.JavaConverters._
 
 package object fs {
   var magicPrefix = ".dfs.core.windows.net"
@@ -48,12 +51,68 @@ package object fs {
       folders.map(x => FSElement(x.getPath.toString, true, x.getLen))
   }
 
+  def synchronizeAcls(fs: FileSystem, sourceFolder: String, targetFolder: String)(implicit pool: ExecutionContextExecutor): Unit = {
+    println("Getting files from " + targetFolder)
+    val targetObjectList = listRecursively(fs, new Path(targetFolder))
+    println("Getting files from " + sourceFolder)
+    val sourceObjectList = listRecursively(fs, new Path(sourceFolder))
+    val defaultTargetAcl = fs.getAclStatus(new Path(targetFolder))
+    val targetFolders = targetObjectList.filter(_.isDirectory)
+    val acls = getAclsForPaths(fs, targetFolders.map(_.path) :+ targetFolder) //get acls for reporting folders
+    val aclsHM = HashMap(acls: _*)
+    val sourceFolders = sourceObjectList.filter(_.isDirectory)
+    println("Assigning ACLs on source folders")
+
+    /**
+     *
+     * @param sourceRootPath Source folder tree root
+     * @param defaultAcl Target root folder ACLs
+     * @return list of paths and AclStatuses according to the following logic: if corresponding folder is found in target, then apply it's acl settings. Otherwise take that folder's parent ACLs
+     */
+    def findIdealAcl(sourceRootPath: String, defaultAcl: AclStatus): Seq[(String, AclStatus)] = {
+      val list = fs.listStatus(new Path(sourceRootPath)).filter(_.isDirectory)
+      if (list.isEmpty) Seq()
+      else {
+        val currAcls = list.map(x => (x.getPath.toString, aclsHM.getOrElse(x.getPath.toString.replace(sourceFolder, targetFolder), defaultAcl)))
+        currAcls ++ currAcls.flatMap(z => findIdealAcl(z._1, z._2))
+      }
+    }
+    val topAcl = getAclsForPaths(fs,Array(targetFolder)).head._2
+    val aclsOnSourceFolders = findIdealAcl(sourceFolder,topAcl):+(sourceFolder, topAcl) //this returns source path and applied acl settings. THis will serve later to find parent folder's ACLs
+    aclsOnSourceFolders.map(x => Future {
+      fs.setAcl(new Path(x._1), x._2.getEntries)
+    }).map(x => Await.result(x, 10.minute))
+
+    println("create hashmap")
+    val aclsForFilesInFoldersHM = HashMap(aclsOnSourceFolders: _*)
+    println("Assigning ACLs on files")
+    sourceObjectList.filter(!_.isDirectory).map(x => Future {
+      val parentFolder = new Path(x.path).getParent.toString
+      val fileAcls = getAccessScopeAclFromDefault(aclsForFilesInFoldersHM.get(parentFolder).get)
+      fs.setAcl(new Path(x.path), fileAcls.asJava)
+    }).map(x => Await.result(x, 10.minute))
+  }
+
+  def getAclsForPaths(fs: FileSystem, paths: Array[String]): Array[(String, AclStatus)] = {
+    paths.map(x => {
+      val p = new Path(x)
+      (x, fs.getAclStatus(p))
+    })
+  }
+
+  def getAccessScopeAclFromDefault(aclStatus: AclStatus): Seq[AclEntry] = {
+    aclStatus.getEntries.asScala.filter(_.getScope == AclEntryScope.DEFAULT).map(x =>
+      new AclEntry.Builder().setName(x.getName).setPermission(x.getPermission).setType(x.getType).
+        setScope(AclEntryScope.ACCESS).build()
+    )
+  }
+
   def getSizeInMB(path: String, driverParallelism: Int = 100, timeoutInMin: Int = 20)(implicit conf: Configuration): Double = {
-    val fs = FileSystem.get(conf)
+    val fs = getFileSystem(conf, path)
     val pool = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(driverParallelism))
     val files = listRecursively(fs, new Path(path), timeoutInMin)(pool)
     val sizeInMb = files.map(_.byteSize).sum.toDouble / 1024 / 1024
-    println("Size of " + path + " is " + (sizeInMb*1000).round.toDouble/1000 + " MB")
+    println("Size of " + path + " is " + (sizeInMb * 1000).round.toDouble / 1000 + " MB")
     sizeInMb
   }
 }

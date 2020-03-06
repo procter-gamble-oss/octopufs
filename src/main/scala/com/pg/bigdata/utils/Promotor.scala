@@ -27,7 +27,7 @@ object Promotor extends Serializable {
     val paths = getTablesPathsList(sourceDbName, sourceTableName, targetDbName, targetTableName) //.take(5)
     if (paths.isEmpty) {
       //throw new Exception("No files to be copied")
-      println("No files to be copied for table  " + sourceDbName+"."+sourceTableName)
+      println("No files to be copied for table  " + sourceDbName + "." + sourceTableName)
       Array[FSOperationResult]()
     }
 
@@ -53,7 +53,7 @@ object Promotor extends Serializable {
   }
 
   def copyOverwriteTable(sourceTableName: String, targetTableName: String, partitionCount: Int)
-                             (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
+                        (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
     val db = spark.catalog.currentDatabase
 
     copyOverwriteTable(db, sourceTableName, db, targetTableName, partitionCount) //todo rethink approach to partition count
@@ -65,7 +65,7 @@ object Promotor extends Serializable {
     val trgLoc = getTableLocation(targetDbName, targetTableName)
     deleteAllChildObjects(trgLoc)
     val res = copyFilesBetweenTables(sourceDbName, sourceTableName, targetDbName, targetTableName, partitionCount) //todo rethink approach to partition count
-    refreshMetadata(targetDbName,targetTableName)
+    refreshMetadata(targetDbName, targetTableName)
     res
   }
 
@@ -79,7 +79,7 @@ object Promotor extends Serializable {
     println("Partitions of table " + sourceDbName + "." + sourceTableName + " which are going to be copied to " + targetDbName + "." + targetTableName + ":")
     sourceTargetPaths.foreach(x => println(x))
     val resultDfs = sourceTargetPaths.map(p => copyFolder(p.sourcePath, p.targetPath, partitionCount))
-    val out = resultDfs.reduce(_ union _) //todo add verification if all files were copied correctly
+    val out = resultDfs.reduce(_ union _)
     refreshMetadata(targetDbName, targetTableName)
     out
   }
@@ -99,7 +99,7 @@ object Promotor extends Serializable {
   }
 
   private def copyFiles(sourceFolderUri: String, targetLocationUri: String, p: Seq[Paths],
-                        partitionCount: Int)
+                        partitionCount: Int, attempt: Int = 0)
                        (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
     val confsd = new ConfigSerDeser(confEx)
     val requestProcessed = spark.sparkContext.longAccumulator("CopyFilesProcessedCount")
@@ -115,15 +115,17 @@ object Promotor extends Serializable {
     val failed = res.filter(!_.success)
     println("Number of files copied properly: " + res.count(_.success))
     println("Files with errors: " + failed.length)
-    if(failed.nonEmpty)
-      throw new Exception("Copy of files did not succeed - please check why and here are some of them: \n"+failed.map(_.path).slice(0,10).mkString("\n"))
-    res
+    if (failed.isEmpty) res
+    else if (failed.length == p.length || attempt > 4)
+      throw new Exception("Copy of files did not succeed - please check why and here are some of them: \n" + failed.map(_.path).slice(0, 10).mkString("\n"))
+    else
+      res.filter(_.success)++copyFiles(sourceFolderUri, targetLocationUri, p.filter(x => failed.contains(x)), partitionCount, attempt + 1)
   }
 
   def copyOverwritePartitions(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, matchStringPartitions: Seq[String],
                               partitionCount: Int = 192)
                              (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
-    deleteTablePartitions(targetDbName, targetTableName, matchStringPartitions) //todo error handling or exception
+    deleteTablePartitions(targetDbName, targetTableName, matchStringPartitions)
     copyTablePartitions(sourceDbName, sourceTableName, targetDbName, targetTableName, matchStringPartitions, partitionCount)
   }
 
@@ -146,7 +148,7 @@ object Promotor extends Serializable {
     //todo add check for empty list
     sourceTargetPaths.foreach(x => println(x))
     val resultDfs = sourceTargetPaths.map(p => {
-      moveFolder(p.sourcePath, p.targetPath, moveContentOnly, partitionCount)
+      moveFolderContent(p.sourcePath, p.targetPath, moveContentOnly, partitionCount)
     }).reduce(_ union _)
 
     refreshMetadata(sourceDbName, sourceTableName)
@@ -154,25 +156,69 @@ object Promotor extends Serializable {
 
     resultDfs
   }
+
   def checkIfFsIsTheSame(targetLocationUri: String, sourceFolderUri: String): Unit = {
     if (getFileSystemPrefix(targetLocationUri) + getContainerName(targetLocationUri) != getFileSystemPrefix(sourceFolderUri) + getContainerName(sourceFolderUri))
       throw new Exception("Cannot move files between 2 different filesystems. Use copy instead")
   }
-  //todo zobaczyc jak sie zachowa gdy docelowy folder/pliki juz istnieje
-  def moveFolder(sourceFolderUri: String, targetLocationUri: String, moveContentOnly: Boolean = false, partitionCount: Int = 192)
-                (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
+
+  /*
+    def moveFolderKeepAcls(sourceFolderUri: String, targetFolderUri: String, keepSourceFolder: Boolean = false)
+                          (implicit conf: Configuration): Boolean = {
+      println("Moving folders: " + sourceFolderUri + "  ==>>  " + targetFolderUri)
+      checkIfFsIsTheSame(sourceFolderUri, targetFolderUri)
+      val srcAcls = AclManager.getAclEntries(sourceFolderUri)
+      val trgAcls = AclManager.getAclEntries(targetFolderUri)
+      val fs = getFileSystem(conf, sourceFolderUri)
+      val srcRelPath = getRelativePath(sourceFolderUri)
+      val trgRelPath = getRelativePath(targetFolderUri)
+
+      if (doesMoveLookSafe(fs, srcRelPath, trgRelPath)) {
+        println("Deleting target folder")
+        if (fs.exists(new Path(trgRelPath)))
+          if (!fs.delete(new Path(trgRelPath), true)) throw new Exception("Cannot delete folder " + targetFolderUri)
+        println("Moving folder " + srcRelPath + " ==>> " + trgRelPath)
+        if (!fs.rename(new Path(srcRelPath), new Path(trgRelPath))) throw new Exception("Move of folder " + srcRelPath + " ==>> " + trgRelPath + " FAILED!")
+        AclManager.resetAclEntries(targetFolderUri, trgAcls)
+        if (fs.mkdirs(new Path(srcRelPath)))
+          AclManager.resetAclEntries(sourceFolderUri, srcAcls)
+        else
+          println("Could not create folder " + sourceFolderUri)
+        true //move successful although source folder could not be recreated
+      } else
+        false
+    } */
+
+  private def doesMoveLookSafe(fs: FileSystem, sourceRelPath: String, targetRelPath: String): Boolean = {
+    if (!fs.exists(new Path(sourceRelPath))) throw new Exception("Source folder " + sourceRelPath + " does not exist")
+    val src = fs.listStatus(new Path(sourceRelPath))
+    val trg = if (fs.exists(new Path(targetRelPath)))
+      fs.listStatus(new Path(targetRelPath))
+    else return true
+
+    if (src.nonEmpty || (src.isEmpty && trg.isEmpty)) true
+    else {
+      println("Looks like your source folder " + sourceRelPath + " is empty, but your target folder " + targetRelPath +
+        " is not. Skipping the move to avoid harmful folder move (assuming it is rerun)")
+      false
+    }
+  }
+
+  def moveFolderContent(sourceFolderUri: String, targetLocationUri: String, keepSourceFolder: Boolean = false, partitionCount: Int = 192)
+                       (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
     println("Moving folders content: " + sourceFolderUri + "  ==>>  " + targetLocationUri)
     checkIfFsIsTheSame(sourceFolderUri, targetLocationUri)
-    val srcFs = getFileSystem(confEx, sourceFolderUri)
-    val trgFs = getFileSystem(confEx, targetLocationUri)
-    //delete target folder
+    val fs = getFileSystem(confEx, sourceFolderUri)
 
-    if (trgFs.exists(new Path(getRelativePath(targetLocationUri)))) //todo test if it works
+    if (!doesMoveLookSafe(fs, getRelativePath(sourceFolderUri), getRelativePath(targetLocationUri)))
+      return Array()
+    //delete target folder
+    if (fs.exists(new Path(getRelativePath(targetLocationUri)))) //todo test if it works
       deleteAllChildObjects(targetLocationUri)
     else
-      trgFs.mkdirs(new Path(targetLocationUri))
+      fs.mkdirs(new Path(targetLocationUri))
 
-    val sourceFileList = srcFs.listStatus(new Path(sourceFolderUri)).map(x => x.getPath.toString)
+    val sourceFileList = fs.listStatus(new Path(sourceFolderUri)).map(x => x.getPath.toString)
     val targetFileList = sourceFileList.map(_.replaceAll(sourceFolderUri, targetLocationUri))
     val paths = sourceFileList.zip(targetFileList).map(x => Paths(x._1, x._2))
 
@@ -185,13 +231,13 @@ object Promotor extends Serializable {
         "The list of first 100 which was not moved is below...\n" +
         res.map(_.path).slice(0, 99).mkString("\n"))
 
-    if (!moveContentOnly)
-      if (srcFs.delete(new Path(getRelativePath(sourceFolderUri)), true))
+    if (!keepSourceFolder)
+      if (fs.delete(new Path(getRelativePath(sourceFolderUri)), true))
         println("WARNING: Folder " + sourceFolderUri + "could not be deleted and was left on storage device")
     res
   }
 
-  private def moveFiles(relativePaths: Seq[Paths], sourceFolderUri: String, partitionCount: Int = 32)
+  private def moveFiles(relativePaths: Seq[Paths], sourceFolderUri: String, partitionCount: Int = 32, attempt: Int = 0)
                        (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
     println("Starting moveFiles. Paths to be moved: " + relativePaths.size)
 
@@ -205,30 +251,34 @@ object Promotor extends Serializable {
         println("Executor paths: " + paths)
         Future(paths, srcFs.rename(new Path(paths.sourcePath), new Path(paths.targetPath))) //todo this fails if folder structure for the file does not exist
       })
-    }).map(x => Await.result(x, 10.seconds)).map(x => FSOperationResult(x._1.sourcePath, x._2)).collect()
+    }).map(x => Await.result(x, 120.seconds)).map(x => FSOperationResult(x._1.sourcePath, x._2)).collect()
     println("Number of files moved properly: " + res.count(_.success))
     println("Files with errors: " + res.count(!_.success))
-    if(res.exists(_.success == false))
-      throw new Exception("Move/rename of did not work for some files. Please check the reason or try rerunning the task")
-    res
+    val failed = res.filter(!_.success)
+
+    if (failed.isEmpty) res
+    else if (failed.length == relativePaths.length || attempt > 4)
+      throw new Exception("Move of files did not succeed - please check why and here are some of them: \n" + failed.map(_.path).slice(0, 10).mkString("\n"))
+    else
+      res.filter(_.success)++moveFiles(relativePaths.filter(x => failed.contains(x)),sourceFolderUri, partitionCount, attempt + 1)
   }
 
-  def deleteAllChildObjects(folderAbsPath: String)(implicit spark: SparkSession, confEx: Configuration): Unit = {
+  def deleteAllChildObjects(folderAbsPath: String, parallelism: Int = 32)(implicit spark: SparkSession, confEx: Configuration): Unit = {
     val relPath = getRelativePath(folderAbsPath)
     val fs = getFileSystem(spark.sparkContext.hadoopConfiguration, folderAbsPath)
     val objectList = fs.listStatus(new Path(relPath))
     val paths = objectList.map(relPath + "/" + _.getPath.getName)
 
-    val r = deletePaths(paths, folderAbsPath)
+    val r = deletePaths(paths, folderAbsPath, parallelism)
     if (r.exists(!_.success)) throw new Exception("Deleting of some objects failed")
   }
 
-  def deleteTablePartitions(db: String, tableName: String, matchStringPartitions: Seq[String])(implicit spark: SparkSession, confEx: Configuration): Unit = {
+  def deleteTablePartitions(db: String, tableName: String, matchStringPartitions: Seq[String], parallelism: Int = 32)(implicit spark: SparkSession, confEx: Configuration): Unit = {
     val paths = filterPartitions(db, tableName, matchStringPartitions).map(x => getRelativePath(x))
     val absTblLoc = getTableLocation(db, tableName)
     println("Partitions of table " + db + "." + tableName + " which are going to be deleted:")
     paths.foreach(println)
-    val r = deletePaths(paths, absTblLoc)
+    val r = deletePaths(paths, absTblLoc, parallelism)
     if (r.exists(!_.success)) throw new Exception("Deleting of some partitions failed")
     refreshMetadata(db, tableName)
   }
@@ -247,8 +297,8 @@ object Promotor extends Serializable {
     moveFilesBetweenTables(db, sourceTableName, db, targetTableName, partitionCnt)
   }
 
-  private def deletePaths(relativePaths: Seq[String], absFolderUri: String, partitionCount: Int = 32)
-                         (implicit spark: SparkSession, confEx: Configuration) = {
+  private def deletePaths(relativePaths: Seq[String], absFolderUri: String, partitionCount: Int = 32, attempt: Int = 0)
+                         (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
     val sdConf = new ConfigSerDeser(confEx)
     println("absFolderUri: " + absFolderUri)
     println("deleting paths count:" + relativePaths.size)
@@ -259,15 +309,18 @@ object Promotor extends Serializable {
       val fs = getFileSystem(conf, absFolderUri)
       pathsPart.map(path => Future {
         FSOperationResult(path, fs.delete(new Path(path), true))
-      }).map(x => Await.result(x, 10.seconds))
-    })
+      }).map(x => Await.result(x, 120.seconds))
+    }).collect()
 
-    val out = res.collect()
-    println("Number of paths deleted properly: " + out.count(_.success == true))
-    println("Files with errors: " + out.count(!_.success))
-    if (out.exists(!_.success))
-      throw new Exception("Delete did not work for some files. Please check the reason or try rerunning the task")
-    out
+    val failed = res.filter(!_.success)
+    println("Number of paths deleted properly: " + res.count(_.success == true))
+    println("Files with errors: " + res.count(!_.success))
+    if (failed.isEmpty) res
+    else if (failed.length == relativePaths.length || attempt > 4)
+      throw new Exception("Delete of some paths did not succeed - please check why and here are some of them: \n" + failed.map(_.path).slice(0, 10).mkString("\n"))
+    else
+      res.filter(_.success)++deletePaths(relativePaths.filter(x => failed.contains(x)),absFolderUri, partitionCount, attempt + 1)
+
   }
 
 
@@ -286,7 +339,7 @@ object Promotor extends Serializable {
     println(paths(0))
     println("Files to be moved: " + paths.length)
     val relativePaths = paths.map(x => Paths(x.sourcePath, x.targetPath))
-    val res = moveFolder(srcLoc,trgLoc, moveContentOnly = true)
+    val res = moveFolderContent(srcLoc, trgLoc, keepSourceFolder = true)
     refreshMetadata(sourceDbName, sourceTableName)
     refreshMetadata(targetDbName, targetTableName)
     res

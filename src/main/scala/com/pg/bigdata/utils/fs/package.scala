@@ -6,10 +6,10 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.permission.{AclEntry, AclEntryScope, AclStatus}
 import org.apache.hadoop.fs.{FileSystem, Path}
 
+import scala.collection.JavaConverters._
 import scala.collection.immutable.HashMap
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor, Future}
-import scala.collection.JavaConverters._
 
 package object fs {
   var magicPrefix = ".dfs.core.windows.net"
@@ -54,10 +54,13 @@ package object fs {
   def synchronizeAcls(fs: FileSystem, sourceFolder: String, targetFolder: String)(implicit pool: ExecutionContextExecutor): Unit = {
     println("Getting files from " + targetFolder)
     val targetObjectList = listRecursively(fs, new Path(targetFolder))
+    println(targetObjectList.size.toString + " objects found in " + targetFolder)
     println("Getting files from " + sourceFolder)
     val sourceObjectList = listRecursively(fs, new Path(sourceFolder))
+    println(sourceObjectList.size.toString + " objects found in " + sourceObjectList)
     val defaultTargetAcl = fs.getAclStatus(new Path(targetFolder))
     val targetFolders = targetObjectList.filter(_.isDirectory)
+    println(s"Getting ACLs for folders")
     val acls = getAclsForPaths(fs, targetFolders.map(_.path) :+ targetFolder) //get acls for reporting folders
     val aclsHM = HashMap(acls: _*)
     val sourceFolders = sourceObjectList.filter(_.isDirectory)
@@ -66,7 +69,7 @@ package object fs {
     /**
      *
      * @param sourceRootPath Source folder tree root
-     * @param defaultAcl Target root folder ACLs
+     * @param defaultAcl     Target root folder ACLs
      * @return list of paths and AclStatuses according to the following logic: if corresponding folder is found in target, then apply it's acl settings. Otherwise take that folder's parent ACLs
      */
     def findIdealAcl(sourceRootPath: String, defaultAcl: AclStatus): Seq[(String, AclStatus)] = {
@@ -77,13 +80,14 @@ package object fs {
         currAcls ++ currAcls.flatMap(z => findIdealAcl(z._1, z._2))
       }
     }
-    val topAcl = getAclsForPaths(fs,Array(targetFolder)).head._2
-    val aclsOnSourceFolders = findIdealAcl(sourceFolder,topAcl):+(sourceFolder, topAcl) //this returns source path and applied acl settings. THis will serve later to find parent folder's ACLs
+
+    val topAcl = getAclsForPaths(fs, Array(targetFolder)).head._2
+    val aclsOnSourceFolders = findIdealAcl(sourceFolder, topAcl) :+ (sourceFolder, topAcl) //this returns source path and applied acl settings. THis will serve later to find parent folder's ACLs
     aclsOnSourceFolders.map(x => Future {
       fs.setAcl(new Path(x._1), x._2.getEntries)
     }).map(x => Await.result(x, 10.minute))
 
-    println("create hashmap")
+    println("Create hashmap with folders' ACLs...")
     val aclsForFilesInFoldersHM = HashMap(aclsOnSourceFolders: _*)
     println("Assigning ACLs on files")
     sourceObjectList.filter(!_.isDirectory).map(x => Future {
@@ -91,6 +95,7 @@ package object fs {
       val fileAcls = getAccessScopeAclFromDefault(aclsForFilesInFoldersHM.get(parentFolder).get)
       fs.setAcl(new Path(x.path), fileAcls.asJava)
     }).map(x => Await.result(x, 10.minute))
+    println("All done!!!...")
   }
 
   def getAclsForPaths(fs: FileSystem, paths: Array[String]): Array[(String, AclStatus)] = {

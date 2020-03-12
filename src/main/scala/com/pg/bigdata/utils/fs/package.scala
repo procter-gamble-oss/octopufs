@@ -3,11 +3,7 @@ package com.pg.bigdata.utils
 import java.util.concurrent.Executors
 
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.permission.{AclEntry, AclEntryScope, AclStatus}
 import org.apache.hadoop.fs.{FileSystem, Path}
-
-import scala.collection.JavaConverters._
-import scala.collection.immutable.HashMap
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor, Future}
 
@@ -48,69 +44,9 @@ package object fs {
     else folders.map(folder => Future {
       listRecursively(fs, folder.getPath)
     }(pool)).flatMap(x => Await.result(x, timeoutMin.minutes)) ++
-      folders.map(x => FSElement(x.getPath.toString, true, x.getLen))
+      elements.map(x => FSElement(x.getPath.toString, x.isDirectory, x.getLen))
   }
 
-  def synchronizeAcls(fs: FileSystem, sourceFolder: String, targetFolder: String)(implicit pool: ExecutionContextExecutor): Unit = {
-    println("Getting files from " + targetFolder)
-    val targetObjectList = listRecursively(fs, new Path(targetFolder))
-    println(targetObjectList.size.toString + " objects found in " + targetFolder)
-    println("Getting files from " + sourceFolder)
-    val sourceObjectList = listRecursively(fs, new Path(sourceFolder))
-    println(sourceObjectList.size.toString + " objects found in " + sourceObjectList)
-    val defaultTargetAcl = fs.getAclStatus(new Path(targetFolder))
-    val targetFolders = targetObjectList.filter(_.isDirectory)
-    println(s"Getting ACLs for folders")
-    val acls = getAclsForPaths(fs, targetFolders.map(_.path) :+ targetFolder) //get acls for reporting folders
-    val aclsHM = HashMap(acls: _*)
-    val sourceFolders = sourceObjectList.filter(_.isDirectory)
-    println("Assigning ACLs on source folders")
-
-    /**
-     *
-     * @param sourceRootPath Source folder tree root
-     * @param defaultAcl     Target root folder ACLs
-     * @return list of paths and AclStatuses according to the following logic: if corresponding folder is found in target, then apply it's acl settings. Otherwise take that folder's parent ACLs
-     */
-    def findIdealAcl(sourceRootPath: String, defaultAcl: AclStatus): Seq[(String, AclStatus)] = {
-      val list = fs.listStatus(new Path(sourceRootPath)).filter(_.isDirectory)
-      if (list.isEmpty) Seq()
-      else {
-        val currAcls = list.map(x => (x.getPath.toString, aclsHM.getOrElse(x.getPath.toString.replace(sourceFolder, targetFolder), defaultAcl)))
-        currAcls ++ currAcls.flatMap(z => findIdealAcl(z._1, z._2))
-      }
-    }
-
-    val topAcl = getAclsForPaths(fs, Array(targetFolder)).head._2
-    val aclsOnSourceFolders = findIdealAcl(sourceFolder, topAcl) :+ (sourceFolder, topAcl) //this returns source path and applied acl settings. THis will serve later to find parent folder's ACLs
-    aclsOnSourceFolders.map(x => Future {
-      fs.setAcl(new Path(x._1), x._2.getEntries)
-    }).map(x => Await.result(x, 10.minute))
-
-    println("Create hashmap with folders' ACLs...")
-    val aclsForFilesInFoldersHM = HashMap(aclsOnSourceFolders: _*)
-    println("Assigning ACLs on files")
-    sourceObjectList.filter(!_.isDirectory).map(x => Future {
-      val parentFolder = new Path(x.path).getParent.toString
-      val fileAcls = getAccessScopeAclFromDefault(aclsForFilesInFoldersHM.get(parentFolder).get)
-      fs.setAcl(new Path(x.path), fileAcls.asJava)
-    }).map(x => Await.result(x, 10.minute))
-    println("All done!!!...")
-  }
-
-  def getAclsForPaths(fs: FileSystem, paths: Array[String]): Array[(String, AclStatus)] = {
-    paths.map(x => {
-      val p = new Path(x)
-      (x, fs.getAclStatus(p))
-    })
-  }
-
-  def getAccessScopeAclFromDefault(aclStatus: AclStatus): Seq[AclEntry] = {
-    aclStatus.getEntries.asScala.filter(_.getScope == AclEntryScope.DEFAULT).map(x =>
-      new AclEntry.Builder().setName(x.getName).setPermission(x.getPermission).setType(x.getType).
-        setScope(AclEntryScope.ACCESS).build()
-    )
-  }
 
   def getSizeInMB(path: String, driverParallelism: Int = 100, timeoutInMin: Int = 20)(implicit conf: Configuration): Double = {
     val fs = getFileSystem(conf, path)
@@ -120,4 +56,34 @@ package object fs {
     println("Size of " + path + " is " + (sizeInMb * 1000).round.toDouble / 1000 + " MB")
     sizeInMb
   }
+
+
+  def checkIfFsIsTheSame(targetLocationUri: String, sourceFolderUri: String): Unit = {
+    if (getFileSystemPrefix(targetLocationUri) + getContainerName(targetLocationUri) != getFileSystemPrefix(sourceFolderUri) + getContainerName(sourceFolderUri))
+      throw new Exception("Cannot move files between 2 different filesystems. Use copy instead")
+  }
+
+  def doesMoveLookSafe(fs: FileSystem, sourceRelPath: String, targetRelPath: String): Boolean = {
+    if (!fs.exists(new Path(sourceRelPath))) throw new Exception("Source folder " + sourceRelPath + " does not exist")
+    val src = fs.listStatus(new Path(sourceRelPath))
+    val trg = if (fs.exists(new Path(targetRelPath)))
+      fs.listStatus(new Path(targetRelPath))
+    else return true
+
+    if (src.nonEmpty || (src.isEmpty && trg.isEmpty)) true
+    else {
+      println("Looks like your source folder " + sourceRelPath + " is empty, but your target folder " + targetRelPath +
+        " is not. Skipping the move to avoid harmful folder move (assuming it is rerun)")
+      false
+    }
+  }
+
+   def copySingleFile(hadoopConf: Configuration, sourcePath: String, targetPath: String, sourceFileSystem: FileSystem, targetFileSystem: FileSystem,
+                             overwrite: Boolean = true, deleteSource: Boolean = false): Boolean = {
+    println(sourcePath + " => " + targetPath)
+    val srcPath = new Path(sourcePath)
+    val destPath = new Path(targetPath)
+    org.apache.hadoop.fs.FileUtil.copy(sourceFileSystem, srcPath, targetFileSystem, destPath, deleteSource, overwrite, hadoopConf)
+  }
+
 }

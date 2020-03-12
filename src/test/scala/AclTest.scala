@@ -20,6 +20,6 @@ object AclTest extends App{
   magicPrefix="hdfs://localhost:8020"
   val fs = getFileSystem(c,"hdfs://localhost:8020/test1")
   implicit val pool = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(100))
-  synchronizeAcls(fs,"/test1","/test2")
+  AclManager.synchronizeAcls(fs,"/dozrobienia","/wzorcowy")
   //AclManager.modifyTableACLs("dp_neighborhood_sales","store_sales_fct_jt",acl, 30)
 }

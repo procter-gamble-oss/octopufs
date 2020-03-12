@@ -6,13 +6,14 @@ import com.pg.bigdata.utils.fs.{FSOperationResult, _}
 import com.pg.bigdata.utils.helpers.ConfigSerDeser
 import com.pg.bigdata.utils.metastore._
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.Path
-import org.apache.hadoop.fs.permission.{AclEntry, AclEntryScope, AclEntryType, FsAction}
+import org.apache.hadoop.fs.permission._
+import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.SparkSession
 
 import scala.collection.JavaConverters._
+import scala.collection.immutable.HashMap
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor, Future}
 import scala.util.Try
 
 object AclManager extends Serializable {
@@ -103,7 +104,7 @@ object AclManager extends Serializable {
     val fs = getFileSystem(configuration, pathUri)
     println("Removing ACLs on " + pathUri + " and setting new entries")
     acls.foreach(println)
-    fs.setAcl(path,acls.asJava)
+    fs.setAcl(path, acls.asJava)
   }
 
   case class FsPermission(scope: String, permission: String, level: String, granteeObjectId: String) {
@@ -115,5 +116,112 @@ object AclManager extends Serializable {
     def getDefaultLevelPerm(): AclManager.FsPermission = FsPermission(scope, permission, "DEFAULT", granteeObjectId)
   }
 
-  //def modifyACL()
+
+  //TARGET folder is something which function is taking ACLs from and apply them to SOURCE folder
+  def synchronizeAcls(fs: FileSystem, sourceFolderRelativePath: String, targetFolderRelativePath: String, timeoutMin: Int = 10, numOfThreads: Int = 32, attempt: Int = 0): Unit = {
+    val executor = Executors.newFixedThreadPool(numOfThreads)
+    implicit val pool = ExecutionContext.fromExecutor(executor)
+
+    println("Getting files from " + targetFolderRelativePath)
+    val targetObjectList = listRecursively(fs, new Path(targetFolderRelativePath)).map(_.toRelativePath)
+    println(targetObjectList.size.toString + " objects found in " + targetFolderRelativePath)
+    val targetFolders = targetObjectList.filter(_.isDirectory)
+
+    //getting entry for top level target folder
+    val topAcl = getAclsForPaths(fs, Array(targetFolderRelativePath)).head._2
+    println("Target folder ACL is: " + topAcl)
+
+    println("Getting files from " + sourceFolderRelativePath)
+    val sourceObjectList = listRecursively(fs, new Path(sourceFolderRelativePath)).map(_.toRelativePath)
+    println(sourceObjectList.size.toString + " objects found in " + sourceFolderRelativePath)
+    val sourceFiles = sourceObjectList.filter(!_.isDirectory)
+
+
+    println(s"Getting ACLs for folders")
+    val acls = getAclsForPaths(fs, targetFolders.map(_.path) :+ targetFolderRelativePath) //get acls for reporting folders
+    val aclsHM = HashMap(acls: _*)
+
+    println("Assigning ACLs on source folders")
+
+    /** This function assigns ACL for the folders. If corresponding folder exists in target as it is in source, source folder gets target object's ACL assigned. If there is no corresponing folder, ACLs from parent folder are inherited
+     *
+     * @param sourceRootPath Source folder tree root
+     * @param defaultAcl     Target root folder ACLs
+     * @return list of paths and AclStatuses according to the following logic: if corresponding folder is found in target, then apply it's acl settings. Otherwise take that folder's parent ACLs
+     */
+    def findIdealAcl(sourceRootPath: String, defaultAcl: AclStatus): Array[AclSetting] = {
+      val list = fs.listStatus(new Path(sourceRootPath)).filter(_.isDirectory)
+      if (list.isEmpty) Array[AclSetting]()
+      else {
+        val currAcls = list.map(x => {
+          val p = getRelativePath(x.getPath.toString)
+          AclSetting(p, aclsHM.getOrElse(p.replace(sourceFolderRelativePath, targetFolderRelativePath), defaultAcl))
+        })
+        currAcls ++ currAcls.flatMap(z => findIdealAcl(z.path, z.aclStatus))
+      }
+    }
+
+    println("Finding ACLs for folders...")
+    val aclsOnSourceFolders = findIdealAcl(sourceFolderRelativePath, topAcl) :+ AclSetting(sourceFolderRelativePath, topAcl) //this returns source path and applied acl settings. THis will serve later to find parent folder's ACLs
+    println("Acls assigned (not yet applied to these folders: (5 first only)")
+    aclsOnSourceFolders.slice(0, 5).foreach(x => println(x.path + " - " + x.aclStatus.toString))
+    println("Number of folder settings to be applied: " + aclsOnSourceFolders.length)
+
+    def applyFolderSecurity(objects: Array[AclSetting], attempt: Int = 0): Array[FSOperationResult] = {
+      val res = aclsOnSourceFolders.map(x => Future {
+        val exec = Try(fs.setAcl(new Path(x.path), x.aclStatus.getEntries))
+        if (exec.isFailure) println(x.path+ " ### " + x.aclStatus +"\n"+ exec.failed.get.getMessage)
+        FSOperationResult(x.path, exec.isSuccess)
+      }).map(x => Await.result(x, 10.minute))
+      val failed = res.filter(!_.success)
+      if (failed.isEmpty) res
+      else if (failed.length == objects.length || attempt > 4)
+        throw new Exception("Setting of ACLs did not succeed - please check why and here are some of them: \n" + failed.map(_.path).slice(0, 10).mkString("\n"))
+      else
+        res.filter(_.success) ++ applyFolderSecurity(objects.filter(x => failed.map(_.path).contains(x.path)), attempt + 1)
+    }
+
+    applyFolderSecurity(aclsOnSourceFolders)
+
+    println("Create hashmap with folders' ACLs...")
+    val aclsForFilesInFoldersHM = HashMap(aclsOnSourceFolders.map(x => (x.path, x.aclStatus)): _*)
+    println("Assigning ACLs on files: (First 5 from the list)")
+    sourceFiles.slice(0, 5).foreach(x => println(x.path))
+
+    println("Number of files be modified (ACLs): " + sourceFiles.length)
+
+    def applyFilesSecurity(objects: Array[FSElement], attempt: Int = 0): Array[FSOperationResult] = {
+      val res =
+        objects.map(x => Future {
+          val parentFolder = new Path(x.path).getParent.toString
+          val fileAcls = getAccessScopeAclFromDefault(aclsForFilesInFoldersHM.get(parentFolder).get)
+          val exec = Try(fs.setAcl(new Path(x.path), fileAcls.asJava))
+          if (exec.isFailure) println(exec.failed.get.getMessage)
+          FSOperationResult(x.path, exec.isSuccess)
+        }).map(x => Await.result(x, 10.minute))
+      val failed = res.filter(!_.success)
+      if (failed.isEmpty) res
+      else if (failed.length == objects.length || attempt > 4)
+        throw new Exception("Setting of ACLs on files did not succeed - please check why and here are some of them: \n" + failed.map(_.path).slice(0, 10).mkString("\n"))
+      else
+        res.filter(_.success) ++ applyFilesSecurity(objects.filter(x => failed.map(_.path).contains(x.path)), attempt + 1)
+    }
+    applyFilesSecurity(sourceFiles)
+    println("All done!!!...")
+    executor.shutdown()
+  }
+
+  def getAclsForPaths(fs: FileSystem, paths: Array[String]): Array[(String, AclStatus)] = {
+    paths.map(x => {
+      val p = new Path(x)
+      (x, fs.getAclStatus(p))
+    })
+  }
+
+  def getAccessScopeAclFromDefault(aclStatus: AclStatus): Seq[AclEntry] = {
+    aclStatus.getEntries.asScala.filter(_.getScope == AclEntryScope.DEFAULT).map(x =>
+      new AclEntry.Builder().setName(x.getName).setPermission(x.getPermission).setType(x.getType).
+        setScope(AclEntryScope.ACCESS).build()
+    )
+  }
 }

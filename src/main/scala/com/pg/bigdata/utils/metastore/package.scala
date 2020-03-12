@@ -16,7 +16,7 @@ package object metastore {
     getTableL1PartitionsPaths(db,tableName).filter(x => partitionsToKeepLike.exists(y => x.contains(y)))
   }
 
-  //returns relative paths of partitions
+  //returns absolute paths of partitions
   def getTableL1PartitionsPaths(db: String, tableName: String)(implicit spark: SparkSession): Array[String] = {
     val m = getTableMetadata(db,tableName).partitionColumnNames
     if(m.isEmpty) throw new Exception("Table " + db + "." + tableName + " is not partitioned")

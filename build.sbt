@@ -13,6 +13,8 @@ libraryDependencies ++= Seq(
  "org.apache.spark" % "spark-sql_2.11" % sparkVersion % "provided",
  "org.apache.spark" % "spark-core_2.11" % sparkVersion % "provided",
  "org.apache.spark" %% "spark-mllib" % sparkVersion % "provided",
+ "org.pegdown" % "pegdown" % "1.6.0" % Test,
+ "org.scalatest" %% "scalatest" % "3.0.5" % "provided",
 
 
   //  "org.slf4j" % "slf4j-api" % "1.7.5",
@@ -26,3 +28,4 @@ libraryDependencies ++= Seq(
 
 )
 
+parallelExecution in Test := false

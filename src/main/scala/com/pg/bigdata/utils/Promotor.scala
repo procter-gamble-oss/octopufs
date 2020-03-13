@@ -1,19 +1,13 @@
 package com.pg.bigdata.utils
 
-import java.util.concurrent.Executors
-
 import com.pg.bigdata.utils.Assistant._
-import com.pg.bigdata.utils.fs.{FSOperationResult, Paths, _}
-import com.pg.bigdata.utils.helpers.ConfigSerDeser
+import com.pg.bigdata.utils.fs.{DistributedExecution, FSOperationResult, Paths, _}
 import com.pg.bigdata.utils.metastore._
-import com.pg.bigdata.utils.fs.DistributedExecution
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.SparkSession
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, Future}
 
 //val magicPrefix = ".dfs.core.windows.net"
 
@@ -75,20 +69,20 @@ object Promotor extends Serializable {
                           partitionCount: Int)
                          (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
     val paths = filterPartitions(sourceDbName, sourceTableName, matchStringPartitions)
-    println("Partitions to be copied: "+paths.mkString("\n"))
+    if (paths.isEmpty)
+      throw new Exception("There are no files to be copied. Please check your input parameters or table content")
+
+    println("Partitions to be copied: " + paths.mkString("\n"))
     val sourceAbsTblLoc = getTableLocation(sourceDbName, sourceTableName)
     val targetAbsTblLoc = getTableLocation(targetDbName, targetTableName)
-    val fs = getFileSystem(confEx,sourceAbsTblLoc)
-   // val sourceTargetPaths = paths.map(x => Paths(x, x.replace(sourceAbsTblLoc, targetAbsTblLoc)))
-    //println("Partitions of table " + sourceDbName + "." + sourceTableName + " which are going to be copied to " + targetDbName + "." + targetTableName + ":")
-   // sourceTargetPaths.foreach(x => println(x))
-    //val resultDfs = sourceTargetPaths.map(p => DistributedExecution.copyFolder(p.sourcePath, p.targetPath, partitionCount))
+    val fs = getFileSystem(confEx, sourceAbsTblLoc)
+
     val allSourceFiles = paths.map(x => listRecursively(fs, new Path(x)).filter(!_.isDirectory)).reduce(_ union _)
-    println("Total number of files to be copied: "+allSourceFiles.length)
+    println("Total number of files to be copied: " + allSourceFiles.length)
     val sourceTargetPaths = allSourceFiles.map(x => Paths(x.path, x.path.replace(sourceAbsTblLoc, targetAbsTblLoc)))
     println("Partitions of table " + sourceDbName + "." + sourceTableName + " which are going to be copied to " + targetDbName + "." + targetTableName + ":")
-    sourceTargetPaths.slice(0,10).foreach(x => println(x))
-    val res = DistributedExecution.copyFiles(sourceAbsTblLoc, targetAbsTblLoc,sourceTargetPaths,partitionCount)
+    sourceTargetPaths.slice(0, 10).foreach(x => println(x))
+    val res = DistributedExecution.copyFiles(sourceAbsTblLoc, targetAbsTblLoc, sourceTargetPaths, partitionCount)
     refreshMetadata(targetDbName, targetTableName)
     res
   }
@@ -109,23 +103,71 @@ object Promotor extends Serializable {
 
   def moveTablePartitions(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String,
                           matchStringPartitions: Seq[String] = Seq(), moveContentOnly: Boolean = false,
-                          partitionCount: Int)
-                         (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
-    val paths = filterPartitions(sourceDbName, sourceTableName, matchStringPartitions)
+                          numOfThreads: Int = 1000, timeoutMin: Int = 10)
+                         (implicit spark: SparkSession, conf: Configuration): Array[FSOperationResult] = {
+    val partitionFoldersUriPaths = filterPartitions(sourceDbName, sourceTableName, matchStringPartitions)
     val sourceAbsTblLoc = getTableLocation(sourceDbName, sourceTableName)
     val targetAbsTblLoc = getTableLocation(targetDbName, targetTableName)
-    val sourceTargetPaths = paths.map(x => Paths(x, x.replace(sourceAbsTblLoc, targetAbsTblLoc)))
+    val sourceTargetPaths = partitionFoldersUriPaths.map(x => Paths(x, x.replace(sourceAbsTblLoc, targetAbsTblLoc)))
     println("Partitions of table " + sourceDbName + "." + sourceTableName + " which are going to be moved to " + targetDbName + "." + targetTableName + ":")
     //todo add check for empty list
     sourceTargetPaths.foreach(x => println(x))
-    val resultDfs = sourceTargetPaths.map(p => {
-      DistributedExecution.moveFolderContent(p.sourcePath, p.targetPath, moveContentOnly, partitionCount)
-    }).reduce(_ union _)
 
+    val allSourceFiles = partitionFoldersUriPaths.
+      map(x => listRecursively(getFileSystem(conf, sourceAbsTblLoc), new Path(x)).filter(!_.isDirectory).map(_.toRelativePath()).map(_.path))
+      .reduce(_ union _)
+    val targetFiles = allSourceFiles.map(_.replace(getRelativePath(sourceAbsTblLoc), getRelativePath(targetAbsTblLoc)))
+    val paths = allSourceFiles.zip(targetFiles).map(x => Paths(x._1, x._2))
+    val res = LocalExecution.moveFiles(paths, sourceAbsTblLoc, numOfThreads, timeoutMin)
+    refreshMetadata(sourceDbName, sourceTableName)
+    refreshMetadata(targetDbName, targetTableName)
+    res
+  }
+
+  def moveTablePartitionFolders(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String,
+                                matchStringPartitions: Seq[String] = Seq(), moveContentOnly: Boolean = false,
+                                numOfThreads: Int = 1000, timeoutMin: Int = 10)
+                               (implicit spark: SparkSession, conf: Configuration): Array[FSOperationResult] = {
+    val partitionFoldersUriPaths = filterPartitions(sourceDbName, sourceTableName, matchStringPartitions)
+    val sourceAbsTblLoc = getTableLocation(sourceDbName, sourceTableName)
+    val targetAbsTblLoc = getTableLocation(targetDbName, targetTableName)
+    val sourceTargetUriPaths = partitionFoldersUriPaths.map(x => Paths(x, x.replace(sourceAbsTblLoc, targetAbsTblLoc)))
+    val fs = getFileSystem(conf,sourceAbsTblLoc)
+    checkIfFsIsTheSame(sourceAbsTblLoc, targetAbsTblLoc) //throws exception in case of discrepancy
+
+    println("Partitions of table " + sourceDbName + "." + sourceTableName + " which are going to be moved to " + targetDbName + "." + targetTableName + ":")
+    //todo add check for empty list
+    if(partitionFoldersUriPaths.isEmpty)
+    sourceTargetUriPaths.foreach(x => println(x))
+
+    //check if it is safe to move folders
+    sourceTargetUriPaths.foreach(x =>
+      if (!doesMoveLookSafe(fs, getRelativePath(x.sourcePath), getRelativePath(x.targetPath))) {
+        throw new Exception("It looks like there is a path in source "+x.sourcePath+" which is empty, but target folder "+x.targetPath +" is not. " +
+          "Promotor tries to protect you from unintentional deletion of your data in the target. If you want to avoid this exception, " +
+          "place at least one empty file in the source folder to avoid run interruption")
+      }
+    )
+
+    val existingTargetFolders = partitionFoldersUriPaths.map(_.replace(getRelativePath(sourceAbsTblLoc), getRelativePath(targetAbsTblLoc))).
+      filter(folder => fs.exists(new Path(folder)))
+    //make backup
+    val backups = existingTargetFolders.map(x => x+"_promotor_backup")
+    val backupPaths = existingTargetFolders.zip(backups).map(x => Paths(x._1, x._2))
+    println("Moving target folders before deletion...\n"+backupPaths.slice(0,5).mkString("\n"))
+    LocalExecution.moveFiles(backupPaths, sourceAbsTblLoc, numOfThreads, timeoutMin)
+
+    println("Backups done.. Now moving source ")
+    val paths = sourceTargetUriPaths.map(x => Paths(getRelativePath(x.sourcePath), getRelativePath(x.targetPath)))
+    val res = LocalExecution.moveFiles(paths, sourceAbsTblLoc, numOfThreads, timeoutMin)
     refreshMetadata(sourceDbName, sourceTableName)
     refreshMetadata(targetDbName, targetTableName)
 
-    resultDfs
+    println("Move is done. Now deleting the backups...")
+    LocalExecution.deletePaths(fs, backups)
+    println("You're all set!..")
+
+    res
   }
 
 

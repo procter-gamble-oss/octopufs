@@ -1,11 +1,11 @@
 package com.pg.bigdata.utils
 
 import java.util.concurrent.Executors
-
+import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor, Future}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor, Future}
+
 
 package object fs {
   var magicPrefix = ".dfs.core.windows.net"

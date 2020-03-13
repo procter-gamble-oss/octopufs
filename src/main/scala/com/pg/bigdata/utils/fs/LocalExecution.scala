@@ -49,7 +49,7 @@ object LocalExecution extends Serializable {
   }
 
   def moveFiles(relativePaths: Array[Paths], sourceFolderUri: String, numOfThreads: Int = 32, timeoutMins: Int = 10, attempt: Int = 0)
-                    (implicit conf: Configuration): Seq[FSOperationResult] = {
+                    (implicit conf: Configuration): Array[FSOperationResult] = {
     println("Starting moveFiles. Paths to be moved: " + relativePaths.size)
     implicit val pool = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(numOfThreads))
     val fs = getFileSystem(conf, sourceFolderUri)

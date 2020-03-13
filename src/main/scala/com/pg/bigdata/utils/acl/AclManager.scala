@@ -33,8 +33,8 @@ object AclManager extends Serializable {
     modifyAcl(files, loc, partitionCount, sdConf, newPermission)
 
   }
-
-  def modifyAcl(paths: List[String], parentFolderURI: String, partitionCount: Int, sdConf: ConfigSerDeser, newFsPermission: FsPermission)
+//todo add remove ACL
+  def modifyAcl(paths: List[String], parentFolderURI: String, partitionCount: Int, sdConf: ConfigSerDeser, newFsPermission: FsPermission) //change to local
                (implicit spark: SparkSession): Array[FSOperationResult] = {
     import scala.concurrent.ExecutionContext.Implicits.global
     spark.sparkContext.parallelize(paths, partitionCount).mapPartitions(part => {
@@ -52,7 +52,7 @@ object AclManager extends Serializable {
         }).getOrElse(FSOperationResult(x, false))
       }).map(x => Await.result(x, 1.minute))
     }
-    ).collect()
+    ).collect()//todo add auto-retry
   }
 
   def getAclEntry(p: FsPermission): AclEntry = {
@@ -122,9 +122,13 @@ object AclManager extends Serializable {
     val executor = Executors.newFixedThreadPool(numOfThreads)
     implicit val pool = ExecutionContext.fromExecutor(executor)
 
+    val e1 = Executors.newFixedThreadPool(numOfThreads)
+    val e2 = Executors.newFixedThreadPool(numOfThreads)
+
     println("Getting files from " + targetFolderRelativePath)
-    val targetObjectList = listRecursively(fs, new Path(targetFolderRelativePath)).map(_.toRelativePath)
+    val targetObjectList = listRecursively(fs, new Path(targetFolderRelativePath))(ExecutionContext.fromExecutor(e1)).map(_.toRelativePath)
     println(targetObjectList.size.toString + " objects found in " + targetFolderRelativePath)
+    e1.shutdown()
     val targetFolders = targetObjectList.filter(_.isDirectory)
 
     //getting entry for top level target folder
@@ -132,8 +136,9 @@ object AclManager extends Serializable {
     println("Target folder ACL is: " + topAcl)
 
     println("Getting files from " + sourceFolderRelativePath)
-    val sourceObjectList = listRecursively(fs, new Path(sourceFolderRelativePath)).map(_.toRelativePath)
+    val sourceObjectList = listRecursively(fs, new Path(sourceFolderRelativePath))(ExecutionContext.fromExecutor(e2)).map(_.toRelativePath)
     println(sourceObjectList.size.toString + " objects found in " + sourceFolderRelativePath)
+    e2.shutdown()
     val sourceFiles = sourceObjectList.filter(!_.isDirectory)
 
 

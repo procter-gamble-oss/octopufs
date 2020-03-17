@@ -64,7 +64,7 @@ object LocalExecution extends Serializable {
 
     if (failed.isEmpty) res
     else if (failed.length == relativePaths.length || attempt > 4)
-      throw new Exception("Move of files did not succeed - please check why and here are some of them: \n" + failed.map(_.path).slice(0, 10).mkString("\n"))
+      throw new Exception("Move of files did not succeed. Attempt: "+attempt+". Please check why and here are some of them: \n" + failed.map(_.path).slice(0, 10).mkString("\n"))
     else {
       val failedPaths = relativePaths.map(_.sourcePath).filter(x => failed.map(_.path).contains(x))
       val pathsForReprocessing = relativePaths.filter(x => failedPaths.contains(x.sourcePath))

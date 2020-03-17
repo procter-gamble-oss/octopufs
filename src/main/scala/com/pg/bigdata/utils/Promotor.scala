@@ -100,7 +100,7 @@ object Promotor extends Serializable {
     val db = spark.catalog.currentDatabase
     moveTablePartitions(db, sourceTableName, db, targetTableName, matchStringPartitions, moveContentOnly, partitionCount)
   }
-
+  @deprecated
   def moveTablePartitions(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String,
                           matchStringPartitions: Seq[String] = Seq(), moveContentOnly: Boolean = false,
                           numOfThreads: Int = 1000, timeoutMin: Int = 10)
@@ -112,12 +112,16 @@ object Promotor extends Serializable {
     println("Partitions of table " + sourceDbName + "." + sourceTableName + " which are going to be moved to " + targetDbName + "." + targetTableName + ":")
     //todo add check for empty list
     sourceTargetPaths.foreach(x => println(x))
-
+    val fs = getFileSystem(conf, sourceAbsTblLoc)
     val allSourceFiles = partitionFoldersUriPaths.
-      map(x => listRecursively(getFileSystem(conf, sourceAbsTblLoc), new Path(x)).filter(!_.isDirectory).map(_.toRelativePath()).map(_.path))
+      map(x => listRecursively(fs, new Path(x)).filter(!_.isDirectory).map(_.toRelativePath()).map(_.path))
       .reduce(_ union _)
     val targetFiles = allSourceFiles.map(_.replace(getRelativePath(sourceAbsTblLoc), getRelativePath(targetAbsTblLoc)))
     val paths = allSourceFiles.zip(targetFiles).map(x => Paths(x._1, x._2))
+    println("Deleting targets...")
+    val targetPathsForDelete = partitionFoldersUriPaths.map(_.replace(sourceAbsTblLoc, targetAbsTblLoc)).filter(x => fs.exists(new Path(x))).map(y => getRelativePath(y))
+    LocalExecution.deletePaths(fs,targetPathsForDelete, timeoutMin,numOfThreads)
+    println("Moving files...")
     val res = LocalExecution.moveFiles(paths, sourceAbsTblLoc, numOfThreads, timeoutMin)
     refreshMetadata(sourceDbName, sourceTableName)
     refreshMetadata(targetDbName, targetTableName)
@@ -128,22 +132,23 @@ object Promotor extends Serializable {
                                 matchStringPartitions: Seq[String] = Seq(), moveContentOnly: Boolean = false,
                                 numOfThreads: Int = 1000, timeoutMin: Int = 10)
                                (implicit spark: SparkSession, conf: Configuration): Array[FSOperationResult] = {
+    //must add preper rerun
     val partitionFoldersUriPaths = filterPartitions(sourceDbName, sourceTableName, matchStringPartitions)
     val sourceAbsTblLoc = getTableLocation(sourceDbName, sourceTableName)
     val targetAbsTblLoc = getTableLocation(targetDbName, targetTableName)
     val sourceTargetUriPaths = partitionFoldersUriPaths.map(x => Paths(x, x.replace(sourceAbsTblLoc, targetAbsTblLoc)))
-    val fs = getFileSystem(conf,sourceAbsTblLoc)
+    val fs = getFileSystem(conf, sourceAbsTblLoc)
     checkIfFsIsTheSame(sourceAbsTblLoc, targetAbsTblLoc) //throws exception in case of discrepancy
 
     println("Partitions of table " + sourceDbName + "." + sourceTableName + " which are going to be moved to " + targetDbName + "." + targetTableName + ":")
     //todo add check for empty list
-    if(partitionFoldersUriPaths.isEmpty)
-    sourceTargetUriPaths.foreach(x => println(x))
+    if (partitionFoldersUriPaths.isEmpty)
+      sourceTargetUriPaths.foreach(x => println(x))
 
     //check if it is safe to move folders
     sourceTargetUriPaths.foreach(x =>
       if (!doesMoveLookSafe(fs, getRelativePath(x.sourcePath), getRelativePath(x.targetPath))) {
-        throw new Exception("It looks like there is a path in source "+x.sourcePath+" which is empty, but target folder "+x.targetPath +" is not. " +
+        throw new Exception("It looks like there is a path in source " + x.sourcePath + " which is empty, but target folder " + x.targetPath + " is not. " +
           "Promotor tries to protect you from unintentional deletion of your data in the target. If you want to avoid this exception, " +
           "place at least one empty file in the source folder to avoid run interruption")
       }
@@ -152,9 +157,9 @@ object Promotor extends Serializable {
     val existingTargetFolders = partitionFoldersUriPaths.map(_.replace(getRelativePath(sourceAbsTblLoc), getRelativePath(targetAbsTblLoc))).
       filter(folder => fs.exists(new Path(folder)))
     //make backup
-    val backups = existingTargetFolders.map(x => x+"_promotor_backup")
+    val backups = existingTargetFolders.map(x => x + "_promotor_backup")
     val backupPaths = existingTargetFolders.zip(backups).map(x => Paths(x._1, x._2))
-    println("Moving target folders before deletion...\n"+backupPaths.slice(0,5).mkString("\n"))
+    println("Moving target folders before deletion...\n" + backupPaths.slice(0, 5).mkString("\n"))
     LocalExecution.moveFiles(backupPaths, sourceAbsTblLoc, numOfThreads, timeoutMin)
 
     println("Backups done.. Now moving source ")

@@ -29,3 +29,25 @@ libraryDependencies ++= Seq(
 )
 
 parallelExecution in Test := false
+
+lazy val root = (project in file(".")).
+  enablePlugins(BuildInfoPlugin).
+  settings(
+   buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion, buildInfoBuildNumber, gitCommitString),
+   buildInfoOptions += BuildInfoOption.ToJson,
+   buildInfoPackage := "buildInformation"
+  )
+gitCommitString := git.gitHeadCommit.value.getOrElse("Not Set")
+
+buildInfoKeys ++= Seq[BuildInfoKey](
+ resolvers,
+ libraryDependencies in Test,
+ //name_of_val -> task
+ "hostname" -> java.net.InetAddress.getLocalHost().getHostName(),
+ "whoami" -> System.getProperty("user.name"),
+ BuildInfoKey.action("buildTimestamp") {
+  java.text.DateFormat.getDateTimeInstance.format(new java.util.Date())
+ }
+)
+//get git commit id
+val gitCommitString = SettingKey[String]("gitCommit")

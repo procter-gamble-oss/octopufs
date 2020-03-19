@@ -1,9 +1,12 @@
 package com.pg.bigdata.utils
 
+import java.net.URI
 import java.util.concurrent.Executors
+
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor, Future}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
+
 import scala.concurrent.duration._
 
 
@@ -26,9 +29,9 @@ package object fs {
   }
 
   def getFileSystem(hadoopConf: Configuration, absoluteTargetLocation: String): FileSystem = {
-    if (!getFileSystemPrefix(absoluteTargetLocation).startsWith("file")) //this is to avoid failures on local fs
+    //if (!getFileSystemPrefix(absoluteTargetLocation).startsWith("file")) //this is to avoid failures on local fs
       hadoopConf.set("fs.defaultFS", getFileSystemPrefix(absoluteTargetLocation))
-    FileSystem.get(hadoopConf)
+    FileSystem.get(new URI(absoluteTargetLocation), hadoopConf)
   }
 
   def getFileSystemPrefix(uri: String): String = {

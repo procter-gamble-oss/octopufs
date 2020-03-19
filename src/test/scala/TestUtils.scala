@@ -2,7 +2,7 @@ import java.io.File
 
 import com.pg.bigdata.utils.Assistant
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions.lit
+import org.apache.spark.sql.functions._
 
 import scala.reflect.io.Directory
 
@@ -10,7 +10,12 @@ class TestUtils(testName: String) {
  val db = "promotor"+testName
   val d = db+"."
 
-  def setupTestEnv()(implicit spark: SparkSession)={
+  val spark: SparkSession = SparkSession.builder().
+    appName("NAS_").
+    master("local").
+    getOrCreate()
+
+  def setupTestEnv()()={
     spark.sparkContext.setLogLevel("ERROR")
 
     com.pg.bigdata.utils.fs.magicPrefix = "file:"
@@ -18,6 +23,7 @@ class TestUtils(testName: String) {
 
 
     spark.read.parquet("data/sfct").where("mm_time_perd_end_date != '2019-12-31'").
+      withColumn("sales_usd_amt", col("sales_usd_amt")*2).
       write.partitionBy("mm_time_perd_end_date").
       option("path","data/testfield"+testName+"/STORE_SALES_FCT").saveAsTable(d+"STORE_SALES_FCT")
     println("Creation of STORE_SALES_FCT - done")
@@ -65,7 +71,7 @@ class TestUtils(testName: String) {
       "check if partition to be promoted exists in source - actual: "+currPrttnCnt)
   }
 
-  def cleanup()(implicit spark: SparkSession): Unit = {
+  def cleanup()(): Unit = {
     spark.catalog.listTables(db).collect().foreach(x => spark.sql("drop table "+d+x.name))
     spark.sql("drop database "+db)
     val directory = new Directory(new File("data/testfield"+testName))

@@ -59,7 +59,7 @@ object Promotor extends Serializable {
   def copyOverwriteTable(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, partitionCount: Int = 192)
                         (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
     val trgLoc = getTableLocation(targetDbName, targetTableName)
-    DistributedExecution.deleteAllChildObjects(trgLoc)
+    LocalExecution.deleteFolder(trgLoc,true)
     val res = copyFilesBetweenTables(sourceDbName, sourceTableName, targetDbName, targetTableName, partitionCount) //todo rethink approach to partition count
     refreshMetadata(targetDbName, targetTableName)
     res
@@ -98,8 +98,9 @@ object Promotor extends Serializable {
                           moveContentOnly: Boolean, partitionCount: Int)
                          (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
     val db = spark.catalog.currentDatabase
-    moveTablePartitions(db, sourceTableName, db, targetTableName, matchStringPartitions, moveContentOnly, partitionCount)
+    moveTablePartitionFolders(db, sourceTableName, db, targetTableName, matchStringPartitions, moveContentOnly, partitionCount)
   }
+
   @deprecated
   def moveTablePartitions(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String,
                           matchStringPartitions: Seq[String] = Seq(), moveContentOnly: Boolean = false,
@@ -120,7 +121,7 @@ object Promotor extends Serializable {
     val paths = allSourceFiles.zip(targetFiles).map(x => Paths(x._1, x._2))
     println("Deleting targets...")
     val targetPathsForDelete = partitionFoldersUriPaths.map(_.replace(sourceAbsTblLoc, targetAbsTblLoc)).filter(x => fs.exists(new Path(x))).map(y => getRelativePath(y))
-    LocalExecution.deletePaths(fs,targetPathsForDelete, timeoutMin,numOfThreads)
+    LocalExecution.deletePaths(fs, targetPathsForDelete, timeoutMin, numOfThreads)
     println("Moving files...")
     val res = LocalExecution.moveFiles(paths, sourceAbsTblLoc, numOfThreads, timeoutMin)
     refreshMetadata(sourceDbName, sourceTableName)
@@ -132,18 +133,22 @@ object Promotor extends Serializable {
                                 matchStringPartitions: Seq[String] = Seq(), moveContentOnly: Boolean = false,
                                 numOfThreads: Int = 1000, timeoutMin: Int = 10)
                                (implicit spark: SparkSession, conf: Configuration): Array[FSOperationResult] = {
-    //must add preper rerun
+    val backupPrefix = "promotor_backup_"
+    //val transaction = SafetyFuse()
     val partitionFoldersUriPaths = filterPartitions(sourceDbName, sourceTableName, matchStringPartitions)
     val sourceAbsTblLoc = getTableLocation(sourceDbName, sourceTableName)
     val targetAbsTblLoc = getTableLocation(targetDbName, targetTableName)
     val sourceTargetUriPaths = partitionFoldersUriPaths.map(x => Paths(x, x.replace(sourceAbsTblLoc, targetAbsTblLoc)))
     val fs = getFileSystem(conf, sourceAbsTblLoc)
+
     checkIfFsIsTheSame(sourceAbsTblLoc, targetAbsTblLoc) //throws exception in case of discrepancy
 
+    if (partitionFoldersUriPaths.isEmpty) {
+      println("There is nothing to be moved (source " + sourceAbsTblLoc + "is empty)")
+      return Array[FSOperationResult]()
+    }
+
     println("Partitions of table " + sourceDbName + "." + sourceTableName + " which are going to be moved to " + targetDbName + "." + targetTableName + ":")
-    //todo add check for empty list
-    if (partitionFoldersUriPaths.isEmpty)
-      sourceTargetUriPaths.foreach(x => println(x))
 
     //check if it is safe to move folders
     sourceTargetUriPaths.foreach(x =>
@@ -157,51 +162,24 @@ object Promotor extends Serializable {
     val existingTargetFolders = partitionFoldersUriPaths.map(_.replace(getRelativePath(sourceAbsTblLoc), getRelativePath(targetAbsTblLoc))).
       filter(folder => fs.exists(new Path(folder)))
     //make backup
-    val backups = existingTargetFolders.map(x => x + "_promotor_backup")
-    val backupPaths = existingTargetFolders.zip(backups).map(x => Paths(x._1, x._2))
-    println("Moving target folders before deletion...\n" + backupPaths.slice(0, 5).mkString("\n"))
-    LocalExecution.moveFiles(backupPaths, sourceAbsTblLoc, numOfThreads, timeoutMin)
+    val transaction = new SafetyFuse(getRelativePath(sourceAbsTblLoc))(fs)
+    if (!transaction.isInProgress()) {
+      transaction.startTransaction()
+      println("Deleting targets... (showing 10 sample paths")
+      existingTargetFolders.slice(0, 10).foreach(println)
+      LocalExecution.deletePaths(fs, existingTargetFolders, timeoutMin, numOfThreads)
+    }
 
-    println("Backups done.. Now moving source ")
     val paths = sourceTargetUriPaths.map(x => Paths(getRelativePath(x.sourcePath), getRelativePath(x.targetPath)))
+    println("Now moving source... Showing first 10 paths")
+    paths.slice(0, 10).foreach(println)
     val res = LocalExecution.moveFiles(paths, sourceAbsTblLoc, numOfThreads, timeoutMin)
+
     refreshMetadata(sourceDbName, sourceTableName)
     refreshMetadata(targetDbName, targetTableName)
-
-    println("Move is done. Now deleting the backups...")
-    LocalExecution.deletePaths(fs, backups)
-    println("You're all set!..")
-
+    transaction.endTransaction()
     res
   }
-
-
-  /*
-    def moveFolderKeepAcls(sourceFolderUri: String, targetFolderUri: String, keepSourceFolder: Boolean = false)
-                          (implicit conf: Configuration): Boolean = {
-      println("Moving folders: " + sourceFolderUri + "  ==>>  " + targetFolderUri)
-      checkIfFsIsTheSame(sourceFolderUri, targetFolderUri)
-      val srcAcls = AclManager.getAclEntries(sourceFolderUri)
-      val trgAcls = AclManager.getAclEntries(targetFolderUri)
-      val fs = getFileSystem(conf, sourceFolderUri)
-      val srcRelPath = getRelativePath(sourceFolderUri)
-      val trgRelPath = getRelativePath(targetFolderUri)
-
-      if (doesMoveLookSafe(fs, srcRelPath, trgRelPath)) {
-        println("Deleting target folder")
-        if (fs.exists(new Path(trgRelPath)))
-          if (!fs.delete(new Path(trgRelPath), true)) throw new Exception("Cannot delete folder " + targetFolderUri)
-        println("Moving folder " + srcRelPath + " ==>> " + trgRelPath)
-        if (!fs.rename(new Path(srcRelPath), new Path(trgRelPath))) throw new Exception("Move of folder " + srcRelPath + " ==>> " + trgRelPath + " FAILED!")
-        AclManager.resetAclEntries(targetFolderUri, trgAcls)
-        if (fs.mkdirs(new Path(srcRelPath)))
-          AclManager.resetAclEntries(sourceFolderUri, srcAcls)
-        else
-          println("Could not create folder " + sourceFolderUri)
-        true //move successful although source folder could not be recreated
-      } else
-        false
-    } */
 
   private def doesMoveLookSafe(fs: FileSystem, sourceRelPath: String, targetRelPath: String): Boolean = {
     if (!fs.exists(new Path(sourceRelPath))) throw new Exception("Source folder " + sourceRelPath + " does not exist")
@@ -223,8 +201,7 @@ object Promotor extends Serializable {
     val absTblLoc = getTableLocation(db, tableName)
     println("Partitions of table " + db + "." + tableName + " which are going to be deleted:")
     paths.foreach(println)
-    val r = LocalExecution.deletePaths(getFileSystem(confEx, absTblLoc), paths, 10, parallelism)
-    if (r.exists(!_.success)) throw new Exception("Deleting of some partitions failed")
+    LocalExecution.deletePaths(getFileSystem(confEx, absTblLoc), paths, 10, parallelism)
     refreshMetadata(db, tableName)
   }
 
@@ -235,22 +212,12 @@ object Promotor extends Serializable {
   }
 
 
-  def moveFilesBetweenTables(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, partitionCount: Int = 192)
+  def moveFilesBetweenTables(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String,
+                             partitionCount: Int = 1000, timeoutMin: Int = 10)
                             (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
     val srcLoc = getTableLocation(sourceDbName, sourceTableName)
     val trgLoc = getTableLocation(targetDbName, targetTableName)
-    checkIfFsIsTheSame(srcLoc, trgLoc)
-    val paths = getTablesPathsList(sourceDbName, sourceTableName, targetDbName, targetTableName) //.take(5)
-    val targetFilesToBeDeleted = getListOfTableFiles(targetDbName, targetTableName)
-    if (paths.isEmpty) {
-      //throw new Exception("No files to be moved for path " + srcLoc)
-      println("No files to be moved from path " + srcLoc)
-      Array[FSOperationResult]()
-    }
-    println(paths(0))
-    println("Files to be moved: " + paths.length)
-    val relativePaths = paths.map(x => Paths(x.sourcePath, x.targetPath))
-    val res = DistributedExecution.moveFolderContent(srcLoc, trgLoc, keepSourceFolder = true)
+    val res = LocalExecution.moveFolderContent(srcLoc, trgLoc, keepSourceFolder = true)
     refreshMetadata(sourceDbName, sourceTableName)
     refreshMetadata(targetDbName, targetTableName)
     res

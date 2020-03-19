@@ -57,51 +57,6 @@ object DistributedExecution extends Serializable {
         false
     } */
 
-
-  def moveFolderContent(sourceFolderUri: String, targetLocationUri: String, keepSourceFolder: Boolean = false, partitionCount: Int = 192)
-                       (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
-    println("Moving folders content: " + sourceFolderUri + "  ==>>  " + targetLocationUri)
-    checkIfFsIsTheSame(sourceFolderUri, targetLocationUri)
-    val fs = getFileSystem(confEx, sourceFolderUri)
-
-    if (!doesMoveLookSafe(fs, getRelativePath(sourceFolderUri), getRelativePath(targetLocationUri)))
-      return Array()
-    //delete target folder
-    if (fs.exists(new Path(getRelativePath(targetLocationUri)))) //todo test if it works
-      deleteAllChildObjects(targetLocationUri)
-    else
-      fs.mkdirs(new Path(targetLocationUri))
-
-    val sourceFileList = fs.listStatus(new Path(sourceFolderUri)).map(x => x.getPath.toString)
-    val targetFileList = sourceFileList.map(_.replaceAll(sourceFolderUri, targetLocationUri))
-    val paths = sourceFileList.zip(targetFileList).map(x => Paths(x._1, x._2))
-
-    val relativePaths = paths.map(x => Paths(getRelativePath(x.sourcePath), getRelativePath(x.targetPath)))
-    println("ALL TO BE MOVED:")
-    relativePaths.foreach(println)
-    val res = moveFiles(relativePaths, sourceFolderUri, partitionCount)
-    if (res.exists(!_.success))
-      throw new Exception("Move operation was not successful. There are " + res.count(!_.success) + " of objects which was not moved... " +
-        "The list of first 100 which was not moved is below...\n" +
-        res.map(_.path).slice(0, 99).mkString("\n"))
-
-    if (!keepSourceFolder)
-      if (fs.delete(new Path(getRelativePath(sourceFolderUri)), true))
-        println("WARNING: Folder " + sourceFolderUri + "could not be deleted and was left on storage device")
-    res
-  }
-
-
-  def deleteAllChildObjects(folderAbsPath: String, parallelism: Int = 32)(implicit spark: SparkSession, confEx: Configuration): Unit = {
-    val relPath = getRelativePath(folderAbsPath)
-    val fs = getFileSystem(spark.sparkContext.hadoopConfiguration, folderAbsPath)
-    val objectList = fs.listStatus(new Path(relPath))
-    val paths = objectList.map(relPath + "/" + _.getPath.getName)
-
-    val r = deletePaths(paths, folderAbsPath, parallelism)
-    if (r.exists(!_.success)) throw new Exception("Deleting of some objects failed")
-  }
-
   def copyFiles(sourceFolderUri: String, targetLocationUri: String, paths: Seq[Paths],
                 partitionCount: Int, attempt: Int = 0)
                (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
@@ -128,32 +83,6 @@ object DistributedExecution extends Serializable {
       println("Reprocessing " + failedPaths.length + " of failed paths...")
       res.filter(_.success) ++ copyFiles(sourceFolderUri, targetLocationUri, pathsForReprocessing, partitionCount, attempt + 1)
     }
-  }
-
-  def deletePaths(relativePaths: Seq[String], absFolderUri: String, partitionCount: Int = 32, attempt: Int = 0)
-                 (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
-    val sdConf = new ConfigSerDeser(confEx)
-    println("absFolderUri: " + absFolderUri)
-    println("deleting paths count:" + relativePaths.size)
-    println("First 20 files for deletion:")
-    relativePaths.slice(0, 20).foreach(println)
-    val res = spark.sparkContext.parallelize(relativePaths, partitionCount).mapPartitions(pathsPart => {
-      val conf = sdConf.get()
-      val fs = getFileSystem(conf, absFolderUri)
-      pathsPart.map(path => Future {
-        FSOperationResult(path, fs.delete(new Path(path), true))
-      }).map(x => Await.result(x, 120.seconds))
-    }).collect()
-
-    val failed = res.filter(!_.success)
-    println("Number of paths deleted properly: " + res.count(_.success == true))
-    println("Files with errors: " + res.count(!_.success))
-    if (failed.isEmpty) res
-    else if (failed.length == relativePaths.length || attempt > 4)
-      throw new Exception("Delete of some paths did not succeed - please check why and here are some of them: \n" + failed.map(_.path).slice(0, 10).mkString("\n"))
-    else
-      res.filter(_.success) ++ deletePaths(relativePaths.filter(x => failed.contains(x)), absFolderUri, partitionCount, attempt + 1)
-
   }
 
   private def moveFiles(relativePaths: Seq[Paths], sourceFolderUri: String, partitionCount: Int = 32, attempt: Int = 0)

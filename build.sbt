@@ -29,6 +29,7 @@ libraryDependencies ++= Seq(
 )
 
 parallelExecution in Test := false
+gitCommitString := git.gitHeadCommit.value.getOrElse("Not Set")
 
 lazy val root = (project in file(".")).
   enablePlugins(BuildInfoPlugin).
@@ -37,7 +38,8 @@ lazy val root = (project in file(".")).
    buildInfoOptions += BuildInfoOption.ToJson,
    buildInfoPackage := "buildInformation"
   )
-gitCommitString := git.gitHeadCommit.value.getOrElse("Not Set")
+
+
 
 buildInfoKeys ++= Seq[BuildInfoKey](
  resolvers,

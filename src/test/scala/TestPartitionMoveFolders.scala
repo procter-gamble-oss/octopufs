@@ -13,8 +13,6 @@ class TestPartitionMoveFolders extends FlatSpec with BeforeAndAfterAll{
   val t = new TestUtils("TestPartitionMoveFolders")
   t.setupTestEnv()
 
-    com.pg.bigdata.utils.fs.magicPrefix = "file:"
-
     println("Partitions in DLT")
     spark.table(t.d+"STORE_SALES_DLT").select("mm_time_perd_end_date").distinct.show()
     val sfctInit = spark.table(t.d+"STORE_SALES_SFCT").

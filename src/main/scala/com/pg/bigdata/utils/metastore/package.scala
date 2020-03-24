@@ -21,9 +21,8 @@ package object metastore {
     val m = getTableMetadata(db,tableName).partitionColumnNames
     if(m.isEmpty) throw new Exception("Table " + db + "." + tableName + " is not partitioned")
     val absTblLoc = getTableLocation(db, tableName)
-    val tblLoc = getRelativePath(absTblLoc)
     val fs = getFileSystem(spark.sparkContext.hadoopConfiguration, absTblLoc)
-    val partList = fs.listStatus(new Path(tblLoc))
+    val partList = fs.listStatus(new Path(absTblLoc))
     partList.filter(_.isDirectory).map(absTblLoc + "/" + _.getPath.getName)
   }
 
@@ -47,7 +46,7 @@ package object metastore {
     }
   }
    def getListOfTableFiles(sourceDbName: String, sourceTableName: String)(implicit spark: SparkSession): Array[String] = {
-      spark.table(sourceDbName + "." + sourceTableName).inputFiles.map(x => getRelativePath(x))
+      spark.table(sourceDbName + "." + sourceTableName).inputFiles
 
     }
 

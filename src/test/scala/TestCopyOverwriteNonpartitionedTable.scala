@@ -12,7 +12,7 @@ class TestCopyOverwriteNonpartitionedTable extends FlatSpec with BeforeAndAfterA
   implicit val c = spark.sparkContext.hadoopConfiguration
   val t = new TestUtils("abc")
   t.setupTestEnv()
-  com.pg.bigdata.utils.fs.magicPrefix = "file:"
+
 
   println("Checking initial tables")
   val pdcIni = spark.table(t.d+"PROD_DIM").select("pg_categ_txt").distinct

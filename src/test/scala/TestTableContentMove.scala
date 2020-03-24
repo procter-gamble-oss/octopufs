@@ -15,8 +15,6 @@ class TestTableContentMove extends FlatSpec with BeforeAndAfterAll{
   override def beforeAll() = t.setupTestEnv()
 
   "Test data" should "be created ok" in {
-    com.pg.bigdata.utils.fs.magicPrefix = "file:"
-
     println("Checking initial tables")
     val pdcIni = spark.table(t.d+"PROD_DIM").select("pg_categ_txt").distinct
     val pscIni = spark.table(t.d+"PROD_SDIM").select("pg_categ_txt").distinct

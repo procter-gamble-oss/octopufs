@@ -15,8 +15,8 @@ object Assistant {
   def getTablesPathsList(sourceDbName: String, sourceTableName: String,
                          targetDbName: String, targetTableName: String)
                         (implicit spark: SparkSession): Array[Paths] = {
-    val sourceLocation = com.pg.bigdata.utils.fs.getRelativePath(getTableLocation(sourceDbName,sourceTableName))
-    val targetLocation = getRelativePath(getTableLocation(targetDbName,targetTableName))
+    val sourceLocation = getTableLocation(sourceDbName,sourceTableName)
+    val targetLocation = getTableLocation(targetDbName,targetTableName)
     println("target location " +targetLocation)
     val sourceFileList = getListOfTableFiles(sourceDbName, sourceTableName)
     if(sourceFileList.isEmpty)

@@ -11,8 +11,6 @@ class SafetyFuseTest extends FlatSpec {
     getOrCreate()
   spark.sparkContext.setLogLevel("ERROR")
 
-  com.pg.bigdata.utils.fs.magicPrefix = "file:"
-
   implicit val c = spark.sparkContext.hadoopConfiguration
   implicit val fs = getFileSystem(c,"file://data")
   val transaction = new SafetyFuse("data/testfield","test")

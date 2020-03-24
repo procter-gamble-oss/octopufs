@@ -7,63 +7,66 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor, Future}
+import scala.concurrent.{Await, Future}
+
+import com.pg.bigdata.utils.helpers.implicits._
 
 object LocalExecution extends Serializable {
 
-  def moveFolderContent(sourceFolderUri: String, targetLocationUri: String, keepSourceFolder: Boolean = false, numOfThreads: Int = 1000, timeoutMin: Int = 10)
+  def moveFolderContent(sourceFolderUri: String, targetFolderUri: String, keepSourceFolder: Boolean = false, numOfThreads: Int = 1000, timeoutMin: Int = 10)
                        (implicit conf: Configuration): Array[FSOperationResult] = {
-    println("Moving folders content: " + sourceFolderUri + "  ==>>  " + targetLocationUri)
-    checkIfFsIsTheSame(sourceFolderUri, targetLocationUri)
-    implicit val fs: FileSystem = getFileSystem(conf, sourceFolderUri)
-    val targetRelPath = getRelativePath(targetLocationUri)
+    println("Moving folders content: " + sourceFolderUri + "  ==>>  " + targetFolderUri)
+    implicit val srcFs: FileSystem = getFileSystem(conf,sourceFolderUri)
+    val trgFs = getFileSystem(conf,targetFolderUri) //needed just to check if both fs are the same
+    checkIfFsIsTheSame(srcFs, trgFs)
 
-    if (!doesMoveLookSafe(fs, getRelativePath(sourceFolderUri), targetRelPath))
+    if (!doesMoveLookSafe(srcFs,sourceFolderUri, targetFolderUri))
       return Array[FSOperationResult]()
 
     //delete target folder
-    val transaction = new SafetyFuse(targetRelPath)
+    val transaction = new SafetyFuse(targetFolderUri)
 
     if (!transaction.isInProgress()) {
       transaction.startTransaction()
 
-      if (fs.exists(new Path(targetRelPath)))
-        deleteFolder(targetLocationUri, true)
+      if (srcFs.exists(new Path(targetFolderUri)))
+        deleteFolder(targetFolderUri, true)
       else
-        fs.mkdirs(new Path(targetLocationUri))
+        srcFs.mkdirs(new Path(targetFolderUri))
     }
 
-    val sourceFileList = fs.listStatus(new Path(sourceFolderUri)).map(x => x.getPath.toString)
-    val targetFileList = sourceFileList.map(_.replaceAll(sourceFolderUri, targetLocationUri))
+    val sourceFileList = srcFs.listStatus(new Path(sourceFolderUri)).map(x => x.getPath.toString)
+    val targetFileList = sourceFileList.map(_.replaceAll(sourceFolderUri, targetFolderUri))
     val paths = sourceFileList.zip(targetFileList).map(x => Paths(x._1, x._2))
 
-    val relativePaths = paths.map(x => Paths(getRelativePath(x.sourcePath), getRelativePath(x.targetPath)))
     println("Files to be moved: (10 first only)")
-    relativePaths.slice(0, 10).foreach(println)
+    paths.slice(0, 10).foreach(println)
 
-    val res = moveFiles(relativePaths, sourceFolderUri, numOfThreads)(conf)
+    val res = moveFiles(paths, numOfThreads)(conf)
 
     if (!keepSourceFolder)
-      if (fs.delete(new Path(getRelativePath(sourceFolderUri)), true))
+      if (srcFs.delete(new Path(sourceFolderUri), true))
         println("WARNING: Folder " + sourceFolderUri + "could not be deleted and was left on storage device")
     res
   }
 
-  def moveFiles(relativePaths: Array[Paths], sourceFolderUri: String, numOfThreads: Int = 32, timeoutMins: Int = 10, attempt: Int = 0)
+  def moveFiles(paths: Array[Paths], timeoutMins: Int = 10, attempt: Int = 0)
                (implicit conf: Configuration): Array[FSOperationResult] = {
-    println("Starting moveFiles - attempt: " + attempt + ". Paths to be moved: " + relativePaths.length)
-    implicit val pool: ExecutionContextExecutor = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(numOfThreads))
-    implicit val fs: FileSystem = getFileSystem(conf, sourceFolderUri)
-    val res = relativePaths.map(x => Future {
+    println("Starting moveFiles - attempt: " + attempt + ". Paths to be moved: " + paths.length)
+    implicit val srcFs: FileSystem = getFileSystem(conf,paths.head.sourcePath)
+    val trgFs = getFileSystem(conf,paths.head.targetPath) //needed just to check if both fs are the same
+    checkIfFsIsTheSame(srcFs,trgFs)
+
+    val res = paths.map(x => Future {
       print(".")
-      FSOperationResult(x.sourcePath, fs.rename(new Path(x.sourcePath), new Path(x.targetPath)))
-    }(pool)).map(x => Await.result(x, timeoutMins.minutes))
+      FSOperationResult(x.sourcePath, srcFs.rename(new Path(x.sourcePath), new Path(x.targetPath)))
+    }).map(x => Await.result(x, timeoutMins.minutes))
 
     println("Number of files moved properly: " + res.count(_.success))
     println("Files with errors: " + res.count(!_.success))
 
     val failed = res.filter(!_.success)
-    val pathsOfFailed = relativePaths.filter(x => failed.map(_.path).contains(x.sourcePath))
+    val pathsOfFailed = paths.filter(x => failed.map(_.path).contains(x.sourcePath))
     val reallyFailed = removeFalseNegatives(pathsOfFailed)
     /*
     //checking if failed actually exist in the source (they were moved but reported error?)
@@ -75,27 +78,24 @@ object LocalExecution extends Serializable {
       filter(y => failedExistingInTarget.contains(y)) //this now gives all paths which are both in target and source
     inBothPlaces.filter(fs.listStatus()) */
 
-
-
     if (reallyFailed.isEmpty) res
-    else if (reallyFailed.length == relativePaths.length || attempt > 4)
+    else if (reallyFailed.length == paths.length || attempt > 4)
       throw new Exception("Move of files did not succeed. Attempt: " + attempt + ". Please check why and here are some of them: \n" +
         reallyFailed.map(_.sourcePath).slice(0, 10).mkString("\n"))
     else {
       val pathsForReprocessing = reallyFailed
-      res.filter(_.success) ++ moveFiles(pathsForReprocessing, sourceFolderUri, numOfThreads, timeoutMins, attempt + 1)(conf)
+      res.filter(_.success) ++ moveFiles(pathsForReprocessing, timeoutMins, attempt + 1)(conf)
     }
   }
 
-  def deletePaths(fs: FileSystem, paths: Array[String], timeoutMin: Int = 10, numOfThreads: Int = 32, attempt: Int = 0): Array[FSOperationResult] = {
-    val exec = Executors.newFixedThreadPool(numOfThreads)
-    implicit val pool = ExecutionContext.fromExecutor(exec)
+  def deletePaths(fs: FileSystem, paths: Array[String], timeoutMin: Int = 10, attempt: Int = 0): Array[FSOperationResult] = {
+
     val res = paths.map(x =>
       Future {
         FSOperationResult(x, fs.delete(new Path(x), true))
       }
     ).map(x => Await.result(x, timeoutMin.minutes))
-    exec.shutdown()
+
     val failed = res.filter(!_.success)
     println("Number of paths deleted properly: " + res.count(_.success == true))
     println("Files with errors: " + res.count(!_.success))
@@ -103,23 +103,22 @@ object LocalExecution extends Serializable {
     else if (failed.length == paths.length || attempt > 4)
       throw new Exception("Delete of some paths did not succeed - please check why and here are some of them: \n" + failed.map(_.path).slice(0, 10).mkString("\n"))
     else
-      res.filter(_.success) ++ deletePaths(fs, paths.filter(x => failed.map(_.path).contains(x)), timeoutMin, numOfThreads, attempt + 1)
+      res.filter(_.success) ++ deletePaths(fs, paths.filter(x => failed.map(_.path).contains(x)), timeoutMin, attempt + 1)
   }
 
-  def deleteFolder(folderUriPath: String, deleteContentOnly: Boolean = false, timeoutMin: Int = 10, parallelism: Int = 1000)(implicit confEx: Configuration): Unit = {
-    val relPath = getRelativePath(folderUriPath)
+  def deleteFolder(folderUriPath: String, deleteContentOnly: Boolean = false, timeoutMin: Int = 10)(implicit confEx: Configuration): Unit = {
     val fs = getFileSystem(confEx, folderUriPath)
     if (deleteContentOnly) {
-      val objectList = fs.listStatus(new Path(relPath))
-      val paths = objectList.map(relPath + "/" + _.getPath.getName)
+      val objectList = fs.listStatus(new Path(folderUriPath))
+      val paths = objectList.map(folderUriPath + "/" + _.getPath.getName)
 
       println("absFolderUri: " + folderUriPath)
       println("Deleting paths count:" + paths.length)
       println("First 20 files for deletion:")
       paths.slice(0, 20).foreach(println)
-      deletePaths(fs, paths, timeoutMin, parallelism)
+      deletePaths(fs, paths, timeoutMin)
     }
-    else if (!fs.delete(new Path(relPath), true)) throw new Exception("Failed to remove " + folderUriPath)
+    else if (!fs.delete(new Path(folderUriPath), true)) throw new Exception("Failed to remove " + folderUriPath)
   }
 
   def getFalseNegatives(paths: Array[Paths])(implicit fs: FileSystem): Array[Paths] = {
@@ -130,11 +129,5 @@ object LocalExecution extends Serializable {
     paths.diff(getFalseNegatives(paths))
   }
 
-  def getExecutorAndPool(numOfThreads: Int): ExecEnv = {
-    val exec = Executors.newFixedThreadPool(numOfThreads)
-    val pool = ExecutionContext.fromExecutor(exec)
-    ExecEnv(exec, pool)
-  }
 
-  case class ExecEnv(executor: ExecutorService, pool: ExecutionContextExecutor)
 }

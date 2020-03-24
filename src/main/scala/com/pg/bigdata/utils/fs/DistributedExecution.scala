@@ -8,7 +8,8 @@ import org.apache.spark.sql.SparkSession
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.forkjoin.ForkJoinPool
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 //val magicPrefix = ".dfs.core.windows.net"
 
@@ -17,9 +18,9 @@ object DistributedExecution extends Serializable {
 
   def copyFolder(sourceFolderUri: String, targetLocationUri: String, partitionCount: Int = 192)(implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
     val srcFs = getFileSystem(confEx, sourceFolderUri)
-    val sourceFileList = listRecursively(srcFs, new Path(sourceFolderUri)).filter(!_.isDirectory).map(_.path) //filter is to avoid copying folders (folders will get created where copying files). Caveat: empty folders will not be copied
-    val rspath = getRelativePath(sourceFolderUri)
-    val rtpath = getRelativePath(targetLocationUri)
+    val exec = new ForkJoinPool(partitionCount)
+    val pool = ExecutionContext.fromExecutor(exec)
+    val sourceFileList = listLevel(srcFs, Array(new Path(sourceFolderUri)))(pool).filter(!_.isDirectory).map(_.path) //filter is to avoid copying folders (folders will get created where copying files). Caveat: empty folders will not be copied
     val targetFileList = sourceFileList.map(_.replaceAll(sourceFolderUri, targetLocationUri)) //uri to work on differnt fikle systems
     println(targetFileList.head)
     val paths = sourceFileList.zip(targetFileList).map(x => Paths(x._1, x._2))

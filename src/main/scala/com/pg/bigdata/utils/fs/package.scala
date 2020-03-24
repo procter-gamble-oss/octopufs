@@ -3,66 +3,42 @@ package com.pg.bigdata.utils
 import java.net.URI
 import java.util.concurrent.Executors
 
-import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor, Future}
+import scala.concurrent.forkjoin.ForkJoinPool
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 
 import scala.concurrent.duration._
+import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor, Future}
 
 
 package object fs {
-  var magicPrefix = ".dfs.core.windows.net"
-
-  def getContainerName(uri: String): String = {
-    if (uri.contains("@"))
-      uri.substring(uri.indexOf("//") + 2, uri.indexOf("@"))
-    else
-      "noContainerInPath"
-  }
-
-  def getRelativePath(uri: String): String = {
-    if (magicPrefix == "") uri
-    else if (!uri.contains(magicPrefix))
-      throw new Exception("MagicPrefix not found")
-    else
-      uri.substring(uri.indexOf(magicPrefix) + magicPrefix.length)
-  }
 
   def getFileSystem(hadoopConf: Configuration, absoluteTargetLocation: String): FileSystem = {
-    //if (!getFileSystemPrefix(absoluteTargetLocation).startsWith("file")) //this is to avoid failures on local fs
-      hadoopConf.set("fs.defaultFS", getFileSystemPrefix(absoluteTargetLocation))
     FileSystem.get(new URI(absoluteTargetLocation), hadoopConf)
   }
 
-  def getFileSystemPrefix(uri: String): String = {
-    if (!uri.contains(magicPrefix))
-      throw new Exception("MagicPrefix " + magicPrefix + " not found in " + uri)
-    uri.substring(0, uri.indexOf(magicPrefix) + magicPrefix.length)
-  }
-
-  def listRecursively(fs: FileSystem, sourceFolder: Path, timeoutMin: Int = 20)(implicit pool: ExecutionContextExecutor): Array[FSElement] = {
-    val elements = fs.listStatus(sourceFolder)
-    val folders = elements.filter(_.isDirectory)
-    if (folders.isEmpty) elements.filter(!_.isDirectory).map(x => FSElement(x.getPath.toString, false, x.getLen))
-    else folders.map(folder => Future {
-      listRecursively(fs, folder.getPath)
-    }(pool)).flatMap(x => Await.result(x, timeoutMin.minutes)) ++
-      elements.map(x => FSElement(x.getPath.toString, x.isDirectory, x.getLen))
+  def listLevel(fs: FileSystem, folders: Array[Path], timeoutMin: Int = 20, level: Int = 0)(implicit pool: ExecutionContextExecutor): Array[FSElement] = {
+    val elements = folders.map(x => Future{fs.listStatus(x)}).flatMap(x => Await.result(x, timeoutMin.minutes))
+    val folderPaths = elements.filter(_.isDirectory).map(_.getPath)
+    val fsElements = elements.map(x => FSElement(x.getPath.toString, x.isDirectory, x.getLen))
+    if(folderPaths.isEmpty) fsElements
+    else fsElements ++ listLevel(fs,folderPaths,timeoutMin, level+1)
   }
 
 
   def getSizeInMB(path: String, driverParallelism: Int = 100, timeoutInMin: Int = 20)(implicit conf: Configuration): Double = {
     val fs = getFileSystem(conf, path)
-    val pool = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(driverParallelism))
-    val files = listRecursively(fs, new Path(path), timeoutInMin)(pool)
+    val exec = new ForkJoinPool(driverParallelism)
+    val pool = ExecutionContext.fromExecutor(exec)
+    val files = listLevel(fs, Array(new Path(path)), timeoutInMin)(pool)
     val sizeInMb = files.map(_.byteSize).sum.toDouble / 1024 / 1024
     println("Size of " + path + " is " + (sizeInMb * 1000).round.toDouble / 1000 + " MB")
     sizeInMb
   }
 
 
-  def checkIfFsIsTheSame(targetLocationUri: String, sourceFolderUri: String): Unit = {
-    if (getFileSystemPrefix(targetLocationUri) + getContainerName(targetLocationUri) != getFileSystemPrefix(sourceFolderUri) + getContainerName(sourceFolderUri))
+  def checkIfFsIsTheSame(srcFs: FileSystem, trgFs: FileSystem): Unit = {
+    if (srcFs.getUri != trgFs.getUri)
       throw new Exception("Cannot move files between 2 different filesystems. Use copy instead")
   }
 
@@ -81,8 +57,8 @@ package object fs {
     }
   }
 
-   def copySingleFile(hadoopConf: Configuration, sourcePath: String, targetPath: String, sourceFileSystem: FileSystem, targetFileSystem: FileSystem,
-                             overwrite: Boolean = true, deleteSource: Boolean = false): Boolean = {
+  def copySingleFile(hadoopConf: Configuration, sourcePath: String, targetPath: String, sourceFileSystem: FileSystem, targetFileSystem: FileSystem,
+                     overwrite: Boolean = true, deleteSource: Boolean = false): Boolean = {
     println(sourcePath + " => " + targetPath)
     val srcPath = new Path(sourcePath)
     val destPath = new Path(targetPath)

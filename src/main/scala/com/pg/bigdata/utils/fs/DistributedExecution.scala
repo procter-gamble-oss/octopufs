@@ -11,7 +11,6 @@ import scala.concurrent.duration._
 import scala.concurrent.forkjoin.ForkJoinPool
 import scala.concurrent.{Await, ExecutionContext, Future}
 
-//val magicPrefix = ".dfs.core.windows.net"
 
 object DistributedExecution extends Serializable {
 
@@ -29,34 +28,6 @@ object DistributedExecution extends Serializable {
     copyFiles(sourceFolderUri, targetLocationUri, paths, partitionCount)
 
   }
-
-
-  /*
-    def moveFolderKeepAcls(sourceFolderUri: String, targetFolderUri: String, keepSourceFolder: Boolean = false)
-                          (implicit conf: Configuration): Boolean = {
-      println("Moving folders: " + sourceFolderUri + "  ==>>  " + targetFolderUri)
-      checkIfFsIsTheSame(sourceFolderUri, targetFolderUri)
-      val srcAcls = AclManager.getAclEntries(sourceFolderUri)
-      val trgAcls = AclManager.getAclEntries(targetFolderUri)
-      val fs = getFileSystem(conf, sourceFolderUri)
-      val srcRelPath = getRelativePath(sourceFolderUri)
-      val trgRelPath = getRelativePath(targetFolderUri)
-
-      if (doesMoveLookSafe(fs, srcRelPath, trgRelPath)) {
-        println("Deleting target folder")
-        if (fs.exists(new Path(trgRelPath)))
-          if (!fs.delete(new Path(trgRelPath), true)) throw new Exception("Cannot delete folder " + targetFolderUri)
-        println("Moving folder " + srcRelPath + " ==>> " + trgRelPath)
-        if (!fs.rename(new Path(srcRelPath), new Path(trgRelPath))) throw new Exception("Move of folder " + srcRelPath + " ==>> " + trgRelPath + " FAILED!")
-        AclManager.resetAclEntries(targetFolderUri, trgAcls)
-        if (fs.mkdirs(new Path(srcRelPath)))
-          AclManager.resetAclEntries(sourceFolderUri, srcAcls)
-        else
-          println("Could not create folder " + sourceFolderUri)
-        true //move successful although source folder could not be recreated
-      } else
-        false
-    } */
 
   def copyFiles(sourceFolderUri: String, targetLocationUri: String, paths: Seq[Paths],
                 partitionCount: Int, attempt: Int = 0)
@@ -118,6 +89,3 @@ object DistributedExecution extends Serializable {
 
 
 }
-
-/*
-*/

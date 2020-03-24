@@ -202,7 +202,6 @@ object AclManager extends Serializable {
       val res =
         objects.map(x => Future {
           val parentFolder = new Path(x.path).getParent.toString
-          println("parent folder: " + parentFolder)
           val fileAcls = getAccessScopeAclFromDefault(aclsForFilesInFoldersHM(parentFolder))
           val exec = Try(targetFs.setAcl(new Path(x.path), fileAcls.asJava))
           if (exec.isFailure) println(exec.failed.get.getMessage)

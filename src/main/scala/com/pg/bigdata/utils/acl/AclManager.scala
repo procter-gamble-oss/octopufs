@@ -76,8 +76,9 @@ object AclManager extends Serializable {
     y
   }
 
-  def modifyFolderACLs(folderUri: String, newPermission: FsPermission, partitionCount: Int = 30, parallelism: Int = 1000)(implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
-
+  def modifyFolderACLs(folderUri: String, newPermission: FsPermission, partitionCount: Int = 30, parallelism: Int = 1000)
+                      (implicit confEx: Configuration): Array[FSOperationResult] = {
+    //todo check if path is a folder
     val fs = getFileSystem(confEx, folderUri)
     val elements = listLevel(fs, Array(new Path(folderUri)))
     val folders = elements.filter(_.isDirectory).map(_.path)
@@ -118,7 +119,7 @@ object AclManager extends Serializable {
 
 
   //TARGET folder is something which function is taking ACLs from and apply them to SOURCE folder
-  def synchronizeAcls(uriOfFolderToApplyAclsTo: String, uriOfFolderToTakeAclsFrom: String, timeoutMin: Int = 10, numOfThreads: Int = 32, attempt: Int = 0)
+  def synchronizeAcls(uriOfFolderToApplyAclsTo: String, uriOfFolderToTakeAclsFrom: String, timeoutMin: Int = 10, numOfThreads: Int = 1000, attempt: Int = 0)
                      (implicit conf: Configuration): Unit = {
     //path.isAbsoluteAndSchemeAuthorityNull
     val targetFs = getFileSystem(conf, uriOfFolderToApplyAclsTo)

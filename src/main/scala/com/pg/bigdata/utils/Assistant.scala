@@ -3,10 +3,10 @@ package com.pg.bigdata.utils
 
 import java.util.concurrent.Executors
 
+import buildInformation.BuildInfo
 import com.pg.bigdata.utils.fs.{FSElement, Paths}
 import com.pg.bigdata.utils.fs._
 import com.pg.bigdata.utils.metastore._
-
 import org.apache.spark.sql.SparkSession
 
 
@@ -27,7 +27,22 @@ object Assistant {
   }
 
 
-
+  def buildInfo(): Unit = {
+    //logger definition
+    println("-----------------info about last build:-----------------")
+    println("name: " + BuildInfo.name)
+    println("buildTimestamp: " + BuildInfo.buildTimestamp)
+    println("hostname: " + BuildInfo.hostname)
+    println("whoami: " + BuildInfo.whoami)
+    println("version: " + BuildInfo.version)
+    println("scalaVersion: " + BuildInfo.scalaVersion)
+    println("sbtVersion: " + BuildInfo.sbtVersion)
+    println("buildInfoNumber: " + BuildInfo.buildInfoBuildNumber.toString)
+    println("gitCommit: " + BuildInfo.gitCommit)
+    println("resolvers: " + BuildInfo.resolvers)
+    println("libraryDependencies: " + BuildInfo.test_libraryDependencies)
+    println("---------------------------end---------------------------")
+  }
 
 
 

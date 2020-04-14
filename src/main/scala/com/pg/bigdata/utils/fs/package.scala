@@ -13,6 +13,8 @@ import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor, Futu
 
 package object fs {
 
+  Assistant.buildInfo()
+
   def getFileSystem(hadoopConf: Configuration, absoluteTargetLocation: String): FileSystem = {
     FileSystem.get(new URI(absoluteTargetLocation), hadoopConf)
   }

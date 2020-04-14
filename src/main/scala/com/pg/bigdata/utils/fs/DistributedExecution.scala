@@ -56,7 +56,7 @@ object DistributedExecution extends Serializable {
       res.filter(_.success) ++ copyFiles(sourceFolderUri, targetLocationUri, pathsForReprocessing, partitionCount, attempt + 1)
     }
   }
-
+/*
   private def moveFiles(relativePaths: Seq[Paths], sourceFolderUri: String, partitionCount: Int = 32, attempt: Int = 0)
                        (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
     println("Starting moveFiles. Paths to be moved: " + relativePaths.size)
@@ -86,6 +86,8 @@ object DistributedExecution extends Serializable {
       res.filter(_.success) ++ moveFiles(pathsForReprocessing, sourceFolderUri, partitionCount, attempt + 1)
     }
   }
+
+ */
 
 
 }

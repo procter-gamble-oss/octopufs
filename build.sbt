@@ -1,10 +1,10 @@
-name := "Promoter"
+name := "Promotor"
 
 version := "0.1"
 
 scalaVersion := "2.11.12"
 
-val sparkVersion = "2.3.4"
+val sparkVersion = "2.4.4"
 
 //unmanagedBase := file("/Users/jacektokar/miniconda3/lib/python3.7/site-packages/pyspark/jars")
 
@@ -53,3 +53,10 @@ buildInfoKeys ++= Seq[BuildInfoKey](
 )
 //get git commit id
 val gitCommitString = SettingKey[String]("gitCommit")
+
+credentials += Credentials(Path.userHome / "credentials.txt")
+
+publishMavenStyle := true
+publishArtifact in Test := false
+publishTo := Some("app-nas-utils" at "https://pkgs.dev.azure.com/dh-platforms-devops/app-deng-nas_us/_packaging/anthill/maven/v1")
+ThisBuild / version      := "0.1."+buildInfoBuildNumber

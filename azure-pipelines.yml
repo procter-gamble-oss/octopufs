@@ -26,8 +26,8 @@ stages:
         displayName: 'Running $ sbt update'
       - script: sbt compile
         displayName: 'Running $ sbt compile'
-      - script: sbt test
-        displayName: 'Running $ sbt test'
+#      - script: sbt test
+#        displayName: 'Running $ sbt test'
 
 - stage: 'Publish'
   displayName: Publish

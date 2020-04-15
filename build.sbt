@@ -1,6 +1,6 @@
 name := "Promotor"
 
-version := "0.1"
+version := "0.1."+buildInfoBuildNumber
 
 scalaVersion := "2.11.12"
 

@@ -1,64 +1,56 @@
 variables:
-- group: credentials
+  - group: credentials
 
 trigger:
   batch: true
   branches:
     include:
-    - master
+      - master
+      - features/*
+      - fix/*
     exclude:
-    - features/experimental/*
+      - features/experimental/*
   paths:
     exclude:
-    - README.md
+      - README.md
 
 pr: none
 
 stages:
-- stage: 'Build'
-  displayName: Build
-  jobs:
-    - job: Build
-      pool:
-        vmImage: 'ubuntu-latest'
-      steps:
-      - script: sbt clean
-        displayName: 'Running $ sbt clean'
-      - script: sbt update
-        displayName: 'Running $ sbt update'
-      - script: sbt compile
-        displayName: 'Running $ sbt compile'
-      - task: DownloadSecureFile@1
-        displayName: 'Getting test data'
-        inputs:
-          secureFile: 'anthillTestData.zip'
-      - task: ExtractFiles@1
-        displayName: 'Extracting test data'
-        inputs:
-          archiveFilePatterns: '$(Agent.TempDirectory)/anthillTestData.zip'
-          destinationFolder: '$(Build.SourcesDirectory)'
-          cleanDestinationFolder: false
-      - script: sbt test
-        displayName: 'Running $ sbt test'
+  - stage: 'Build'
+    displayName: Build
+    jobs:
+      - job: Build
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - script: sbt clean
+            displayName: 'Running $ sbt clean'
 
-- stage: 'Publish'
-  displayName: Publish
-  condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
-  jobs:
-    - job: Publish
-      pool:
-        vmImage: 'ubuntu-latest'
-      steps:
-      - task: Bash@3
-        displayName: 'Replacing build number'
-        inputs:
-          targetType: 'inline'
-          script: |
-            sed -i 's/{xxbuildversionxx}/$(Build.BuildNumber)/g' build.sbt
-            cat build.sbt | grep version
-      - script: "printf 'realm=https://pkgsprodcus1.pkgs.visualstudio.com/\n host=pkgs.dev.azure.com \n user=dh-platforms-devops \n password=$(maven_password)' > ~/credentials.txt"
-        displayName: 'Generate credentials file'
-      - script: sbt publish
-        displayName: 'Running $ sbt publish'
-      - script: "rm ~/credentials.txt"
-        displayName: 'Remove credentials file'
+  - stage: 'Publish'
+    displayName: Publish
+    #condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
+    condition: succeeded()
+    jobs:
+      - job: Publish
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: Bash@3
+            displayName: 'Replacing build number'
+            inputs:
+              targetType: 'inline'
+              script: |
+                BRANCH=`echo $(Build.SourceBranch) | rev | cut -d / -f1 | rev`
+                BUILD=$(Build.BuildNumber)
+                echo ${BRANCH}
+                echo ${BUILD}
+                sed -i "s/{xxbuildversionxx}/${BRANCH}_${BUILD}/g" build.sbt
+                cat build.sbt
+
+          - script: "printf 'realm=https://pkgsprodcus1.pkgs.visualstudio.com/\n host=pkgs.dev.azure.com \n user=dh-platforms-devops \n password=$(maven_password)' > ~/credentials.txt"
+            displayName: 'Generate credentials file'
+          - script: sbt publish
+            displayName: 'Running $ sbt publish'
+          - script: "rm ~/credentials.txt"
+            displayName: 'Remove credentials file'

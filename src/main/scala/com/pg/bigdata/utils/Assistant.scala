@@ -1,11 +1,8 @@
 package com.pg.bigdata.utils
 
 
-import java.util.concurrent.Executors
-
-import buildInformation.BuildInfo
+//import buildInformation.BuildInfo
 import com.pg.bigdata.utils.fs.{FSElement, Paths}
-import com.pg.bigdata.utils.fs._
 import com.pg.bigdata.utils.metastore._
 import org.apache.spark.sql.SparkSession
 
@@ -25,7 +22,7 @@ object Assistant {
     println(targetFileList(0))
     sourceFileList.zip(targetFileList).map(x => Paths(x._1,x._2))
   }
-
+/*
 
   def buildInfo(): Unit = {
     //logger definition
@@ -43,7 +40,7 @@ object Assistant {
     println("libraryDependencies: " + BuildInfo.test_libraryDependencies)
     println("---------------------------end---------------------------")
   }
-
+*/
 
 
 }

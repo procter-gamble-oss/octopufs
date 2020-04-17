@@ -31,11 +31,11 @@ stages:
       - task: DownloadSecureFile@1
         displayName: 'Getting test data'
         inputs:
-          secureFile: 'anthillTestData'
+          secureFile: 'anthillTestData.zip'
       - task: ExtractFiles@1
         displayName: 'Extracting test data'
         inputs:
-          archiveFilePatterns: '*.zip'
+          archiveFilePatterns: '$(Agent.TempDirectory)/anthillTestData.zip'
           destinationFolder: '$(Build.SourcesDirectory)'
           cleanDestinationFolder: false
       - script: sbt test

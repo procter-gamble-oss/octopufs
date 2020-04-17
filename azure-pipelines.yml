@@ -34,7 +34,7 @@ stages:
       - task: ExtractFiles@1
         inputs:
           archiveFilePatterns: '*.zip'
-          destinationFolder: '$(agent.builddirectory)'
+          destinationFolder: '$(Build.SourcesDirectory)'
           cleanDestinationFolder: false
       - script: sbt test
         displayName: 'Running $ sbt test'

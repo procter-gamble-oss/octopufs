@@ -29,9 +29,11 @@ stages:
       - script: sbt compile
         displayName: 'Running $ sbt compile'
       - task: DownloadSecureFile@1
+        displayName: 'Getting test data'
         inputs:
           secureFile: 'anthillTestData'
       - task: ExtractFiles@1
+        displayName: 'Extracting test data'
         inputs:
           archiveFilePatterns: '*.zip'
           destinationFolder: '$(Build.SourcesDirectory)'
@@ -47,6 +49,13 @@ stages:
       pool:
         vmImage: 'ubuntu-latest'
       steps:
+      - task: Bash@3
+        displayName: 'Replacing build number'
+        inputs:
+          targetType: 'inline'
+          script: |
+            sed -i 's/{xxbuildversionxx}/$(Build.BuildNumber)/g' build.sbt
+            cat build.sbt | grep version
       - script: "printf 'realm=https://pkgsprodcus1.pkgs.visualstudio.com/\n host=pkgs.dev.azure.com \n user=dh-platforms-devops \n password=$(maven_password)' > ~/credentials.txt"
         displayName: 'Generate credentials file'
       - script: sbt publish

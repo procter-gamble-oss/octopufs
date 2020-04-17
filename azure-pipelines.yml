@@ -28,8 +28,16 @@ stages:
         displayName: 'Running $ sbt update'
       - script: sbt compile
         displayName: 'Running $ sbt compile'
-#      - script: sbt test
-#        displayName: 'Running $ sbt test'
+      - task: DownloadSecureFile@1
+        inputs:
+          secureFile: 'anthillTestData'
+      - task: ExtractFiles@1
+        inputs:
+          archiveFilePatterns: '*.zip'
+          destinationFolder: '$(agent.builddirectory)'
+          cleanDestinationFolder: false
+      - script: sbt test
+        displayName: 'Running $ sbt test'
 
 - stage: 'Publish'
   displayName: Publish

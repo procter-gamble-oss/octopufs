@@ -27,15 +27,21 @@ package object fs {
     else fsElements ++ listLevel(fs,folderPaths,timeoutMin, level+1)
   }
 
+  def displaySizeNicely(unitNames: Seq[String], size: Double): String = {
+    if(size<1024 || unitNames.tail.isEmpty) ((size*1000).round/1000.0).toString +" "+unitNames.head
+    else displaySizeNicely(unitNames.tail,size/1024)
+  }
 
-  def getSizeInMB(path: String, driverParallelism: Int = 100, timeoutInMin: Int = 20)(implicit conf: Configuration): Double = {
+  def getSize(path: String, driverParallelism: Int = 100, timeoutInMin: Int = 20)(implicit conf: Configuration): Double = {
+    val units = Seq("B","KB","MB","GB","TB")
     val fs = getFileSystem(conf, path)
     val exec = new ForkJoinPool(driverParallelism)
     val pool = ExecutionContext.fromExecutor(exec)
     val files = listLevel(fs, Array(new Path(path)), timeoutInMin)(pool)
-    val sizeInMb = files.map(_.byteSize).sum.toDouble / 1024 / 1024
-    println("Size of " + path + " is " + (sizeInMb * 1000).round.toDouble / 1000 + " MB")
-    sizeInMb
+    println("Number of files in " + path + " is " + files.length)
+    val size = files.map(_.byteSize).sum.toDouble
+    println("Size of " + path + " is " + displaySizeNicely(units, size))
+    size
   }
 
 

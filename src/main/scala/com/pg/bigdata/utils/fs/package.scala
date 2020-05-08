@@ -29,7 +29,7 @@ package object fs {
   }
 
   def toNiceSizeString(unitNames: Seq[String], size: Double): String = {
-    if (size < 1024 || unitNames.tail.isEmpty) ((size * 100).round / 1000.0).toString + " " + unitNames.head
+    if (size < 1024 || unitNames.tail.isEmpty) ((size * 100).round / 100.0).toString + " " + unitNames.head
     else toNiceSizeString(unitNames.tail, size / 1024)
   }
 

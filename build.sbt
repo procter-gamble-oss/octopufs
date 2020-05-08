@@ -4,6 +4,7 @@ version := "0.1.{xxbuildversionxx}"
 
 scalaVersion := "2.11.12"
 
+val hadoopVersion = "2.7.3"
 val sparkVersion = "2.4.4"
 
 //unmanagedBase := file("/Users/jacektokar/miniconda3/lib/python3.7/site-packages/pyspark/jars")
@@ -13,11 +14,10 @@ libraryDependencies ++= Seq(
  "org.apache.spark" % "spark-core_2.11" % sparkVersion % "provided",
  "org.pegdown" % "pegdown" % "1.6.0" % Test,
  "org.scalatest" %% "scalatest" % "3.0.5" % "provided",
-  "org.apache.hadoop" % "hadoop-common" % "3.2.0" % "provided" ,
- // "org.apache.commons" % "commons-io" % "3.2.0" % "provided" ,
-  "org.apache.hadoop" % "hadoop-hdfs" % "3.2.0" % "provided",
+  "org.apache.hadoop" % "hadoop-common" % hadoopVersion % "provided" ,
+  "org.apache.hadoop" % "hadoop-hdfs" % hadoopVersion % "provided",
   "com.databricks" % "dbutils-api_2.11" % "0.0.4" % "provided",
- "org.apache.hadoop" % "hadoop-azure" % "3.2.0"
+ "org.apache.hadoop" % "hadoop-azure" % hadoopVersion % "provided"
 )
 
 parallelExecution in Test := false

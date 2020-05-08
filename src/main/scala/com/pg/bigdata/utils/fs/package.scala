@@ -1,13 +1,12 @@
 package com.pg.bigdata.utils
 
 import java.net.URI
-import java.util.concurrent.Executors
 
-import scala.concurrent.forkjoin.ForkJoinPool
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 
 import scala.concurrent.duration._
+import scala.concurrent.forkjoin.ForkJoinPool
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor, Future}
 
 
@@ -19,31 +18,48 @@ package object fs {
     FileSystem.get(new URI(absoluteTargetLocation), hadoopConf)
   }
 
-  def listLevel(fs: FileSystem, folders: Array[Path], timeoutMin: Int = 20, level: Int = 0)(implicit pool: ExecutionContextExecutor): Array[FSElement] = {
-    val elements = folders.map(x => Future{fs.listStatus(x)}).flatMap(x => Await.result(x, timeoutMin.minutes))
+  def listLevel(fs: FileSystem, folders: Array[Path], timeoutMin: Int = 20, level: Int = 0)(implicit pool: ExecutionContextExecutor): Array[FsElement] = {
+    val elements = folders.map(x => Future {
+      fs.listStatus(x)
+    }).flatMap(x => Await.result(x, timeoutMin.minutes))
     val folderPaths = elements.filter(_.isDirectory).map(_.getPath)
-    val fsElements = elements.map(x => FSElement(x.getPath.toString, x.isDirectory, x.getLen))
-    if(folderPaths.isEmpty) fsElements
-    else fsElements ++ listLevel(fs,folderPaths,timeoutMin, level+1)
+    val fsElements = elements.map(x => FsElement(x.getPath.toString, x.isDirectory, x.getLen))
+    if (folderPaths.isEmpty) fsElements
+    else fsElements ++ listLevel(fs, folderPaths, timeoutMin, level + 1)
   }
 
-  def displaySizeNicely(unitNames: Seq[String], size: Double): String = {
-    if(size<1024 || unitNames.tail.isEmpty) ((size*1000).round/1000.0).toString +" "+unitNames.head
-    else displaySizeNicely(unitNames.tail,size/1024)
+  def toNiceSizeString(unitNames: Seq[String], size: Double): String = {
+    if (size < 1024 || unitNames.tail.isEmpty) ((size * 100).round / 1000.0).toString + " " + unitNames.head
+    else toNiceSizeString(unitNames.tail, size / 1024)
   }
 
-  def getSize(path: String, driverParallelism: Int = 100, timeoutInMin: Int = 20)(implicit conf: Configuration): Double = {
-    val units = Seq("B","KB","MB","GB","TB")
+  case class FsSizes(sizes: Array[FsElement]) {
+    def getSizeOfPath(absolutePath: String): Double = {
+      val list = sizes.filter(_.path.startsWith(absolutePath))
+      val size = list.map(_.byteSize).sum.toDouble
+      displayNumberOfFiles(absolutePath, list.length)
+      displaySize(absolutePath, size)
+      size
+    }
+  }
+
+  def displaySize(path: String, size: Double) = {
+    val units = Seq("B", "KB", "MB", "GB", "TB")
+    println("Size of " + path + " is " + toNiceSizeString(units, size))
+  }
+
+  def displayNumberOfFiles(path: String, numberOfFiles: Long) = println("Number of files in " + path + " is " + numberOfFiles)
+
+  def getSize(path: String, driverParallelism: Int = 1000, timeoutInMin: Int = 20)(implicit conf: Configuration): FsSizes = {
     val fs = getFileSystem(conf, path)
     val exec = new ForkJoinPool(driverParallelism)
     val pool = ExecutionContext.fromExecutor(exec)
     val files = listLevel(fs, Array(new Path(path)), timeoutInMin)(pool)
-    println("Number of files in " + path + " is " + files.length)
+    displayNumberOfFiles(path, files.length)
     val size = files.map(_.byteSize).sum.toDouble
-    println("Size of " + path + " is " + displaySizeNicely(units, size))
-    size
+    displaySize(path, size)
+    FsSizes(files)
   }
-
 
   def checkIfFsIsTheSame(srcFs: FileSystem, trgFs: FileSystem): Unit = {
     if (srcFs.getUri != trgFs.getUri)

@@ -135,7 +135,7 @@ object AclManager extends Serializable {
     println("Target folder ACL is: " + topAcl)
 
     println("Getting files from " + uriOfFolderToApplyAclsTo)
-    val targetObjectList = listLevel(targetFs, Array(new Path(uriOfFolderToApplyAclsTo))) :+ FSElement(uriOfFolderToApplyAclsTo, true, 0) //adding top level folder
+    val targetObjectList = listLevel(targetFs, Array(new Path(uriOfFolderToApplyAclsTo))) :+ FsElement(uriOfFolderToApplyAclsTo, true, 0) //adding top level folder
     println(targetObjectList.length.toString + " objects found in " + uriOfFolderToApplyAclsTo)
     val nTargetFiles = targetObjectList.filter(!_.isDirectory)
 
@@ -199,7 +199,7 @@ object AclManager extends Serializable {
 
     println("Number of files be modified (ACLs): " + nTargetFiles.length)
 
-    def applyFilesSecurity(objects: Array[FSElement], attempt: Int = 0): Array[FSOperationResult] = {
+    def applyFilesSecurity(objects: Array[FsElement], attempt: Int = 0): Array[FSOperationResult] = {
       val res =
         objects.map(x => Future {
           val parentFolder = new Path(x.path).getParent.toString

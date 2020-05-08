@@ -2,7 +2,7 @@ package com.pg.bigdata.utils
 
 
 //import buildInformation.BuildInfo
-import com.pg.bigdata.utils.fs.{FSElement, Paths}
+import com.pg.bigdata.utils.fs.{FsElement, Paths}
 import com.pg.bigdata.utils.metastore._
 import org.apache.spark.sql.SparkSession
 

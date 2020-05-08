@@ -13,10 +13,11 @@ libraryDependencies ++= Seq(
  "org.apache.spark" % "spark-core_2.11" % sparkVersion % "provided",
  "org.pegdown" % "pegdown" % "1.6.0" % Test,
  "org.scalatest" %% "scalatest" % "3.0.5" % "provided",
-  "org.apache.hadoop" % "hadoop-common" % "2.7.3" % "provided" ,
- // "org.apache.commons" % "commons-io" % "1.3.2" % "provided" ,
-  "org.apache.hadoop" % "hadoop-hdfs" % "2.7.3" % "provided",
-  "com.databricks" % "dbutils-api_2.11" % "0.0.4" % "provided"
+  "org.apache.hadoop" % "hadoop-common" % "3.2.0" % "provided" ,
+ // "org.apache.commons" % "commons-io" % "3.2.0" % "provided" ,
+  "org.apache.hadoop" % "hadoop-hdfs" % "3.2.0" % "provided",
+  "com.databricks" % "dbutils-api_2.11" % "0.0.4" % "provided",
+ "org.apache.hadoop" % "hadoop-azure" % "3.2.0"
 )
 
 parallelExecution in Test := false

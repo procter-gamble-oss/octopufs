@@ -17,7 +17,7 @@ libraryDependencies ++= Seq(
   "org.apache.hadoop" % "hadoop-common" % hadoopVersion % "provided" ,
   "org.apache.hadoop" % "hadoop-hdfs" % hadoopVersion % "provided",
   "com.databricks" % "dbutils-api_2.11" % "0.0.4" % "provided",
- "org.apache.hadoop" % "hadoop-azure" % hadoopVersion % "provided"
+ "com.microsoft.azure" % "azure-data-lake-store-sdk" % "2.2.8"
 )
 
 parallelExecution in Test := false

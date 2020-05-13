@@ -10,7 +10,7 @@ class TestPartitionCopy extends FlatSpec with BeforeAndAfterAll {
     getOrCreate()
   implicit val c = spark.sparkContext.hadoopConfiguration
 
-  val t = new TestUtils(this.getClass.getName)
+  val t = new TestUtils("TestPartitionCopy")
   t.setupTestEnv()
     //modify partition content to make sure later, that partition was actually exchanged
     val modifiedDLT = spark.table(t.d+"STORE_SALES_DLT").filter("mm_time_perd_end_date = '2019-10-31'").

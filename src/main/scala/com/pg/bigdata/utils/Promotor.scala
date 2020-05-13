@@ -178,7 +178,7 @@ object Promotor extends Serializable {
     val absTblLoc = getTableLocation(db, tableName)
     println("Partitions of table " + db + "." + tableName + " which are going to be deleted:")
     paths.foreach(println)
-    LocalExecution.deletePaths(paths, 0)
+    LocalExecution.deletePaths(paths)
     refreshMetadata(db, tableName)
   }
 

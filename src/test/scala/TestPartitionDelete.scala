@@ -8,7 +8,7 @@ class TestPartitionDelete extends FlatSpec with BeforeAndAfterAll{
     master("local").
     getOrCreate()
 
-  val t = new TestUtils(this.getClass.getName)
+  val t = new TestUtils("TestPartitionDelete")
   t.setupTestEnv()
 
     //#test1

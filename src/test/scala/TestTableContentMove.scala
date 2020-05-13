@@ -11,8 +11,8 @@ class TestTableContentMove extends FlatSpec with BeforeAndAfterAll{
   implicit val c = spark.sparkContext.hadoopConfiguration
   val testName = "TestTableContentMove"
 
-  val t = new TestUtils(this.getClass.getName)
-  override def beforeAll() = t.setupTestEnv()
+  val t = new TestUtils(testName)
+  t.setupTestEnv()
 
   "Test data" should "be created ok" in {
     println("Checking initial tables")

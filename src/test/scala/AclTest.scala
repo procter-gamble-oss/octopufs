@@ -1,5 +1,6 @@
 
 import com.pg.bigdata.utils.helpers.implicits._
+import com.pg.bigdata.utils.fs._
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.fs.permission.{AclEntry, AclEntryScope, AclEntryType, FsAction}
 import org.apache.spark.sql.SparkSession
@@ -20,8 +21,8 @@ class AclTest extends FlatSpec with BeforeAndAfterAll {
   "This" should "never fail" in {
     assert(1==1)
   }
-}
-/*
+
+
     val basePath = "hdfs://localhost:8020/"
     implicit val conf = spark.sparkContext.hadoopConfiguration
     val fs = getFileSystem(conf, basePath)
@@ -93,14 +94,12 @@ class AclTest extends FlatSpec with BeforeAndAfterAll {
     toApplyAclsOnFiles.map(x => fs.modifyAclEntries(new Path(x), List(buildRandomAclForPath(x, "ACCESS")).asJava))
     targetFolders.map(x => fs.modifyAclEntries(new Path(x), List(buildRandomAclForPath(x, "ACCESS")).asJava))
     // targetFolders.map(x => fs.modifyAclEntries(new Path(x),List(buildRandomAclForPath(x, "DEFAULT")).asJava))
-  }
-  //"File trees"
-  ignore should "be the different before the test" in {
+
+  "File trees" should "be the different before the test" in {
     assert(listLevel(fs, Array(new Path(toTakeAclsFrom))) != listLevel(fs, Array(new Path(toApplyOn))))
   }
 
-  //"ACLs before test"
-  ignore should "be the different in both folder trees" in {
+  "ACLs before test" should "be the different in both folder trees" in {
     val initAcls = folders.sorted.map(x => fs.getAclStatus(new Path(x))).toList
     val targetAcls = targetFolders.sorted.map(x => fs.getAclStatus(new Path(x)))
     assert(initAcls != targetAcls)
@@ -108,20 +107,17 @@ class AclTest extends FlatSpec with BeforeAndAfterAll {
 
   AclManager.synchronizeAcls(toApplyOn, toTakeAclsFrom)
 
-  //"ACLs"
-  ignore should "be the same" in {
+  "ACLs" should "be the same" in {
     val initAcls = folders.sorted.map(x => fs.getAclStatus(new Path(x))).toList
     val targetAcls = targetFolders.sorted.map(x => fs.getAclStatus(new Path(x)))
     assert(initAcls != targetAcls)
   }
 
-  //"ACLs of top folders"
-  ignore should "be the same" in {
+  "ACLs of top folders" should "be the same" in {
     assert(fs.getAclStatus(new Path(toTakeAclsFrom)) == fs.getAclStatus(new Path(toApplyOn)))
     //assert(initAcls != targetAcls)
   }
-  //"File trees"
-  ignore should "be the different AFTER the test" in {
+  "File trees" should "be the different AFTER the test" in {
     assert(listLevel(fs, Array(new Path(toTakeAclsFrom))) != listLevel(fs, Array(new Path(toApplyOn))))
     println("cleanup")
     folders.map(x => fs.delete(new Path(x), true))
@@ -129,4 +125,3 @@ class AclTest extends FlatSpec with BeforeAndAfterAll {
   }
 
 }
-*/

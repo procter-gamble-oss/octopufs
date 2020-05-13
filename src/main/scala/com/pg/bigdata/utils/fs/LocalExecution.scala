@@ -24,7 +24,7 @@ object LocalExecution extends Serializable {
       return Array[FsOperationResult]()
 
     //delete target folder
-    val transaction = new SafetyFuse(targetFolderUri)
+    val transaction = new SafetyFuse("data/movefolderContent")
 
     if (!transaction.isInProgress()) {
       transaction.startTransaction()

@@ -1,13 +1,15 @@
 package com.pg.bigdata.utils.fs
 
+import java.util.concurrent.Executors
+
 import com.pg.bigdata.utils.fs
 import com.pg.bigdata.utils.helpers.ConfigSerDeser
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.spark.sql.SparkSession
+import com.pg.bigdata.utils.helpers.implicits._
+import org.apache.spark.{Partitioner, SerializableWritable}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
 import scala.concurrent.forkjoin.ForkJoinPool
 import scala.concurrent.{Await, ExecutionContext, Future}
 
@@ -15,32 +17,39 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 object DistributedExecution extends Serializable {
 
 
-  def copyFolder(sourceFolderUri: String, targetLocationUri: String, partitionCount: Int = 192)(implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
-    val srcFs = getFileSystem(confEx, sourceFolderUri)
-    val exec = new ForkJoinPool(partitionCount)
-    val pool = ExecutionContext.fromExecutor(exec)
-    val sourceFileList = listLevel(srcFs, Array(new Path(sourceFolderUri)))(pool).filter(!_.isDirectory).map(_.path) //filter is to avoid copying folders (folders will get created where copying files). Caveat: empty folders will not be copied
+  def copyFolder(sourceFolderUri: String, targetLocationUri: String, partitionCount: Int = -1)(implicit spark: SparkSession): Array[FsOperationResult] = {
+    implicit val conf = spark.sparkContext.hadoopConfiguration
+    val srcFs = getFileSystem(conf, sourceFolderUri)
+    val sourceFileList = listLevel(srcFs, Array(new Path(sourceFolderUri))).filter(!_.isDirectory).map(_.path) //filter is to avoid copying folders (folders will get created where copying files). Caveat: empty folders will not be copied
     val targetFileList = sourceFileList.map(_.replaceAll(sourceFolderUri, targetLocationUri)) //uri to work on differnt fikle systems
-    println(targetFileList.head)
     val paths = sourceFileList.zip(targetFileList).map(x => Paths(x._1, x._2))
-
-    println(paths.head)
-    copyFiles(sourceFolderUri, targetLocationUri, paths, partitionCount)
-
+    println("First path is: " +paths.head)
+    copyFiles(paths, partitionCount)
   }
 
-  def copyFiles(sourceFolderUri: String, targetLocationUri: String, paths: Seq[Paths],
-                partitionCount: Int, attempt: Int = 0)
-               (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
-    val confsd = new ConfigSerDeser(confEx)
+  def copyFiles(paths: Seq[Paths], partitionCount: Int = -1, attempt: Int = 0)
+               (implicit spark: SparkSession): Array[FsOperationResult] = {
+    //val confsd = new ConfigSerDeser(spark.sparkContext.hadoopConfiguration)
     val requestProcessed = spark.sparkContext.longAccumulator("CopyFilesProcessedCount")
-    val res = spark.sparkContext.parallelize(paths, partitionCount).mapPartitions(x => {
-      val conf = confsd.get()
-      val srcFs = getFileSystem(conf, sourceFolderUri)
-      val trgFs = getFileSystem(conf, targetLocationUri)
+    val confBroadcast = spark.sparkContext.broadcast(new SerializableWritable(spark.sparkContext.hadoopConfiguration))
+
+    class PromotorPartitioner(override val numPartitions: Int) extends Partitioner {
+      override def getPartition(key: Any): Int = key match {
+        case (ind: Int) => numPartitions % ind
+      }
+    }
+    
+    val partCnt = if(partitionCount == -1) paths.length else partitionCount
+    val df = spark.sparkContext.parallelize(paths.indices.map(i => (i,paths(i))), partCnt).keyBy(x => x._1).partitionBy(new PromotorPartitioner(partCnt)).values.values
+    //val res = spark.sparkContext.parallelize(paths, partitionCount)
+    val res = df.mapPartitions(x => {
+      //val conf = confsd.get()
+      val conf: Configuration = confBroadcast.value.value
+      val srcFs = getFileSystem(conf, paths.head.sourcePath)
+      val trgFs = getFileSystem(conf, paths.head.targetPath)
       x.map(paths => {
         requestProcessed.add(1)
-        FSOperationResult(paths.sourcePath, fs.copySingleFile(conf, paths.sourcePath, paths.targetPath, srcFs, trgFs))
+        FsOperationResult(paths.sourcePath, fs.copySingleFile(conf, paths.sourcePath, paths.targetPath, srcFs, trgFs))
       })
     }).collect()
     val failed = res.filter(!_.success)
@@ -53,7 +62,7 @@ object DistributedExecution extends Serializable {
       val failedPaths = paths.map(_.sourcePath).filter(x => failed.map(_.path).contains(x))
       val pathsForReprocessing = paths.filter(x => failedPaths.contains(x.sourcePath))
       println("Reprocessing " + failedPaths.length + " of failed paths...")
-      res.filter(_.success) ++ copyFiles(sourceFolderUri, targetLocationUri, pathsForReprocessing, partitionCount, attempt + 1)
+      res.filter(_.success) ++ copyFiles(pathsForReprocessing, partitionCount, attempt + 1)
     }
   }
 /*

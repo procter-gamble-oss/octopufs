@@ -14,14 +14,14 @@ import com.pg.bigdata.utils.helpers.implicits._
 object LocalExecution extends Serializable {
 
   def moveFolderContent(sourceFolderUri: String, targetFolderUri: String, keepSourceFolder: Boolean = false, numOfThreads: Int = 1000, timeoutMin: Int = 10)
-                       (implicit conf: Configuration): Array[FSOperationResult] = {
+                       (implicit conf: Configuration): Array[FsOperationResult] = {
     println("Moving folders content: " + sourceFolderUri + "  ==>>  " + targetFolderUri)
     implicit val srcFs: FileSystem = getFileSystem(conf,sourceFolderUri)
     val trgFs = getFileSystem(conf,targetFolderUri) //needed just to check if both fs are the same
     checkIfFsIsTheSame(srcFs, trgFs)
 
     if (!doesMoveLookSafe(srcFs,sourceFolderUri, targetFolderUri))
-      return Array[FSOperationResult]()
+      return Array[FsOperationResult]()
 
     //delete target folder
     val transaction = new SafetyFuse(targetFolderUri)
@@ -51,7 +51,7 @@ object LocalExecution extends Serializable {
   }
 
   def moveFiles(paths: Array[Paths], timeoutMins: Int = 10, attempt: Int = 0)
-               (implicit conf: Configuration): Array[FSOperationResult] = {
+               (implicit conf: Configuration): Array[FsOperationResult] = {
     println("Starting moveFiles - attempt: " + attempt + ". Paths to be moved: " + paths.length)
     implicit val srcFs: FileSystem = getFileSystem(conf,paths.head.sourcePath)
     val trgFs = getFileSystem(conf,paths.head.targetPath) //needed just to check if both fs are the same
@@ -59,7 +59,7 @@ object LocalExecution extends Serializable {
 
     val res = paths.map(x => Future {
       print(".")
-      FSOperationResult(x.sourcePath, srcFs.rename(new Path(x.sourcePath), new Path(x.targetPath)))
+      FsOperationResult(x.sourcePath, srcFs.rename(new Path(x.sourcePath), new Path(x.targetPath)))
     }).map(x => Await.result(x, timeoutMins.minutes))
 
     println("Number of files moved properly: " + res.count(_.success))
@@ -88,11 +88,11 @@ object LocalExecution extends Serializable {
     }
   }
 
-  def deletePaths(fs: FileSystem, paths: Array[String], timeoutMin: Int = 10, attempt: Int = 0): Array[FSOperationResult] = {
+  def deletePaths(fs: FileSystem, paths: Array[String], timeoutMin: Int = 10, attempt: Int = 0): Array[FsOperationResult] = {
 
     val res = paths.map(x =>
       Future {
-        FSOperationResult(x, fs.delete(new Path(x), true))
+        FsOperationResult(x, fs.delete(new Path(x), true))
       }
     ).map(x => Await.result(x, timeoutMin.minutes))
 

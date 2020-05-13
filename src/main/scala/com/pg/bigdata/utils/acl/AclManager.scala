@@ -2,7 +2,7 @@ package com.pg.bigdata.utils.acl
 
 import java.util.concurrent.Executors
 
-import com.pg.bigdata.utils.fs.{FSOperationResult, _}
+import com.pg.bigdata.utils.fs.{FsOperationResult, _}
 import com.pg.bigdata.utils.metastore._
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.permission._
@@ -20,7 +20,7 @@ import com.pg.bigdata.utils.helpers.implicits._
 object AclManager extends Serializable {
 
   def modifyTableACLs(db: String, tableName: String, newPermission: FsPermission, partitionCount: Int = 1000)
-                     (implicit spark: SparkSession, conf: Configuration): Array[FSOperationResult] = {
+                     (implicit spark: SparkSession, conf: Configuration): Array[FsOperationResult] = {
     import collection.JavaConverters._
 
     val loc = getTableLocation(db, tableName)
@@ -36,7 +36,7 @@ object AclManager extends Serializable {
   //todo add remove ACL
   //assumes the same fs for all
   def modifyAcl(paths: Array[String], newFsPermission: FsPermission, timeoutMin: Int = 10, numOfThreads: Int = 1000, attempt: Int = 0) //change to local
-               (implicit conf: Configuration): Array[FSOperationResult] = {
+               (implicit conf: Configuration): Array[FsOperationResult] = {
     println("Settign ACLs - attempt " + attempt)
 
     val y = AclManager.getAclEntry(newFsPermission)
@@ -46,8 +46,8 @@ object AclManager extends Serializable {
     val res = paths.map(x => Future {
       Try({
         fs.modifyAclEntries(new Path(x), Seq(y).asJava)
-        FSOperationResult(x, true)
-      }).getOrElse(FSOperationResult(x, false))
+        FsOperationResult(x, true)
+      }).getOrElse(FsOperationResult(x, false))
     }).map(x => Await.result(x, timeoutMin.minute))
     val failed = res.filter(!_.success).filter(x => fs.exists(new Path(x.path))).map(_.path)
     if (failed.isEmpty) res
@@ -77,7 +77,7 @@ object AclManager extends Serializable {
   }
 
   def modifyFolderACLs(folderUri: String, newPermission: FsPermission, partitionCount: Int = 30, parallelism: Int = 1000)
-                      (implicit confEx: Configuration): Array[FSOperationResult] = {
+                      (implicit confEx: Configuration): Array[FsOperationResult] = {
     //todo check if path is a folder
     val fs = getFileSystem(confEx, folderUri)
     val elements = listLevel(fs, Array(new Path(folderUri)))
@@ -172,12 +172,12 @@ object AclManager extends Serializable {
     aclsOnTargetFolders.slice(0, 5).foreach(x => println(x.path + " - " + x.aclStatus.toString))
     println("Number of folder settings to be applied: " + aclsOnTargetFolders.length)
 
-    def applyFolderSecurity(objects: Array[AclSetting], attempt: Int = 0): Array[FSOperationResult] = {
+    def applyFolderSecurity(objects: Array[AclSetting], attempt: Int = 0): Array[FsOperationResult] = {
       val res = aclsOnTargetFolders.map(x => Future {
         targetFs.removeAcl(new Path(x.path))
         val exec = Try(targetFs.modifyAclEntries(new Path(x.path), x.aclStatus.getEntries))
         if (exec.isFailure) println(x.path + " ### " + x.aclStatus + "\n" + exec.failed.get.getMessage)
-        FSOperationResult(x.path, exec.isSuccess)
+        FsOperationResult(x.path, exec.isSuccess)
       }).map(x => Await.result(x, 10.minute))
       val failed = res.filter(!_.success)
       if (failed.isEmpty) res
@@ -199,14 +199,14 @@ object AclManager extends Serializable {
 
     println("Number of files be modified (ACLs): " + nTargetFiles.length)
 
-    def applyFilesSecurity(objects: Array[FsElement], attempt: Int = 0): Array[FSOperationResult] = {
+    def applyFilesSecurity(objects: Array[FsElement], attempt: Int = 0): Array[FsOperationResult] = {
       val res =
         objects.map(x => Future {
           val parentFolder = new Path(x.path).getParent.toString
           val fileAcls = getAccessScopeAclFromDefault(aclsForFilesInFoldersHM(parentFolder))
           val exec = Try(targetFs.setAcl(new Path(x.path), fileAcls.asJava))
           if (exec.isFailure) println(exec.failed.get.getMessage)
-          FSOperationResult(x.path, exec.isSuccess)
+          FsOperationResult(x.path, exec.isSuccess)
         }).map(x => Await.result(x, 10.minute))
       val failed = res.filter(!_.success)
       if (failed.isEmpty) res

@@ -13,20 +13,22 @@ class TestPartitionCopyOverwrite extends FlatSpec with BeforeAndAfterAll{
   t.setupTestEnv()
 
   //#test1
-  val currPrttnCnt = spark.table(t.d+"STORE_SALES_DLT").
-    filter("mm_time_perd_end_date in ('2019-12-31','2019-10-31')").select("mm_time_perd_end_date").distinct.count()
-  assert(currPrttnCnt == 2,
-    "check if partition to be promoted exists in source - actual: "+currPrttnCnt)
+  "initial tests" should "be passed" in {
+    val currPrttnCnt = spark.table(t.d + "STORE_SALES_DLT").
+      filter("mm_time_perd_end_date in ('2019-12-31','2019-10-31')").select("mm_time_perd_end_date").distinct.count()
+    assert(currPrttnCnt == 2,
+      "check if partition to be promoted exists in source - actual: " + currPrttnCnt)
 
-  println("Partitions in DLT")
-  spark.table(t.d+"STORE_SALES_DLT").select("mm_time_perd_end_date").distinct.show()
+    println("Partitions in DLT")
+    spark.table(t.d + "STORE_SALES_DLT").select("mm_time_perd_end_date").distinct.show()
 
-  assert(spark.table(t.d+"STORE_SALES_SFCT").filter("mm_time_perd_end_date = '2019-12-31'").count() == 0,
-    "check if partition to be promoted does not exists in target")
-  println("Partitions in SFCT")
-  spark.table(t.d+"STORE_SALES_SFCT").select("mm_time_perd_end_date").distinct.show()
+    assert(spark.table(t.d + "STORE_SALES_SFCT").filter("mm_time_perd_end_date = '2019-12-31'").count() == 0,
+      "check if partition to be promoted does not exists in target")
+    println("Partitions in SFCT")
+    spark.table(t.d + "STORE_SALES_SFCT").select("mm_time_perd_end_date").distinct.show()
 
-  Promotor.copyOverwritePartitions(t.db,"STORE_SALES_DLT",t.db,"STORE_SALES_SFCT",Seq("2019-10-31","2019-12-31"), 1)
+    Promotor.copyOverwritePartitions(t.db, "STORE_SALES_DLT", t.db, "STORE_SALES_SFCT", Seq("2019-10-31", "2019-12-31"), 1)
+  }
 
   "SFCT" should "contain new partition after copy operation" in {
     println("SFCT partitions after promotion:")

@@ -11,7 +11,7 @@ class SafetyFuse(folderUri: String, runId: String = SafetyFuse.defaultRunId)(imp
 
   def startTransaction(): Unit = {
     if (!fs.createNewFile(new Path(fusePath))) throw new Exception("Could not create transaction marker "+fusePath)
-    println("Fuse " + fusePath + " deleted")
+    println("Fuse " + fusePath + " created")
   }
 
   def endTransaction(): Unit = {

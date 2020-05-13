@@ -3,7 +3,6 @@ package com.pg.bigdata.utils.fs
 import java.util.concurrent.Executors
 
 import com.pg.bigdata.utils.fs
-import com.pg.bigdata.utils.helpers.ConfigSerDeser
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.spark.sql.SparkSession
@@ -35,7 +34,7 @@ object DistributedExecution extends Serializable {
 
     class PromotorPartitioner(override val numPartitions: Int) extends Partitioner {
       override def getPartition(key: Any): Int = key match {
-        case (ind: Int) => numPartitions % (ind+1)
+        case (ind: Int) => ind % numPartitions
       }
     }
 

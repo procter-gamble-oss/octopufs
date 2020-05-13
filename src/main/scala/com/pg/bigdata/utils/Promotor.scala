@@ -145,12 +145,12 @@ object Promotor extends Serializable {
       transaction.startTransaction()
       println("Deleting targets... (showing 10 sample paths")
       existingTargetFolders.slice(0, 10).foreach(println)
-      LocalExecution.deletePaths(srcFs, existingTargetFolders, timeoutMin, numOfThreads)
+      LocalExecution.deletePaths(existingTargetFolders, timeoutMin)
     }
 
     println("Now moving source... Showing first 10 paths")
     sourceTargetUriPaths.slice(0, 10).foreach(println)
-    val res = LocalExecution.moveFiles(sourceTargetUriPaths, numOfThreads, timeoutMin)
+    val res = LocalExecution.movePaths(sourceTargetUriPaths, numOfThreads, timeoutMin)
 
     refreshMetadata(sourceDbName, sourceTableName)
     refreshMetadata(targetDbName, targetTableName)
@@ -178,7 +178,7 @@ object Promotor extends Serializable {
     val absTblLoc = getTableLocation(db, tableName)
     println("Partitions of table " + db + "." + tableName + " which are going to be deleted:")
     paths.foreach(println)
-    LocalExecution.deletePaths(getFileSystem(confEx, absTblLoc), paths, 10, parallelism)
+    LocalExecution.deletePaths(paths, 0)
     refreshMetadata(db, tableName)
   }
 
@@ -201,6 +201,3 @@ object Promotor extends Serializable {
   }
 
 }
-
-/*
-*/

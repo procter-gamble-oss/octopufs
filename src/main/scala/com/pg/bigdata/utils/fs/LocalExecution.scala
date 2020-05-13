@@ -13,7 +13,7 @@ import com.pg.bigdata.utils.helpers.implicits._
 
 object LocalExecution extends Serializable {
 
-  def moveFolderContent(sourceFolderUri: String, targetFolderUri: String, keepSourceFolder: Boolean = false, numOfThreads: Int = 1000, timeoutMin: Int = 10)
+  def moveFolderContent(sourceFolderUri: String, targetFolderUri: String, keepSourceFolder: Boolean = false, timeoutMin: Int = 10)
                        (implicit conf: Configuration): Array[FsOperationResult] = {
     println("Moving folders content: " + sourceFolderUri + "  ==>>  " + targetFolderUri)
     implicit val srcFs: FileSystem = getFileSystem(conf,sourceFolderUri)
@@ -42,15 +42,16 @@ object LocalExecution extends Serializable {
     println("Files to be moved: (10 first only)")
     paths.slice(0, 10).foreach(println)
 
-    val res = moveFiles(paths, numOfThreads)(conf)
+    val res = movePaths(paths)(conf)
 
     if (!keepSourceFolder)
       if (srcFs.delete(new Path(sourceFolderUri), true))
         println("WARNING: Folder " + sourceFolderUri + "could not be deleted and was left on storage device")
+    transaction.endTransaction()
     res
   }
 
-  def moveFiles(paths: Array[Paths], timeoutMins: Int = 10, attempt: Int = 0)
+  def movePaths(paths: Array[Paths], timeoutMins: Int = 10, attempt: Int = 0)
                (implicit conf: Configuration): Array[FsOperationResult] = {
     println("Starting moveFiles - attempt: " + attempt + ". Paths to be moved: " + paths.length)
     implicit val srcFs: FileSystem = getFileSystem(conf,paths.head.sourcePath)
@@ -68,15 +69,6 @@ object LocalExecution extends Serializable {
     val failed = res.filter(!_.success)
     val pathsOfFailed = paths.filter(x => failed.map(_.path).contains(x.sourcePath))
     val reallyFailed = removeFalseNegatives(pathsOfFailed)
-    /*
-    //checking if failed actually exist in the source (they were moved but reported error?)
-    val stillInSource = pathsOfFailed.filter(x => fs.exists(new Path(x.sourcePath)))
-    //checking if failed exist in the target (they were moved but reported error?)
-    val failedExistingInTarget = pathsOfFailed.filter(y => fs.exists(new Path(y.targetPath)))
-    //step 1: if file exist in both places compare modification dates. If target is < then source, throw exception (someone modified the target?)
-    val inBothPlaces = pathsOfFailed.filter(x => stillInSource.contains(x)). //leave only those which are still in source
-      filter(y => failedExistingInTarget.contains(y)) //this now gives all paths which are both in target and source
-    inBothPlaces.filter(fs.listStatus()) */
 
     if (reallyFailed.isEmpty) res
     else if (reallyFailed.length == paths.length || attempt > 4)
@@ -84,12 +76,13 @@ object LocalExecution extends Serializable {
         reallyFailed.map(_.sourcePath).slice(0, 10).mkString("\n"))
     else {
       val pathsForReprocessing = reallyFailed
-      res.filter(_.success) ++ moveFiles(pathsForReprocessing, timeoutMins, attempt + 1)(conf)
+      res.filter(_.success) ++ movePaths(pathsForReprocessing, timeoutMins, attempt + 1)(conf)
     }
   }
 
-  def deletePaths(fs: FileSystem, paths: Array[String], timeoutMin: Int = 10, attempt: Int = 0): Array[FsOperationResult] = {
-
+  def deletePaths(paths: Array[String], timeoutMin: Int = 10, attempt: Int = 0)(implicit confEx: Configuration): Array[FsOperationResult] = {
+    //todo add check if all paths are from the same fs
+    val fs = getFileSystem(confEx, paths(0))
     val res = paths.map(x =>
       Future {
         FsOperationResult(x, fs.delete(new Path(x), true))
@@ -103,7 +96,7 @@ object LocalExecution extends Serializable {
     else if (failed.length == paths.length || attempt > 4)
       throw new Exception("Delete of some paths did not succeed - please check why and here are some of them: \n" + failed.map(_.path).slice(0, 10).mkString("\n"))
     else
-      res.filter(_.success) ++ deletePaths(fs, paths.filter(x => failed.map(_.path).contains(x)), timeoutMin, attempt + 1)
+      res.filter(_.success) ++ deletePaths(paths.filter(x => failed.map(_.path).contains(x)), timeoutMin, attempt + 1)
   }
 
   def deleteFolder(folderUriPath: String, deleteContentOnly: Boolean = false, timeoutMin: Int = 10)(implicit confEx: Configuration): Unit = {
@@ -116,7 +109,7 @@ object LocalExecution extends Serializable {
       println("Deleting paths count:" + paths.length)
       println("First 20 files for deletion:")
       paths.slice(0, 20).foreach(println)
-      deletePaths(fs, paths, timeoutMin)
+      deletePaths(paths, timeoutMin)
     }
     else if (!fs.delete(new Path(folderUriPath), true)) throw new Exception("Failed to remove " + folderUriPath)
   }

@@ -35,10 +35,10 @@ object DistributedExecution extends Serializable {
 
     class PromotorPartitioner(override val numPartitions: Int) extends Partitioner {
       override def getPartition(key: Any): Int = key match {
-        case (ind: Int) => numPartitions % ind
+        case (ind: Int) => numPartitions % (ind+1)
       }
     }
-    
+
     val partCnt = if(partitionCount == -1) paths.length else partitionCount
     val df = spark.sparkContext.parallelize(paths.indices.map(i => (i,paths(i))), partCnt).keyBy(x => x._1).partitionBy(new PromotorPartitioner(partCnt)).values.values
     //val res = spark.sparkContext.parallelize(paths, partitionCount)

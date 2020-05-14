@@ -28,7 +28,7 @@ object DistributedExecution extends Serializable {
 
   def copyFiles(paths: Seq[Paths], partitionCount: Int = -1, attempt: Int = 0)
                (implicit spark: SparkSession): Array[FsOperationResult] = {
-    //val confsd = new ConfigSerDeser(spark.sparkContext.hadoopConfiguration)
+
     val requestProcessed = spark.sparkContext.longAccumulator("CopyFilesProcessedCount")
     val confBroadcast = spark.sparkContext.broadcast(new SerializableWritable(spark.sparkContext.hadoopConfiguration))
 
@@ -39,9 +39,9 @@ object DistributedExecution extends Serializable {
     }
 
     val partCnt = if(partitionCount == -1) paths.length else partitionCount
-    val df = spark.sparkContext.parallelize(paths.indices.map(i => (i,paths(i))), partCnt).keyBy(x => x._1).partitionBy(new PromotorPartitioner(partCnt)).values.values
+    val rdd = spark.sparkContext.parallelize(paths.indices.map(i => (i,paths(i))), partCnt).keyBy(x => x._1).partitionBy(new PromotorPartitioner(partCnt)).values.values //todo sprawdz czy potreba jest ilosc partycji w parallelize
     //val res = spark.sparkContext.parallelize(paths, partitionCount)
-    val res = df.mapPartitions(x => {
+    val res = rdd.mapPartitions(x => {
       //val conf = confsd.get()
       val conf: Configuration = confBroadcast.value.value
       val srcFs = getFileSystem(conf, paths.head.sourcePath)

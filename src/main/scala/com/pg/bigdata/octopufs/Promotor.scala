@@ -20,14 +20,14 @@ object Promotor extends Serializable {
    * Execution is distributed to entire cluster so performance will depend on number of cores and VMs network throughput. This function assumes that both tables are in the same hive CURRENT database spark.catalog.currentDatabase
    * @param sourceTableName - source table name
    * @param targetTableName - target table name
-   * @param partitionCount - number of threads to distribute the load to. It equals number of files by default which ensures best distribution, however it may trigger a lot of small tasks if your files are small.
+   * @param taskCount - number of threads to distribute the load to. It equals number of files by default which ensures best distribution, however it may trigger a lot of small tasks if your files are small.
    * @param spark - spark session required to access hive metastore and to run distributed jobs.
    * @return FSOperationResult which contains all copied paths together with copy result (isSuccess)
    */
-  def copyFilesBetweenTables(sourceTableName: String, targetTableName: String, partitionCount: Int = -1)
+  def copyFilesBetweenTables(sourceTableName: String, targetTableName: String, taskCount: Int = -1)
                             (implicit spark: SparkSession): Array[FsOperationResult] = {
     val db = spark.catalog.currentDatabase
-    copyFilesBetweenTables(db, sourceTableName, db, targetTableName, partitionCount)
+    copyFilesBetweenTables(db, sourceTableName, db, targetTableName, taskCount)
   }
 
   /**
@@ -37,12 +37,12 @@ object Promotor extends Serializable {
    * @param sourceTableName - source table name
    * @param targetDbName - hive metastore database where source table is defined
    * @param targetTableName - target table name
-   * @param partitionCount - number of threads to distribute the load to. It equals number of files by default which ensures best distribution, however it may trigger a lot of small tasks if your files are small.
+   * @param taskCount - number of threads to distribute the load to. It equals number of files by default which ensures best distribution, however it may trigger a lot of small tasks if your files are small.
    * @param spark - spark session required to access hive metastore and to run distributed jobs.
    * @return Array of FSOperationResult which contains all copied paths together with copy result (isSuccess)
    * @return
    */
-  def copyFilesBetweenTables(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, partitionCount: Int = -1)
+  def copyFilesBetweenTables(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, taskCount: Int = -1)
                             (implicit spark: SparkSession): Array[FsOperationResult] = {
     val paths = getTablesPathsList(sourceDbName, sourceTableName, targetDbName, targetTableName) //.take(5)
     if (paths.isEmpty) {
@@ -53,7 +53,7 @@ object Promotor extends Serializable {
 
     val srcLoc = getTableLocation(sourceDbName, sourceTableName)
     val trgLoc = getTableLocation(targetDbName, targetTableName)
-    DistributedExecution.copyFolder(srcLoc, trgLoc, partitionCount)
+    DistributedExecution.copyFolder(srcLoc, trgLoc, taskCount)
   }
 
   /**
@@ -62,15 +62,15 @@ object Promotor extends Serializable {
    * @param sourceTableName - source table name
    * @param targetTableName - target table name
    * @param matchStringPartitions - sequence of string which is used to match partitions folder names. The match is done using String "contains" function.
-   * @param partitionCount - number of threads to distribute the load to. It equals number of files by default, which ensures best distribution, however it may trigger a lot of small tasks if your files are small.
+   * @param taskCount - number of threads to distribute the load to. It equals number of files by default, which ensures best distribution, however it may trigger a lot of small tasks if your files are small.
    * @param spark - spark session required to access hive metastore and to run distributed jobs.
    * @return Array of FSOperationResult which contains all copied paths together with copy result (isSuccess)
    */
   def copyTablePartitions(sourceTableName: String, targetTableName: String, matchStringPartitions: Seq[String],
-                          partitionCount: Int = -1)
+                          taskCount: Int = -1)
                          (implicit spark: SparkSession): Array[FsOperationResult] = {
     copyTablePartitions(spark.catalog.currentDatabase, sourceTableName, spark.catalog.currentDatabase,
-      targetTableName, matchStringPartitions, partitionCount)
+      targetTableName, matchStringPartitions, taskCount)
   }
 
   //if target folder exists, it will be deleted first
@@ -80,16 +80,16 @@ object Promotor extends Serializable {
    * ACLs if different partitions require different security settings.
    * @param sourceTableName - source table name
    * @param targetTableName - target table name
-   * @param matchStringPartitions - sequence of string which is used to match partitions folder names. The match is done using String "contains" function.
-   * @param partitionCount - number of threads to distribute the load to. It equals number of files by default, which ensures best distribution, however it may trigger a lot of small tasks if your files are small.
+   * @param matchStringPartitions - sequence of string which is used to match partitions folder names. The match is done using String "contains" function. Works only for 1st level partitioning.
+   * @param taskCount - number of threads to distribute the load to. It equals number of files by default, which ensures best distribution, however it may trigger a lot of small tasks if your files are small.
    * @param spark - spark session required to access hive metastore and to run distributed jobs.
    * @return Array of FSOperationResult which contains all copied paths together with copy result (isSuccess)
    */
-  def copyOverwritePartitions(sourceTableName: String, targetTableName: String, matchStringPartitions: Seq[String], partitionCount: Int = -1)
+  def copyOverwritePartitions(sourceTableName: String, targetTableName: String, matchStringPartitions: Seq[String], taskCount: Int = -1)
                              (implicit spark: SparkSession): Array[FsOperationResult] = {
     val db = spark.catalog.currentDatabase
-    deleteTablePartitions(db, targetTableName, matchStringPartitions)(spark, spark.sparkContext.hadoopConfiguration)
-    copyTablePartitions(db, sourceTableName, db, targetTableName, matchStringPartitions, partitionCount)
+    deleteTablePartitions(db, targetTableName, matchStringPartitions)(spark)
+    copyTablePartitions(db, sourceTableName, db, targetTableName, matchStringPartitions, taskCount)
   }
 
   /**
@@ -97,14 +97,14 @@ object Promotor extends Serializable {
    * tables must be in the same, current database spark.catalog.currentDatabase.
    * @param sourceTableName - source table name
    * @param targetTableName - target table name
-   * @param partitionCount - number of threads to distribute the load to. It equals number of files by default, which ensures best distribution, however it may trigger a lot of small tasks if your files are small.
+   * @param taskCount - number of threads to distribute the load to. It equals number of files by default, which ensures best distribution, however it may trigger a lot of small tasks if your files are small.
    * @param spark - spark session required to access hive metastore and to run distributed jobs.
    * @return Array of FSOperationResult which contains all copied paths together with copy result (isSuccess)
    */
-  def copyOverwriteTable(sourceTableName: String, targetTableName: String, partitionCount: Int)
+  def copyOverwriteTable(sourceTableName: String, targetTableName: String, taskCount: Int)
                         (implicit spark: SparkSession, confEx: Configuration): Array[FsOperationResult] = {
     val db = spark.catalog.currentDatabase
-    copyOverwriteTable(db, sourceTableName, db, targetTableName, partitionCount) //todo rethink approach to partition count
+    copyOverwriteTable(db, sourceTableName, db, targetTableName, taskCount) //todo rethink approach to partition count
   }
 
   /**
@@ -113,32 +113,32 @@ object Promotor extends Serializable {
    * @param sourceTableName - source table name
    * @param targetDbName - hive metastore database where source table is defined
    * @param targetTableName - target table name
-   * @param partitionCount - number of threads to distribute the load to. It equals number of files by default, which ensures best distribution, however it may trigger a lot of small tasks if your files are small.
+   * @param taskCount - number of threads to distribute the load to. It equals number of files by default, which ensures best distribution, however it may trigger a lot of small tasks if your files are small.
    * @param spark - spark session required to access hive metastore and to run distributed jobs.
    * @return
    */
-  def copyOverwriteTable(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, partitionCount: Int = -1)
+  def copyOverwriteTable(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, taskCount: Int = -1)
                         (implicit spark: SparkSession): Array[FsOperationResult] = {
     val trgLoc = getTableLocation(targetDbName, targetTableName)
     LocalExecution.deleteFolder(trgLoc,true)(spark.sparkContext.hadoopConfiguration)
-    val res = copyFilesBetweenTables(sourceDbName, sourceTableName, targetDbName, targetTableName, partitionCount) //todo rethink approach to partition count
+    val res = copyFilesBetweenTables(sourceDbName, sourceTableName, targetDbName, targetTableName, taskCount) //todo rethink approach to partition count
     refreshMetadata(targetDbName, targetTableName)
     res
   }
 
   /**
-   * This function copies partitions from source table to target. Only first level partitioning is taken into account. 
+   * This function copies partitions from source table to target. Only first level partitioning is taken into account.
    * @param sourceDbName - source database name
    * @param sourceTableName - source table name
    * @param targetDbName - target database name
    * @param targetTableName - target table name
-   * @param matchStringPartitions - sequence of string which is used to match partitions folder names. The match is done using String "contains" function.
-   * @param partitionCount - number of threads to distribute the load to. It equals number of files by default, which ensures best distribution, however it may trigger a lot of small tasks if your files are small.
+   * @param matchStringPartitions - sequence of string which is used to match partitions folder names. The match is done using String "contains" function. Works only for 1st level partitioning.
+   * @param taskCount - number of threads to distribute the load to. It equals number of files by default, which ensures best distribution, however it may trigger a lot of small tasks if your files are small.
    * @param spark - spark session required to access hive metastore and to run distributed jobs.
    * @return Array of FSOperationResult which contains all copied paths together with copy result (isSuccess)
    */
   def copyTablePartitions(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, matchStringPartitions: Seq[String],
-                          partitionCount: Int = -1)
+                          taskCount: Int = -1)
                          (implicit spark: SparkSession): Array[FsOperationResult] = {
     val paths = filterPartitions(sourceDbName, sourceTableName, matchStringPartitions)
     if (paths.isEmpty)
@@ -154,32 +154,60 @@ object Promotor extends Serializable {
     val sourceTargetPaths = allSourceFiles.map(x => Paths(x.path, x.path.replace(sourceAbsTblLoc, targetAbsTblLoc)))
     println("Partitions of table " + sourceDbName + "." + sourceTableName + " which are going to be copied to " + targetDbName + "." + targetTableName + ":")
     sourceTargetPaths.slice(0, 5).foreach(x => println(x)) //debug
-    val res = DistributedExecution.copyFiles(sourceTargetPaths, partitionCount)
+    val res = DistributedExecution.copyFiles(sourceTargetPaths, taskCount)
     refreshMetadata(targetDbName, targetTableName)
     res
   }
 
+  /**
+   *This function deletes partitions from the target table (if exist and match matchStringPartitions) and copies partitions from source table to target. Only first level partitioning is taken into account.
+   * @param sourceDbName - source database name
+   * @param sourceTableName - source table name
+   * @param targetDbName - target database name
+   * @param targetTableName - target table name
+   * @param matchStringPartitions - sequence of string which is used to match partitions folder names. The match is done using String "contains" function. Works only for 1st level partitioning.
+   * @param taskCount - number of threads to distribute the load to. It equals number of files by default, which ensures best distribution, however it may trigger a lot of small tasks if your files are small.
+   * @param spark - spark session required to access hive metastore and to run distributed jobs.
+   * @return Array of FSOperationResult which contains all copied paths together with copy result (isSuccess)
+   */
   def copyOverwritePartitions(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, matchStringPartitions: Seq[String],
-                              partitionCount: Int = -1)
-                             (implicit spark: SparkSession, confEx: Configuration): Array[FsOperationResult] = {
-    deleteTablePartitions(targetDbName, targetTableName, matchStringPartitions)
-    copyTablePartitions(sourceDbName, sourceTableName, targetDbName, targetTableName, matchStringPartitions, partitionCount)
+                              taskCount: Int = -1)
+                             (implicit spark: SparkSession): Array[FsOperationResult] = {
+    deleteTablePartitions(targetDbName, targetTableName, matchStringPartitions)(spark)
+    copyTablePartitions(sourceDbName, sourceTableName, targetDbName, targetTableName, matchStringPartitions, taskCount)
   }
 
-  def moveTablePartitions(sourceTableName: String, targetTableName: String, matchStringPartitions: Seq[String],
-                          moveContentOnly: Boolean, partitionCount: Int)
-                         (implicit spark: SparkSession, confEx: Configuration): Array[FsOperationResult] = {
+  /**
+   * Moves partition from one table to another. This is purely metadata operation on ADLSgen2 thus it runs on a driver and does not use workers.
+   * @param sourceTableName - source table name
+   * @param targetTableName - target table name
+   * @param matchStringPartitions - sequence of string which is used to match partitions folder names. The match is done using String "contains" function. Works only for 1st level partitioning.
+   * @param spark - spark session required to access hive metastore to get list of files
+   * @return Array of FSOperationResult which contains all copied paths together with copy result (isSuccess)
+   */
+  def moveTablePartitions(sourceTableName: String, targetTableName: String, matchStringPartitions: Seq[String])
+                         (implicit spark: SparkSession): Array[FsOperationResult] = {
     val db = spark.catalog.currentDatabase
-    moveTablePartitionFolders(db, sourceTableName, db, targetTableName, matchStringPartitions, moveContentOnly, partitionCount)
+    moveTablePartitions(db, sourceTableName, db, targetTableName, matchStringPartitions)(spark)
   }
 
+  /**
+   * Function will delete existing (and overlapping) partitions from the target table and move partitions from source to the target. Please note that
+   * move operation does NOT modify ACLs, so you may want to assign ACLs after the move. Function runs on driver node, because move and delete operations
+   * are metadata modifications on ADLSg2
+   * @param sourceDbName - source database name
+   * @param sourceTableName - source table name
+   * @param targetDbName - target database name
+   * @param targetTableName - target table name
+   * @param matchStringPartitions - sequence of string which is used to match partitions folder names. The match is done using String "contains" function. Works only for 1st level partitioning.
+   * @param spark - spark session required to access hive metastore.
+   * @return Array of FSOperationResult which contains all copied paths together with copy result (isSuccess)
+   */
+  def moveTablePartitions(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String,
+                          matchStringPartitions: Seq[String] = Seq())
+                         (implicit spark: SparkSession): Array[FsOperationResult] = {
 
-  def moveTablePartitionFolders(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String,
-                                matchStringPartitions: Seq[String] = Seq(), moveContentOnly: Boolean = false,
-                                numOfThreads: Int = 1000, timeoutMin: Int = 10)
-                               (implicit spark: SparkSession, conf: Configuration): Array[FsOperationResult] = {
-    val backupPrefix = "promotor_backup_"
-    //val transaction = SafetyFuse()
+    implicit val conf: Configuration = spark.sparkContext.hadoopConfiguration
     val partitionFoldersUriPaths = filterPartitions(sourceDbName, sourceTableName, matchStringPartitions)
     val sourceAbsTblLoc = getTableLocation(sourceDbName, sourceTableName)
     val targetAbsTblLoc = getTableLocation(targetDbName, targetTableName)
@@ -213,12 +241,12 @@ object Promotor extends Serializable {
       transaction.startTransaction()
       println("Deleting targets... (showing 10 sample paths")
       existingTargetFolders.slice(0, 10).foreach(println)
-      LocalExecution.deletePaths(existingTargetFolders, timeoutMin)
+      LocalExecution.deletePaths(existingTargetFolders)
     }
 
     println("Now moving source... Showing first 10 paths")
     sourceTargetUriPaths.slice(0, 10).foreach(println)
-    val res = LocalExecution.movePaths(sourceTargetUriPaths, numOfThreads, timeoutMin)
+    val res = LocalExecution.movePaths(sourceTargetUriPaths)
 
     refreshMetadata(sourceDbName, sourceTableName)
     refreshMetadata(targetDbName, targetTableName)
@@ -226,7 +254,15 @@ object Promotor extends Serializable {
     res
   }
 
-  private def doesMoveLookSafe(fs: FileSystem, sourceRelPath: String, targetRelPath: String): Boolean = {
+  /**
+   * This function attempts to protect the user from moving empty folder to location, which contains files. The assumption is that this is user mistake
+   * as it will effectively perform delete operation on the target folder.
+   * @param fs - Hadoop FileSystem instance
+   * @param sourceRelPath - source folder path
+   * @param targetRelPath - target folder path
+   * @return Returns true if move looks like safe
+   */
+  protected def doesMoveLookSafe(fs: FileSystem, sourceRelPath: String, targetRelPath: String): Boolean = {
     if (!fs.exists(new Path(sourceRelPath))) throw new Exception("Source folder " + sourceRelPath + " does not exist")
     val src = fs.listStatus(new Path(sourceRelPath))
     val trg = if (fs.exists(new Path(targetRelPath)))
@@ -241,28 +277,50 @@ object Promotor extends Serializable {
     }
   }
 
-  def deleteTablePartitions(db: String, tableName: String, matchStringPartitions: Seq[String], parallelism: Int = 32)(implicit spark: SparkSession, confEx: Configuration): Unit = {
+  /**
+   * Function deletes partitions of a table
+   * @param db - Hive database, where the table is defined
+   * @param tableName - Hive table name
+   * @param matchStringPartitions - sequence of string which is used to match partitions folder names. The match is done using String "contains" function. Works only for 1st level partitioning.
+   * @param spark - spark session to get access to Hive metastore
+   * @return Array of FSOperationResult which contains all copied paths together with copy result (isSuccess)
+   */
+  def deleteTablePartitions(db: String, tableName: String, matchStringPartitions: Seq[String])(implicit spark: SparkSession): Array[FsOperationResult]  = {
     val paths = filterPartitions(db, tableName, matchStringPartitions)
-    val absTblLoc = getTableLocation(db, tableName)
     println("Partitions of table " + db + "." + tableName + " which are going to be deleted:")
     paths.foreach(println)
-    LocalExecution.deletePaths(paths)
+    val res = LocalExecution.deletePaths(paths)(spark.sparkContext.hadoopConfiguration)
     refreshMetadata(db, tableName)
+    res
   }
 
-  def moveFilesBetweenTables(sourceTableName: String, targetTableName: String, partitionCnt: Int)
-                            (implicit spark: SparkSession, conf1: Configuration): Array[FsOperationResult] = {
+  /**
+   * Function moves files of one table to another one. It will delete all files from target table. Function relies on hive metadata (it will not scan the storage)
+   * @param sourceTableName - source table name
+   * @param targetTableName - target table name
+   * @param spark - spark session required to access hive metastore to get list of files
+   * @return Array of FSOperationResult which contains all copied paths together with copy result (isSuccess)
+   */
+  def moveFilesBetweenTables(sourceTableName: String, targetTableName: String)
+                            (implicit spark: SparkSession): Array[FsOperationResult] = {
     val db = spark.catalog.currentDatabase
-    moveFilesBetweenTables(db, sourceTableName, db, targetTableName, partitionCnt)
+    moveFilesBetweenTables(db, sourceTableName, db, targetTableName)(spark)
   }
 
-
-  def moveFilesBetweenTables(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String,
-                             partitionCount: Int = 1000, timeoutMin: Int = 10)
-                            (implicit spark: SparkSession, confEx: Configuration): Array[FsOperationResult] = {
+  /**
+   * Function moves files of one table to another one. It will delete all files from target table. Function relies on hive metadata (it will not scan the storage)
+   * @param sourceDbName - source database name
+   * @param sourceTableName - source table name
+   * @param targetDbName - target database name
+   * @param targetTableName - target table name
+   * @param spark - spark session required to access hive metastore to get list of files
+   * @return Array of FSOperationResult which contains all copied paths together with copy result (isSuccess)
+   */
+  def moveFilesBetweenTables(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String)
+                            (implicit spark: SparkSession): Array[FsOperationResult] = {
     val srcLoc = getTableLocation(sourceDbName, sourceTableName)
     val trgLoc = getTableLocation(targetDbName, targetTableName)
-    val res = LocalExecution.moveFolderContent(srcLoc, trgLoc, keepSourceFolder = true)
+    val res = LocalExecution.moveFolderContent(srcLoc, trgLoc, keepSourceFolder = true)(spark.sparkContext.hadoopConfiguration)
     refreshMetadata(sourceDbName, sourceTableName)
     refreshMetadata(targetDbName, targetTableName)
     res

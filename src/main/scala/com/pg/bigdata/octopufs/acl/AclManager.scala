@@ -1,9 +1,9 @@
-package com.pg.bigdata.utils.acl
+package com.pg.bigdata.octopufs.acl
 
 import java.util.concurrent.Executors
 
-import com.pg.bigdata.utils.fs.{FsOperationResult, _}
-import com.pg.bigdata.utils.metastore._
+import com.pg.bigdata.octopufs.fs.{FsOperationResult, _}
+import com.pg.bigdata.octopufs.metastore._
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.permission._
 import org.apache.hadoop.fs.{FileSystem, Path}
@@ -15,7 +15,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.util.Try
 
-import com.pg.bigdata.utils.helpers.implicits._
+import com.pg.bigdata.octopufs.helpers.implicits._
 
 object AclManager extends Serializable {
 
@@ -81,10 +81,10 @@ object AclManager extends Serializable {
     //todo check if path is a folder
     val fs = getFileSystem(confEx, folderUri)
     val elements = listLevel(fs, Array(new Path(folderUri)))
-    val folders = elements.filter(_.isDirectory).map(_.path)
+    val folders = elements.filter(_.isDirectory).map(_.path):+folderUri
     val files = elements.filter(!_.isDirectory).map(_.path)
 
-    println(files(0))
+    
     println("Files to process: " + files.length)
     println("Folders to process: " + folders.length)
 

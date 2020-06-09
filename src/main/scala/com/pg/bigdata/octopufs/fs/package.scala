@@ -1,4 +1,4 @@
-package com.pg.bigdata.utils
+package com.pg.bigdata.octopufs
 
 import java.net.URI
 

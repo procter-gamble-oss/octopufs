@@ -1,12 +1,12 @@
-package com.pg.bigdata.utils.fs
+package com.pg.bigdata.octopufs.fs
 
 import java.util.concurrent.Executors
 
-import com.pg.bigdata.utils.fs
+import com.pg.bigdata.octopufs.fs
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.spark.sql.SparkSession
-import com.pg.bigdata.utils.helpers.implicits._
+import com.pg.bigdata.octopufs.helpers.implicits._
 import org.apache.spark.{Partitioner, SerializableWritable}
 
 import scala.concurrent.forkjoin.ForkJoinPool

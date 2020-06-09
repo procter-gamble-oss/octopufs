@@ -1,7 +1,7 @@
-import com.pg.bigdata.utils.acl.AclManager
-import com.pg.bigdata.utils.acl.AclManager.FsPermission
+import com.pg.bigdata.octopufs.acl.AclManager
+import com.pg.bigdata.octopufs.acl.AclManager.FsPermission
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import com.pg.bigdata.utils.fs._
+import com.pg.bigdata.octopufs.fs._
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.fs.permission.{AclEntry, AclEntryScope}
 import scala.collection.JavaConverters._

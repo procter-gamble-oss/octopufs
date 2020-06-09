@@ -1,7 +1,7 @@
 import java.io.File
 import org.apache.hadoop.fs.FileSystem
 
-import com.pg.bigdata.utils.fs.getFileSystem
+import com.pg.bigdata.octopufs.fs.getFileSystem
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.spark.sql.SparkSession

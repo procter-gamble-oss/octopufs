@@ -1,5 +1,5 @@
-import com.pg.bigdata.utils.{Promotor, SafetyFuse}
-import com.pg.bigdata.utils.fs._
+import com.pg.bigdata.octopufs.{Promotor, SafetyFuse}
+import com.pg.bigdata.octopufs.fs._
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions.lit
 import org.scalatest.FlatSpec

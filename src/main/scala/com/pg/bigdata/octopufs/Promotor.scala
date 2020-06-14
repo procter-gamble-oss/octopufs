@@ -254,28 +254,6 @@ object Promotor extends Serializable {
     res
   }
 
-  /**
-   * This function attempts to protect the user from moving empty folder to location, which contains files. The assumption is that this is user mistake
-   * as it will effectively perform delete operation on the target folder.
-   * @param fs - Hadoop FileSystem instance
-   * @param sourceRelPath - source folder path
-   * @param targetRelPath - target folder path
-   * @return Returns true if move looks like safe
-   */
-  protected def doesMoveLookSafe(fs: FileSystem, sourceRelPath: String, targetRelPath: String): Boolean = {
-    if (!fs.exists(new Path(sourceRelPath))) throw new Exception("Source folder " + sourceRelPath + " does not exist")
-    val src = fs.listStatus(new Path(sourceRelPath))
-    val trg = if (fs.exists(new Path(targetRelPath)))
-      fs.listStatus(new Path(targetRelPath))
-    else return true
-
-    if (src.nonEmpty || (src.isEmpty && trg.isEmpty)) true
-    else {
-      println("Looks like your source folder " + sourceRelPath + " is empty, but your target folder " + targetRelPath +
-        " is not. Skipping the move to avoid harmful folder move (assuming it is rerun)")
-      false
-    }
-  }
 
   /**
    * Function deletes partitions of a table

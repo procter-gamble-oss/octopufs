@@ -12,14 +12,14 @@ object Test2 extends App {
 
 
   def credentialsConfiguration()(implicit spark: SparkSession) ={
-    val storageName = "***REMOVED***"
+    val storageName = "adls2nas001"
     val principalID = "b74d7952-eea1-43bc-b0bb-a1088e6d32f5"
     val secretName = "propensity-storage-principal"
     val secretScopeName = "propensity"
 
     val conf = spark.sparkContext.hadoopConfiguration
     conf.set("fs.azure.account.auth.type." + storageName + ".dfs.core.windows.net", "OAuth")
-    //conf.set("fs.azure.account.key.***REMOVED***.dfs.core.windows.net","xxxxx")
+    //conf.set("fs.azure.account.key.adls2nas001.dfs.core.windows.net","xxxxx")
     conf.set("fs.azure.account.oauth.provider.type." + storageName + ".dfs.core.windows.net", "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider")
     conf.set("fs.azure.account.oauth2.client.id." + storageName + ".dfs.core.windows.net", principalID)
     conf.set("fs.azure.account.oauth2.client.secret." + storageName + ".dfs.core.windows.net", dbutils.secrets.get(scope = secretScopeName, key = secretName))

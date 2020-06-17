@@ -1,6 +1,6 @@
 
-import com.pg.bigdata.utils.helpers.implicits._
-import com.pg.bigdata.utils.fs._
+import com.pg.bigdata.octopufs.helpers.implicits._
+import com.pg.bigdata.octopufs.fs._
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.fs.permission.{AclEntry, AclEntryScope, AclEntryType, FsAction}
 import org.apache.spark.sql.SparkSession
@@ -11,7 +11,7 @@ import scala.util.Random
 
 class AclTest extends FlatSpec with BeforeAndAfterAll {
 
-  import com.pg.bigdata.utils.acl.AclManager
+  import com.pg.bigdata.octopufs.acl.AclManager
 
   implicit val spark: SparkSession = SparkSession.builder().
     appName("NAS_").
@@ -21,7 +21,6 @@ class AclTest extends FlatSpec with BeforeAndAfterAll {
   "This" should "never fail" in {
     assert(1==1)
   }
-/*
 
     val basePath = "hdfs://localhost:8020/"
     implicit val conf = spark.sparkContext.hadoopConfiguration
@@ -125,5 +124,5 @@ class AclTest extends FlatSpec with BeforeAndAfterAll {
   }
 
 
- */
+
 }

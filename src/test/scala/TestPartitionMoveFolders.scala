@@ -1,4 +1,4 @@
-import com.pg.bigdata.utils.Promotor
+import com.pg.bigdata.octopufs.Promotor
 import org.apache.spark.sql.SparkSession
 import org.scalatest.{BeforeAndAfterAll, FlatSpec}
 
@@ -26,7 +26,7 @@ class TestPartitionMoveFolders extends FlatSpec with BeforeAndAfterAll {
     println("Partitions in SFCT")
     spark.table(t.d + "STORE_SALES_SFCT").select("mm_time_perd_end_date").distinct.show()
 
-    Promotor.moveTablePartitionFolders(t.db, "STORE_SALES_DLT", t.db, "STORE_SALES_SFCT", Seq("2019-10-31", "2019-12-31"), false, 1)
+    Promotor.moveTablePartitions(t.db, "STORE_SALES_DLT", t.db, "STORE_SALES_SFCT", Seq("2019-10-31", "2019-12-31"))
 
     println("SFCT partitions after promotion:")
     spark.table(t.d + "STORE_SALES_SFCT").select("mm_time_perd_end_date").distinct.show()

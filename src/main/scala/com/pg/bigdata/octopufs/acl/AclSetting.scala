@@ -1,4 +1,4 @@
-package com.pg.bigdata.utils.acl
+package com.pg.bigdata.octopufs.acl
 
 import org.apache.hadoop.fs.permission.AclStatus
 

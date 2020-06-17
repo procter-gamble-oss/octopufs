@@ -1,9 +1,9 @@
-package com.pg.bigdata.utils
+package com.pg.bigdata.octopufs
 
 
 //import buildInformation.BuildInfo
-import com.pg.bigdata.utils.fs.{FsElement, Paths}
-import com.pg.bigdata.utils.metastore._
+import com.pg.bigdata.octopufs.fs.{FsElement, Paths}
+import com.pg.bigdata.octopufs.metastore._
 import org.apache.spark.sql.SparkSession
 
 

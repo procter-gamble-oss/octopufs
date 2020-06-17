@@ -1,12 +1,12 @@
-package com.pg.bigdata.utils
+package com.pg.bigdata.octopufs
 
 
-import com.pg.bigdata.utils.fs._
+import com.pg.bigdata.octopufs.fs._
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.spark.sql.SparkSession
 
-import com.pg.bigdata.utils.helpers.implicits._
+import com.pg.bigdata.octopufs.helpers.implicits._
 class Delta(config: Configuration) {
 
   def synchronize(sourceUri: String, targetUri: String, copyParallelism: Int = -1, timeoutMin: Int = 10)

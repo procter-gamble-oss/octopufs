@@ -1,7 +1,7 @@
-package com.pg.bigdata.utils
+package com.pg.bigdata.octopufs
 
-import com.pg.bigdata.utils.fs._
-import com.pg.bigdata.utils.metastore._
+import com.pg.bigdata.octopufs.fs._
+import com.pg.bigdata.octopufs.metastore._
 import org.apache.hadoop.fs.Path
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.TableIdentifier

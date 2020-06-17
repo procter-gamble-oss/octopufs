@@ -1,4 +1,4 @@
-package com.pg.bigdata.utils.metastore
+package com.pg.bigdata.octopufs.metastore
 
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.catalog.CatalogTable

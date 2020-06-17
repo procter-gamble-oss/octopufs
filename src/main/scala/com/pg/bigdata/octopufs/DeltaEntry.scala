@@ -1,4 +1,4 @@
-package com.pg.bigdata.utils
+package com.pg.bigdata.octopufs
 
 case class DeltaEntry(path: String, message: String){
   override def toString: String = path + " ->" + message

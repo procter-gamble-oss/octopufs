@@ -1,13 +1,13 @@
-package com.pg.bigdata.utils.acl
+package com.pg.bigdata.octopufs.acl
 
-import java.util.concurrent.Executors
-
-import com.pg.bigdata.utils.fs.{FsOperationResult, _}
-import com.pg.bigdata.utils.metastore._
+import com.pg.bigdata.octopufs.fs.{FsOperationResult, _}
+import com.pg.bigdata.octopufs.helpers.implicits._
+import com.pg.bigdata.octopufs.metastore._
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.permission._
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.SparkSession
+import com.pg.bigdata.octopufs.helpers.implicits._
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable.HashMap
@@ -15,14 +15,23 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.util.Try
 
-import com.pg.bigdata.utils.helpers.implicits._
-
+/**
+ * Object provides useful functions for seting up ACLs on files on ADLSgen2. Since package is using standard libraries, it is expected to work on all FSes supporting ACLs.
+ */
 object AclManager extends Serializable {
 
-  def modifyTableACLs(db: String, tableName: String, newPermission: FsPermission, partitionCount: Int = 1000)
-                     (implicit spark: SparkSession, conf: Configuration): Array[FsOperationResult] = {
+  /**
+   * Allows modification of ACLs on files, which belong to particular hive table. List of files for the table is taken from hive metastore cache.
+   * @param db - Hive database name
+   * @param tableName - Hive table name
+   * @param newPermission - permission which should be applied on files. Create new permission using FsPermission case class from this object
+   * @param spark - SparkSession needed to access hive metastore.
+   * @return Array of FsOperationResult objects containing information if operation succeeded for each path.
+   */
+  def modifyTableACLs(db: String, tableName: String, newPermission: FsPermission)
+                     (implicit spark: SparkSession): Array[FsOperationResult] = {
     import collection.JavaConverters._
-
+    implicit val conf = spark.sparkContext.hadoopConfiguration
     val loc = getTableLocation(db, tableName)
     val files = getListOfTableFiles(db, tableName)
 
@@ -30,33 +39,40 @@ object AclManager extends Serializable {
 
     println(files.head)
     println("Files to process: " + files.length)
-    modifyAcl(files, newPermission, partitionCount)
+    modifyAcl(files, newPermission)
   }
 
   //todo add remove ACL
   //assumes the same fs for all
-  def modifyAcl(paths: Array[String], newFsPermission: FsPermission, timeoutMin: Int = 10, numOfThreads: Int = 1000, attempt: Int = 0) //change to local
+  /**
+   * Modifies ACLs for all provided paths (path is absolute like abfss://cont@nameofsa.dfs.microsoft....)
+   * @param paths - Array of paths to modify ACLs for
+   * @param newFsPermission - permission which will be set for all paths provided.
+   * @param attempt - retry feature. Keep at 0 (default)
+   * @param conf - configuration of hadoop. Best to get it is from spark.sparkContext.hadoopConfiguration
+   * @return Array of FsOperationResult objects containing information if operation succeeded for each path.
+   */
+  def modifyAcl(paths: Array[String], newFsPermission: FsPermission, attempt: Int = 0)
                (implicit conf: Configuration): Array[FsOperationResult] = {
-    println("Settign ACLs - attempt " + attempt)
+    println("Modifying ACLs - attempt " + attempt)
 
     val y = AclManager.getAclEntry(newFsPermission)
     val fs = getFileSystem(conf, paths.head)
-
 
     val res = paths.map(x => Future {
       Try({
         fs.modifyAclEntries(new Path(x), Seq(y).asJava)
         FsOperationResult(x, true)
       }).getOrElse(FsOperationResult(x, false))
-    }).map(x => Await.result(x, timeoutMin.minute))
+    }).map(x => Await.result(x, fsOperationTimeoutMinutes.minute))
     val failed = res.filter(!_.success).filter(x => fs.exists(new Path(x.path))).map(_.path)
     if (failed.isEmpty) res
     else if (failed.length == paths.length || attempt > 4) throw new Exception("Some paths failed - showing 10 of them " + failed.slice(0, 10).mkString("\n"))
-    else modifyAcl(failed, newFsPermission, timeoutMin, numOfThreads, attempt + 1)
+    else modifyAcl(failed, newFsPermission, attempt + 1)
   }
 
 
-  def getAclEntry(p: FsPermission): AclEntry = {
+  private def getAclEntry(p: FsPermission): AclEntry = {
     val ptype = if (p.scope == p.USER) AclEntryType.USER
     else if (p.scope == p.GROUP) AclEntryType.GROUP
     else if (p.scope == p.OTHER) AclEntryType.OTHER
@@ -76,15 +92,21 @@ object AclManager extends Serializable {
     y
   }
 
-  def modifyFolderACLs(folderUri: String, newPermission: FsPermission, partitionCount: Int = 30, parallelism: Int = 1000)
-                      (implicit confEx: Configuration): Array[FsOperationResult] = {
+  /**
+   * Modifies ACLs for folder and all it's files.
+   * @param folderUri - absolute path to the folder like abfss://cont@nameofsa.dfs.microsoft....
+   * @param newPermission - permission to set
+   * @param conf - configuration of hadoop. Best to get it is from spark.sparkContext.hadoopConfiguration
+   * @return Array of FsOperationResult objects containing information if operation succeeded for each path.
+   */
+  def modifyFolderACLs(folderUri: String, newPermission: FsPermission)
+                      (implicit conf: Configuration): Array[FsOperationResult] = {
     //todo check if path is a folder
-    val fs = getFileSystem(confEx, folderUri)
+    val fs = getFileSystem(conf, folderUri)
     val elements = listLevel(fs, Array(new Path(folderUri)))
-    val folders = elements.filter(_.isDirectory).map(_.path)
+    val folders = elements.filter(_.isDirectory).map(_.path) :+ folderUri
     val files = elements.filter(!_.isDirectory).map(_.path)
 
-    println(files(0))
     println("Files to process: " + files.length)
     println("Folders to process: " + folders.length)
 
@@ -95,19 +117,38 @@ object AclManager extends Serializable {
     resAccess.union(resDefault)
   }
 
-  def getAclEntries(path: String)(implicit configuration: Configuration): Seq[AclEntry] = {
-    val fs = getFileSystem(configuration, path)
+  /**
+   * Gets ACL entries for the path
+   * @param path - absolute path
+   * @param conf - configuration of hadoop. Best to get it is from spark.sparkContext.hadoopConfiguration
+   * @return - collection of ACL entries for th path
+   */
+  def getAclEntries(path: String)(implicit conf: Configuration): Seq[AclEntry] = {
+    val fs = getFileSystem(conf, path)
     fs.getAclStatus(new Path(path)).getEntries.asScala.toSeq
   }
 
-  def resetAclEntries(pathUri: String, acls: Seq[AclEntry])(implicit configuration: Configuration) = {
+  /**
+   * Applies all ACL enties for the path. It is different than modifyAcls, because it re-sets ACLs, instead of incrementally modifying them.
+   * @param pathUri - absolute path to the file, e.g.  abfss://cont@nameofsa.dfs.microsoft....
+   * @param acls - collection of permissions to set
+   * @param conf - configuration of hadoop. Best to get it is from spark.sparkContext.hadoopConfiguration
+   */
+  def resetAclEntries(pathUri: String, acls: Seq[AclEntry])(implicit conf: Configuration) = {
     val path = new Path(pathUri)
-    val fs = getFileSystem(configuration, pathUri)
+    val fs = getFileSystem(conf, pathUri)
     println("Removing ACLs on " + pathUri + " and setting new entries")
     acls.foreach(println)
     fs.setAcl(path, acls.asJava)
   }
 
+  /**
+   * Use object of this case class to define permission to set on files/folders
+   * @param scope - can be one of user, group, other, mask
+   * @param permission - posix permisision, e.g. r-- or rwx or --x
+   * @param level - DEFAULT or ACCESS (DEFAULT will apply this permission to all children of the folder)
+   * @param granteeObjectId - user of group ID to apply permissions to
+   */
   case class FsPermission(scope: String, permission: String, level: String, granteeObjectId: String) {
     val USER: String = "user"
     val GROUP: String = "group"
@@ -117,9 +158,14 @@ object AclManager extends Serializable {
     def getDefaultLevelPerm(): AclManager.FsPermission = FsPermission(scope, permission, "DEFAULT", granteeObjectId)
   }
 
-
-  //TARGET folder is something which function is taking ACLs from and apply them to SOURCE folder
-  def synchronizeAcls(uriOfFolderToApplyAclsTo: String, uriOfFolderToTakeAclsFrom: String, timeoutMin: Int = 10, numOfThreads: Int = 1000, attempt: Int = 0)
+  /**
+   * This function will synchronize ACLs on folder/file trees. First, it will apply all ACLs on subfolders of uriOfFolderToApplyAclsTo - whenever there is
+   * folder with the same name/path. Then all elements (folders and files) will get ACLs from their parent folders.
+   * @param uriOfFolderToApplyAclsTo - top folder of a tree where ACLs should be applied on
+   * @param uriOfFolderToTakeAclsFrom- top folder of a tree where ACLs should be taken from
+   * @param conf - hadoop configuration (spark.sparkContext.hadoopConfiguration)
+   */
+  def synchronizeAcls(uriOfFolderToApplyAclsTo: String, uriOfFolderToTakeAclsFrom: String)
                      (implicit conf: Configuration): Unit = {
     //path.isAbsoluteAndSchemeAuthorityNull
     val targetFs = getFileSystem(conf, uriOfFolderToApplyAclsTo)
@@ -138,7 +184,6 @@ object AclManager extends Serializable {
     val targetObjectList = listLevel(targetFs, Array(new Path(uriOfFolderToApplyAclsTo))) :+ FsElement(uriOfFolderToApplyAclsTo, true, 0) //adding top level folder
     println(targetObjectList.length.toString + " objects found in " + uriOfFolderToApplyAclsTo)
     val nTargetFiles = targetObjectList.filter(!_.isDirectory)
-
 
     println(s"Getting ACLs for folders")
     val acls = getAclsForPaths(sourceFs, nSourceFolders.map(_.path) :+ uriOfFolderToTakeAclsFrom) //get acls for reporting folders
@@ -220,14 +265,20 @@ object AclManager extends Serializable {
     println("All done!!!...")
   }
 
-  def getAclsForPaths(fs: FileSystem, paths: Array[String]): Array[(String, AclStatus)] = {
+  /**
+   * Gets ACLs for the provided paths
+   * @param fs - hadoop filesystem
+   * @param paths - list of paths to get ACLs for
+   * @return - Array of ACLs
+   */
+  protected def getAclsForPaths(fs: FileSystem, paths: Array[String]): Array[(String, AclStatus)] = {
     paths.map(x => {
       val p = new Path(x)
       (x, fs.getAclStatus(p))
     })
   }
 
-  def getAccessScopeAclFromDefault(aclStatus: AclStatus): Seq[AclEntry] = {
+  private def getAccessScopeAclFromDefault(aclStatus: AclStatus): Seq[AclEntry] = {
     aclStatus.getEntries.asScala.filter(_.getScope == AclEntryScope.DEFAULT).map(x =>
       new AclEntry.Builder().setName(x.getName).setPermission(x.getPermission).setType(x.getType).
         setScope(AclEntryScope.ACCESS).build()

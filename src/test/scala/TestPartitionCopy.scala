@@ -1,4 +1,4 @@
-import com.pg.bigdata.utils.Promotor
+import com.pg.bigdata.octopufs.Promotor
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions.lit
 import org.scalatest.{BeforeAndAfterAll, FlatSpec}

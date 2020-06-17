@@ -1,12 +1,12 @@
-package com.pg.bigdata.utils.fs
+package com.pg.bigdata.octopufs.fs
 
 import java.util.concurrent.Executors
 
-import com.pg.bigdata.utils.fs
+import com.pg.bigdata.octopufs.fs
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.spark.sql.SparkSession
-import com.pg.bigdata.utils.helpers.implicits._
+import com.pg.bigdata.octopufs.helpers.implicits._
 import org.apache.spark.{Partitioner, SerializableWritable}
 
 import scala.concurrent.forkjoin.ForkJoinPool
@@ -15,18 +15,35 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 
 object DistributedExecution extends Serializable {
 
-
-  def copyFolder(sourceFolderUri: String, targetLocationUri: String, partitionCount: Int = -1)(implicit spark: SparkSession): Array[FsOperationResult] = {
+  /**
+   * Function copies all files under specified source folder to target location. The copy is distributed to spark tasks. By default, each tasks gets exactly
+   * one file for copy operation. This can be changed by providing different taskCount value. It can be useful especially when there is a lot of small files to be copied.
+   * @param sourceFolderUri - absolute path to the source folder
+   * @param targetLocationUri  - absolute path to the target folder
+   * @param taskCount - number of spark taks to run. Keep default to have one file per task.
+   * @param spark - spark session
+   * @return - result of operation for each path
+   */
+  def copyFolder(sourceFolderUri: String, targetLocationUri: String, taskCount: Int = -1)(implicit spark: SparkSession): Array[FsOperationResult] = {
     implicit val conf = spark.sparkContext.hadoopConfiguration
     val srcFs = getFileSystem(conf, sourceFolderUri)
     val sourceFileList = listLevel(srcFs, Array(new Path(sourceFolderUri))).filter(!_.isDirectory).map(_.path) //filter is to avoid copying folders (folders will get created where copying files). Caveat: empty folders will not be copied
     val targetFileList = sourceFileList.map(_.replaceAll(sourceFolderUri, targetLocationUri)) //uri to work on differnt fikle systems
     val paths = sourceFileList.zip(targetFileList).map(x => Paths(x._1, x._2))
     println("First path is: " +paths.head)
-    copyFiles(paths, partitionCount)
+    copyFiles(paths, taskCount)
   }
 
-  def copyFiles(paths: Seq[Paths], partitionCount: Int = -1, attempt: Int = 0)
+  /**
+   * Copies all files in distributed manner. The copy is distributed to spark tasks. By default, each tasks gets exactly
+   * * one file for copy operation. This can be changed by providing different taskCount value. It can be useful especially when there is a lot of small files to be copied.
+   * @param paths - collection of files to be copied.
+   * @param taskCount - number of spark taks to run. Keep default to have one file per task.
+   * @param attempt - do not use
+   * @param spark - SparkSession
+   * @return - result of operation for each path
+   */
+  def copyFiles(paths: Seq[Paths], taskCount: Int = -1, attempt: Int = 0)
                (implicit spark: SparkSession): Array[FsOperationResult] = {
 
     val requestProcessed = spark.sparkContext.longAccumulator("CopyFilesProcessedCount")
@@ -38,7 +55,7 @@ object DistributedExecution extends Serializable {
       }
     }
 
-    val partCnt = if(partitionCount == -1) paths.length else partitionCount
+    val partCnt = if(taskCount == -1) paths.length else taskCount
     val rdd = spark.sparkContext.parallelize(paths.indices.map(i => (i,paths(i))), partCnt).keyBy(x => x._1).partitionBy(new PromotorPartitioner(partCnt)).values.values //todo sprawdz czy potreba jest ilosc partycji w parallelize
     //val res = spark.sparkContext.parallelize(paths, partitionCount)
     val res = rdd.mapPartitions(x => {
@@ -61,41 +78,10 @@ object DistributedExecution extends Serializable {
       val failedPaths = paths.map(_.sourcePath).filter(x => failed.map(_.path).contains(x))
       val pathsForReprocessing = paths.filter(x => failedPaths.contains(x.sourcePath))
       println("Reprocessing " + failedPaths.length + " of failed paths...")
-      res.filter(_.success) ++ copyFiles(pathsForReprocessing, partitionCount, attempt + 1)
-    }
-  }
-/*
-  private def moveFiles(relativePaths: Seq[Paths], sourceFolderUri: String, partitionCount: Int = 32, attempt: Int = 0)
-                       (implicit spark: SparkSession, confEx: Configuration): Array[FSOperationResult] = {
-    println("Starting moveFiles. Paths to be moved: " + relativePaths.size)
-
-    val requestProcessed = spark.sparkContext.longAccumulator("MoveFilesProcessedCount")
-    val sdConf = new ConfigSerDeser(confEx)
-    val res = spark.sparkContext.parallelize(relativePaths, partitionCount).mapPartitions(x => {
-      val conf = sdConf.get()
-      val srcFs = getFileSystem(conf, sourceFolderUri) //move can be done only within single fs, which makes sense :)
-      x.map(paths => {
-        requestProcessed.add(1)
-        println("Executor paths: " + paths)
-        Future(paths, srcFs.rename(new Path(paths.sourcePath), new Path(paths.targetPath))) //todo this fails if folder structure for the file does not exist
-      })
-    }).map(x => Await.result(x, 120.seconds)).map(x => FSOperationResult(x._1.sourcePath, x._2)).collect()
-    println("Number of files moved properly: " + res.count(_.success))
-    println("Files with errors: " + res.count(!_.success))
-    val failed = res.filter(!_.success)
-
-    if (failed.isEmpty) res
-    else if (failed.length == relativePaths.length || attempt > 4)
-      throw new Exception("Move of files did not succeed - please check why and here are some of them: \n" + failed.map(_.path).slice(0, 10).mkString("\n"))
-    else {
-      val failedPaths = relativePaths.map(_.sourcePath).filter(x => failed.map(_.path).contains(x))
-      val pathsForReprocessing = relativePaths.filter(x => failedPaths.contains(x.sourcePath))
-      println("Reprocessing " + failedPaths.length + " of failed paths...")
-      res.filter(_.success) ++ moveFiles(pathsForReprocessing, sourceFolderUri, partitionCount, attempt + 1)
+      res.filter(_.success) ++ copyFiles(pathsForReprocessing, taskCount, attempt + 1)
     }
   }
 
- */
 
 
 }

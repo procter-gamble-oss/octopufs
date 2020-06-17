@@ -1,3 +1,3 @@
-package com.pg.bigdata.utils.fs
+package com.pg.bigdata.octopufs.fs
 
 case class FsOperationResult(path: String, success: Boolean)

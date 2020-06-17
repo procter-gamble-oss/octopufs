@@ -1,15 +1,15 @@
-package com.pg.bigdata.utils.fs
+package com.pg.bigdata.octopufs.fs
 
 import java.util.concurrent.{ExecutorService, Executors}
 
-import com.pg.bigdata.utils.SafetyFuse
+import com.pg.bigdata.octopufs.SafetyFuse
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
-import com.pg.bigdata.utils.helpers.implicits._
+import com.pg.bigdata.octopufs.helpers.implicits._
 
 object LocalExecution extends Serializable {
 

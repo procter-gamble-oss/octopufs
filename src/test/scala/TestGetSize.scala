@@ -1,5 +1,5 @@
 import org.scalatest.FlatSpec
-import com.pg.bigdata.utils.fs.getSize
+import com.pg.bigdata.octopufs.fs.getSize
 import org.apache.hadoop.fs.Path
 import org.apache.spark.sql.SparkSession
 class TestGetSize extends FlatSpec{

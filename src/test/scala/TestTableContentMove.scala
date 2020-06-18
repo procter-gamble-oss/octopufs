@@ -26,7 +26,7 @@ class TestTableContentMove extends FlatSpec with BeforeAndAfterAll{
   }
 
   "moveFilesBetweenTables" should "execute ok" in {
-    Promotor.moveFilesBetweenTables(t.db, "PROD_SDIM", t.db, "PROD_DIM", 1)
+    Promotor.moveFilesBetweenTables(t.db, "PROD_SDIM", t.db, "PROD_DIM")
   }
 
   "moveFilesBetweenTables" should "remove content of source table" in {

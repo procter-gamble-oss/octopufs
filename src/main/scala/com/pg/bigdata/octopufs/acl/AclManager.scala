@@ -72,7 +72,7 @@ object AclManager extends Serializable {
   }
 
 
-  private def getAclEntry(p: FsPermission): AclEntry = {
+  def getAclEntry(p: FsPermission): AclEntry = {
     val ptype = if (p.scope == p.USER) AclEntryType.USER
     else if (p.scope == p.GROUP) AclEntryType.GROUP
     else if (p.scope == p.OTHER) AclEntryType.OTHER

@@ -37,12 +37,11 @@ object Promotor extends Serializable {
    * @param sourceTableName - source table name
    * @param targetDbName - hive metastore database where source table is defined
    * @param targetTableName - target table name
-   * @param taskCount - number of threads to distribute the load to. It equals number of files by default which ensures best distribution, however it may trigger a lot of small tasks if your files are small.
+   * @param taskCount - number of threads to distribute the load to. Value -1 ensures best distribution (one file per task), however it may trigger a lot of small tasks if your files are small.
    * @param spark - spark session required to access hive metastore and to run distributed jobs.
    * @return Array of FSOperationResult which contains all copied paths together with copy result (isSuccess)
-   * @return
    */
-  def copyFilesBetweenTables(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, taskCount: Int = -1)
+  def copyFilesBetweenTables(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, taskCount: Int)
                             (implicit spark: SparkSession): Array[FsOperationResult] = {
     val paths = getTablesPathsList(sourceDbName, sourceTableName, targetDbName, targetTableName) //.take(5)
     if (paths.isEmpty) {
@@ -133,12 +132,12 @@ object Promotor extends Serializable {
    * @param targetDbName - target database name
    * @param targetTableName - target table name
    * @param matchStringPartitions - sequence of string which is used to match partitions folder names. The match is done using String "contains" function. Works only for 1st level partitioning.
-   * @param taskCount - number of threads to distribute the load to. It equals number of files by default, which ensures best distribution, however it may trigger a lot of small tasks if your files are small.
+   * @param taskCount - number of threads to distribute the load to. Value -1 ensures best distribution (one file per task), however it may trigger a lot of small tasks if your files are small.
    * @param spark - spark session required to access hive metastore and to run distributed jobs.
    * @return Array of FSOperationResult which contains all copied paths together with copy result (isSuccess)
    */
   def copyTablePartitions(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, matchStringPartitions: Seq[String],
-                          taskCount: Int = -1)
+                          taskCount: Int)
                          (implicit spark: SparkSession): Array[FsOperationResult] = {
     val paths = filterPartitions(sourceDbName, sourceTableName, matchStringPartitions)
     if (paths.isEmpty)
@@ -166,12 +165,12 @@ object Promotor extends Serializable {
    * @param targetDbName - target database name
    * @param targetTableName - target table name
    * @param matchStringPartitions - sequence of string which is used to match partitions folder names. The match is done using String "contains" function. Works only for 1st level partitioning.
-   * @param taskCount - number of threads to distribute the load to. It equals number of files by default, which ensures best distribution, however it may trigger a lot of small tasks if your files are small.
+   * @param taskCount - number of threads to distribute the load to. Value -1 ensures best distribution (one file per task), however it may trigger a lot of small tasks if your files are small.
    * @param spark - spark session required to access hive metastore and to run distributed jobs.
    * @return Array of FSOperationResult which contains all copied paths together with copy result (isSuccess)
    */
   def copyOverwritePartitions(sourceDbName: String, sourceTableName: String, targetDbName: String, targetTableName: String, matchStringPartitions: Seq[String],
-                              taskCount: Int = -1)
+                              taskCount: Int)
                              (implicit spark: SparkSession): Array[FsOperationResult] = {
     deleteTablePartitions(targetDbName, targetTableName, matchStringPartitions)(spark)
     copyTablePartitions(sourceDbName, sourceTableName, targetDbName, targetTableName, matchStringPartitions, taskCount)

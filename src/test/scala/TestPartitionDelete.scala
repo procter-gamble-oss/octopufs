@@ -14,7 +14,7 @@ class TestPartitionDelete extends FlatSpec with BeforeAndAfterAll{
     //#test1
     assert(spark.table(t.d+"STORE_SALES_FCT_PREV").filter("mm_time_perd_end_date = '2019-05-31'").count() != 0, "check if partition to be dropped exists")
     spark.table(t.d+"STORE_SALES_FCT_PREV").select("mm_time_perd_end_date").distinct.show()
-    Promotor.deleteTablePartitions(t.db, "STORE_SALES_FCT_PREV", Seq("2019-05-31"))(spark, spark.sparkContext.hadoopConfiguration)
+    Promotor.deleteTablePartitions(t.db, "STORE_SALES_FCT_PREV", Seq("2019-05-31"))(spark)
     spark.table(t.d+"STORE_SALES_FCT_PREV").select("mm_time_perd_end_date").distinct.show()
 
   "Partition 2019-05" should "be dropped" in {

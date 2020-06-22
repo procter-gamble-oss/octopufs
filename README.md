@@ -1,19 +1,19 @@
 ## OctopuFS
 OctopuFS is Scala/Spark toolkit to manage cloud storage, especially ADLSgen2 directly from databricks. It provides several capabilities, which internally have retry mechanism built in, which will repeat unsuccessful operations up to 5 times :
 ## File copy 
-```com.pg.bigdata.utils.fs.DistributedExecution```
+```com.pg.bigdata.octopufs.fs.DistributedExecution```
 OctopuFS distributes copy operation to spark tasks and does data copy **3x faster** than spark read/write operation while utilizing less CPU
 ## Local multi-threaded operations
 Many operations on ADLS are limited to HTTP requests only, thus they don't require significant fardware involvement and can be run on single machine. Operation on tens of thousands of files/folders take appox **1 minute**. There operations inclide:
 # File move/rename/delete
-```com.pg.bigdata.utils.fs.LocalExecution```
+```com.pg.bigdata.octopufs.fs.LocalExecution```
 # Setting up ACLs on files and folders (recursively)
-```com.pg.bigdata.utils.acl.AclManager```
+```com.pg.bigdata.octopufs.acl.AclManager```
 # Getting size of files and folders
-```com.pg.bigdata.utils.fs.getSize```
+```com.pg.bigdata.octopufs.fs.getSize```
 <br>
 ## Hive metadata operations 
-```com.pg.bigdata.utils.Promotor```
+```com.pg.bigdata.octopufs.Promotor```
 OctopuFS uses above functions on Hive metadata layer (i.e. Tableas and partitions) to enable operations currently not accessible for tables, which are not using Databricks Delta format abstraction.
 <BR><BR>
 # Required setup of databricks cluster:

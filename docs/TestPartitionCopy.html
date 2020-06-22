@@ -1,0 +1,2303 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <title>TestPartitionCopy - Octopufs documentation - TestPartitionCopy</title>
+          <meta name="description" content="TestPartitionCopy - Octopufs documentation - TestPartitionCopy" />
+          <meta name="keywords" content="TestPartitionCopy Octopufs documentation TestPartitionCopy" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="lib/jquery.js" id="jquery-js"></script>
+      <script type="text/javascript" src="lib/jquery-ui.js"></script>
+      <script type="text/javascript" src="lib/template.js"></script>
+      <script type="text/javascript" src="lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+         if(top === self) {
+            var url = 'index.html';
+            var hash = 'TestPartitionCopy';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="type">
+      <div id="definition">
+        <img alt="Class" src="lib/class_big.png" />
+        
+        <h1>TestPartitionCopy</h1><h3><span class="morelinks"><div>Related Doc:
+            <a href="package.html" class="extype" name="_root_">package root</a>
+          </div></span></h3><span class="permalink">
+      <a href="index.html#TestPartitionCopy" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">TestPartitionCopy</span><span class="result"> extends <span class="extype" name="org.scalatest.FlatSpec">FlatSpec</span> with <span class="extype" name="org.scalatest.BeforeAndAfterAll">BeforeAndAfterAll</span></span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="org.scalatest.BeforeAndAfterAll">BeforeAndAfterAll</span>, <span class="extype" name="org.scalatest.SuiteMixin">SuiteMixin</span>, <span class="extype" name="org.scalatest.FlatSpec">FlatSpec</span>, <span class="extype" name="org.scalatest.FlatSpecLike">FlatSpecLike</span>, <span class="extype" name="org.scalatest.Documenting">Documenting</span>, <span class="extype" name="org.scalatest.Alerting">Alerting</span>, <span class="extype" name="org.scalatest.Notifying">Notifying</span>, <span class="extype" name="org.scalatest.Informing">Informing</span>, <span class="extype" name="org.scalatest.words.CanVerb">CanVerb</span>, <span class="extype" name="org.scalatest.words.MustVerb">MustVerb</span>, <span class="extype" name="org.scalatest.words.ShouldVerb">ShouldVerb</span>, <span class="extype" name="org.scalatest.TestRegistration">TestRegistration</span>, <span class="extype" name="org.scalatest.TestSuite">TestSuite</span>, <span class="extype" name="org.scalatest.Suite">Suite</span>, <span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="org.scalatest.Assertions">Assertions</span>, <span class="extype" name="org.scalactic.TripleEquals">TripleEquals</span>, <span class="extype" name="org.scalactic.TripleEqualsSupport">TripleEqualsSupport</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="TestPartitionCopy"><span>TestPartitionCopy</span></li><li class="in" name="org.scalatest.BeforeAndAfterAll"><span>BeforeAndAfterAll</span></li><li class="in" name="org.scalatest.SuiteMixin"><span>SuiteMixin</span></li><li class="in" name="org.scalatest.FlatSpec"><span>FlatSpec</span></li><li class="in" name="org.scalatest.FlatSpecLike"><span>FlatSpecLike</span></li><li class="in" name="org.scalatest.Documenting"><span>Documenting</span></li><li class="in" name="org.scalatest.Alerting"><span>Alerting</span></li><li class="in" name="org.scalatest.Notifying"><span>Notifying</span></li><li class="in" name="org.scalatest.Informing"><span>Informing</span></li><li class="in" name="org.scalatest.words.CanVerb"><span>CanVerb</span></li><li class="in" name="org.scalatest.words.MustVerb"><span>MustVerb</span></li><li class="in" name="org.scalatest.words.ShouldVerb"><span>ShouldVerb</span></li><li class="in" name="org.scalatest.TestRegistration"><span>TestRegistration</span></li><li class="in" name="org.scalatest.TestSuite"><span>TestSuite</span></li><li class="in" name="org.scalatest.Suite"><span>Suite</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="org.scalatest.Assertions"><span>Assertions</span></li><li class="in" name="org.scalactic.TripleEquals"><span>TripleEquals</span></li><li class="in" name="org.scalactic.TripleEqualsSupport"><span>TripleEqualsSupport</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show All</span></li>
+            </ol>
+          </div>
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        <div id="constructors" class="members">
+              <h3>Instance Constructors</h3>
+              <ol><li name="TestPartitionCopy#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;():TestPartitionCopy"></a>
+      <a id="&lt;init&gt;:TestPartitionCopy"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">new</span>
+      </span>
+      <span class="symbol">
+        <span class="name">TestPartitionCopy</span><span class="params">()</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@&lt;init&gt;():TestPartitionCopy" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li></ol>
+            </div>
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="org.scalatest.Assertions.AssertionsHelper" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="AssertionsHelperextendsAnyRef"></a>
+      <a id="AssertionsHelper:AssertionsHelper"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">AssertionsHelper</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@AssertionsHelperextendsAnyRef" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike.BehaviorWord" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="BehaviorWordextendsAnyRef"></a>
+      <a id="BehaviorWord:BehaviorWord"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">BehaviorWord</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@BehaviorWordextendsAnyRef" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike</dd></dl></div>
+    </li><li name="org.scalactic.TripleEqualsSupport.CheckingEqualizer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="CheckingEqualizer[L]extendsAnyRef"></a>
+      <a id="CheckingEqualizer[L]:CheckingEqualizer[L]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">CheckingEqualizer</span><span class="tparams">[<span name="L">L</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@CheckingEqualizer[L]extendsAnyRef" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TripleEqualsSupport</dd></dl></div>
+    </li><li name="org.scalactic.TripleEqualsSupport.Equalizer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Equalizer[L]extendsAnyRef"></a>
+      <a id="Equalizer[L]:Equalizer[L]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">Equalizer</span><span class="tparams">[<span name="L">L</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@Equalizer[L]extendsAnyRef" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TripleEqualsSupport</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike.IgnoreVerbString" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="IgnoreVerbStringextendsAnyRef"></a>
+      <a id="IgnoreVerbString:IgnoreVerbString"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">IgnoreVerbString</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@IgnoreVerbStringextendsAnyRef" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike.IgnoreVerbStringTaggedAs" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="IgnoreVerbStringTaggedAsextendsAnyRef"></a>
+      <a id="IgnoreVerbStringTaggedAs:IgnoreVerbStringTaggedAs"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">IgnoreVerbStringTaggedAs</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@IgnoreVerbStringTaggedAsextendsAnyRef" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike.IgnoreWord" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="IgnoreWordextendsAnyRef"></a>
+      <a id="IgnoreWord:IgnoreWord"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">IgnoreWord</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@IgnoreWordextendsAnyRef" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike.InAndIgnoreMethods" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="InAndIgnoreMethodsextendsAnyRef"></a>
+      <a id="InAndIgnoreMethods:InAndIgnoreMethods"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">InAndIgnoreMethods</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@InAndIgnoreMethodsextendsAnyRef" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike.InAndIgnoreMethodsAfterTaggedAs" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="InAndIgnoreMethodsAfterTaggedAsextendsAnyRef"></a>
+      <a id="InAndIgnoreMethodsAfterTaggedAs:InAndIgnoreMethodsAfterTaggedAs"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">InAndIgnoreMethodsAfterTaggedAs</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@InAndIgnoreMethodsAfterTaggedAsextendsAnyRef" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike.ItVerbString" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ItVerbStringextendsAnyRef"></a>
+      <a id="ItVerbString:ItVerbString"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ItVerbString</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@ItVerbStringextendsAnyRef" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike.ItVerbStringTaggedAs" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ItVerbStringTaggedAsextendsAnyRef"></a>
+      <a id="ItVerbStringTaggedAs:ItVerbStringTaggedAs"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ItVerbStringTaggedAs</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@ItVerbStringTaggedAsextendsAnyRef" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike.ItWord" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ItWordextendsAnyRef"></a>
+      <a id="ItWord:ItWord"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ItWord</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@ItWordextendsAnyRef" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike</dd></dl></div>
+    </li><li name="org.scalatest.TestSuite.NoArgTest" visbl="prt" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="NoArgTestextends()=&gt;org.scalatest.OutcomewithTestData"></a>
+      <a id="NoArgTest:NoArgTest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <span class="name">NoArgTest</span><span class="result"> extends () ⇒ <span class="extype" name="org.scalatest.Outcome">Outcome</span> with <span class="extype" name="org.scalatest.TestData">TestData</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@NoArgTestextends()=&gt;org.scalatest.OutcomewithTestData" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>TestSuite</dd></dl></div>
+    </li><li name="org.scalatest.words.CanVerb.StringCanWrapperForVerb" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="StringCanWrapperForVerbextendsAnyRef"></a>
+      <a id="StringCanWrapperForVerb:StringCanWrapperForVerb"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <span class="name">StringCanWrapperForVerb</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@StringCanWrapperForVerbextendsAnyRef" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>CanVerb</dd></dl></div>
+    </li><li name="org.scalatest.words.MustVerb.StringMustWrapperForVerb" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="StringMustWrapperForVerbextendsAnyRef"></a>
+      <a id="StringMustWrapperForVerb:StringMustWrapperForVerb"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <span class="name">StringMustWrapperForVerb</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@StringMustWrapperForVerbextendsAnyRef" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MustVerb</dd></dl></div>
+    </li><li name="org.scalatest.words.ShouldVerb.StringShouldWrapperForVerb" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="StringShouldWrapperForVerbextendsAnyRef"></a>
+      <a id="StringShouldWrapperForVerb:StringShouldWrapperForVerb"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <span class="name">StringShouldWrapperForVerb</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@StringShouldWrapperForVerbextendsAnyRef" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ShouldVerb</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike.TheyVerbString" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="TheyVerbStringextendsAnyRef"></a>
+      <a id="TheyVerbString:TheyVerbString"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">TheyVerbString</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@TheyVerbStringextendsAnyRef" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike.TheyVerbStringTaggedAs" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="TheyVerbStringTaggedAsextendsAnyRef"></a>
+      <a id="TheyVerbStringTaggedAs:TheyVerbStringTaggedAs"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">TheyVerbStringTaggedAs</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@TheyVerbStringTaggedAsextendsAnyRef" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike.TheyWord" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="TheyWordextendsAnyRef"></a>
+      <a id="TheyWord:TheyWord"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">TheyWord</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@TheyWordextendsAnyRef" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike</dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!=(x$1:Any):Boolean"></a>
+      <a id="!=(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq" class="name">!=</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@!=(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="org.scalactic.TripleEqualsSupport#!==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!==[T](right:org.scalactic.TripleEqualsSupport.Spread[T]):org.scalactic.TripleEqualsSupport.TripleEqualsInvocationOnSpread[T]"></a>
+      <a id="!==[T](Spread[T]):TripleEqualsInvocationOnSpread[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq$eq" class="name">!==</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="right">right: <span class="extype" name="org.scalactic.TripleEqualsSupport.Spread">Spread</span>[<span class="extype" name="org.scalactic.TripleEqualsSupport.!==.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="org.scalactic.TripleEqualsSupport.TripleEqualsInvocationOnSpread">TripleEqualsInvocationOnSpread</span>[<span class="extype" name="org.scalactic.TripleEqualsSupport.!==.T">T</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@!==[T](right:org.scalactic.TripleEqualsSupport.Spread[T]):org.scalactic.TripleEqualsSupport.TripleEqualsInvocationOnSpread[T]" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TripleEqualsSupport</dd></dl></div>
+    </li><li name="org.scalactic.TripleEqualsSupport#!==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!==(right:Null):org.scalactic.TripleEqualsSupport.TripleEqualsInvocation[Null]"></a>
+      <a id="!==(Null):TripleEqualsInvocation[Null]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq$eq" class="name">!==</span><span class="params">(<span name="right">right: <span class="extype" name="scala.Null">Null</span></span>)</span><span class="result">: <span class="extype" name="org.scalactic.TripleEqualsSupport.TripleEqualsInvocation">TripleEqualsInvocation</span>[<span class="extype" name="scala.Null">Null</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@!==(right:Null):org.scalactic.TripleEqualsSupport.TripleEqualsInvocation[Null]" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TripleEqualsSupport</dd></dl></div>
+    </li><li name="org.scalactic.TripleEqualsSupport#!==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="!==[T](right:T):org.scalactic.TripleEqualsSupport.TripleEqualsInvocation[T]"></a>
+      <a id="!==[T](T):TripleEqualsInvocation[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $bang$eq$eq" class="name">!==</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="right">right: <span class="extype" name="org.scalactic.TripleEqualsSupport.!==.T">T</span></span>)</span><span class="result">: <span class="extype" name="org.scalactic.TripleEqualsSupport.TripleEqualsInvocation">TripleEqualsInvocation</span>[<span class="extype" name="org.scalactic.TripleEqualsSupport.!==.T">T</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@!==[T](right:T):org.scalactic.TripleEqualsSupport.TripleEqualsInvocation[T]" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TripleEqualsSupport</dd></dl></div>
+    </li><li name="scala.AnyRef###" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="##():Int"></a>
+      <a id="##():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $hash$hash" class="name">##</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@##():Int" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#==" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="==(x$1:Any):Boolean"></a>
+      <a id="==(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq" class="name">==</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@==(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="org.scalactic.TripleEqualsSupport#===" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="===[T](right:org.scalactic.TripleEqualsSupport.Spread[T]):org.scalactic.TripleEqualsSupport.TripleEqualsInvocationOnSpread[T]"></a>
+      <a id="===[T](Spread[T]):TripleEqualsInvocationOnSpread[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq$eq" class="name">===</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="right">right: <span class="extype" name="org.scalactic.TripleEqualsSupport.Spread">Spread</span>[<span class="extype" name="org.scalactic.TripleEqualsSupport.===.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="org.scalactic.TripleEqualsSupport.TripleEqualsInvocationOnSpread">TripleEqualsInvocationOnSpread</span>[<span class="extype" name="org.scalactic.TripleEqualsSupport.===.T">T</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@===[T](right:org.scalactic.TripleEqualsSupport.Spread[T]):org.scalactic.TripleEqualsSupport.TripleEqualsInvocationOnSpread[T]" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TripleEqualsSupport</dd></dl></div>
+    </li><li name="org.scalactic.TripleEqualsSupport#===" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="===(right:Null):org.scalactic.TripleEqualsSupport.TripleEqualsInvocation[Null]"></a>
+      <a id="===(Null):TripleEqualsInvocation[Null]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq$eq" class="name">===</span><span class="params">(<span name="right">right: <span class="extype" name="scala.Null">Null</span></span>)</span><span class="result">: <span class="extype" name="org.scalactic.TripleEqualsSupport.TripleEqualsInvocation">TripleEqualsInvocation</span>[<span class="extype" name="scala.Null">Null</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@===(right:Null):org.scalactic.TripleEqualsSupport.TripleEqualsInvocation[Null]" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TripleEqualsSupport</dd></dl></div>
+    </li><li name="org.scalactic.TripleEqualsSupport#===" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="===[T](right:T):org.scalactic.TripleEqualsSupport.TripleEqualsInvocation[T]"></a>
+      <a id="===[T](T):TripleEqualsInvocation[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span title="gt4s: $eq$eq$eq" class="name">===</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="right">right: <span class="extype" name="org.scalactic.TripleEqualsSupport.===.T">T</span></span>)</span><span class="result">: <span class="extype" name="org.scalactic.TripleEqualsSupport.TripleEqualsInvocation">TripleEqualsInvocation</span>[<span class="extype" name="org.scalactic.TripleEqualsSupport.===.T">T</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@===[T](right:T):org.scalactic.TripleEqualsSupport.TripleEqualsInvocation[T]" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TripleEqualsSupport</dd></dl></div>
+    </li><li name="TestPartitionCopy#afterAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="afterAll():Unit"></a>
+      <a id="afterAll():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">afterAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@afterAll():Unit" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="TestPartitionCopy">TestPartitionCopy</a> → BeforeAndAfterAll</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike#alert" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="alert:org.scalatest.Alerter"></a>
+      <a id="alert:Alerter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">alert</span><span class="result">: <span class="extype" name="org.scalatest.Alerter">Alerter</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@alert:org.scalatest.Alerter" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike → Alerting</dd></dl></div>
+    </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="asInstanceOf[T0]:T0"></a>
+      <a id="asInstanceOf[T0]:T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">asInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Any.asInstanceOf.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@asInstanceOf[T0]:T0" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="org.scalatest.Assertions#assert" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="assert(condition:Boolean,clue:Any)(implicitprettifier:org.scalactic.Prettifier,implicitpos:org.scalactic.source.Position):org.scalatest.Assertion"></a>
+      <a id="assert(Boolean,Any)(Prettifier,Position):Assertion"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">macro </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">assert</span><span class="params">(<span name="condition">condition: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="clue">clue: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="prettifier">prettifier: <span class="extype" name="org.scalactic.Prettifier">Prettifier</span></span>, <span name="pos">pos: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <span class="extype" name="org.scalatest.Assertion">Assertion</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@assert(condition:Boolean,clue:Any)(implicitprettifier:org.scalactic.Prettifier,implicitpos:org.scalactic.source.Position):org.scalatest.Assertion" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="org.scalatest.Assertions#assert" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="assert(condition:Boolean)(implicitprettifier:org.scalactic.Prettifier,implicitpos:org.scalactic.source.Position):org.scalatest.Assertion"></a>
+      <a id="assert(Boolean)(Prettifier,Position):Assertion"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">macro </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">assert</span><span class="params">(<span name="condition">condition: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="prettifier">prettifier: <span class="extype" name="org.scalactic.Prettifier">Prettifier</span></span>, <span name="pos">pos: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <span class="extype" name="org.scalatest.Assertion">Assertion</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@assert(condition:Boolean)(implicitprettifier:org.scalactic.Prettifier,implicitpos:org.scalactic.source.Position):org.scalatest.Assertion" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="org.scalatest.Assertions#assertCompiles" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="assertCompiles(code:String)(implicitpos:org.scalactic.source.Position):org.scalatest.Assertion"></a>
+      <a id="assertCompiles(String)(Position):Assertion"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">macro </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">assertCompiles</span><span class="params">(<span name="code">code: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="pos">pos: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <span class="extype" name="org.scalatest.Assertion">Assertion</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@assertCompiles(code:String)(implicitpos:org.scalactic.source.Position):org.scalatest.Assertion" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="org.scalatest.Assertions#assertDoesNotCompile" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="assertDoesNotCompile(code:String)(implicitpos:org.scalactic.source.Position):org.scalatest.Assertion"></a>
+      <a id="assertDoesNotCompile(String)(Position):Assertion"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">macro </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">assertDoesNotCompile</span><span class="params">(<span name="code">code: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="pos">pos: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <span class="extype" name="org.scalatest.Assertion">Assertion</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@assertDoesNotCompile(code:String)(implicitpos:org.scalactic.source.Position):org.scalatest.Assertion" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="org.scalatest.Assertions#assertResult" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="assertResult(expected:Any)(actual:Any)(implicitprettifier:org.scalactic.Prettifier,implicitpos:org.scalactic.source.Position):org.scalatest.Assertion"></a>
+      <a id="assertResult(Any)(Any)(Prettifier,Position):Assertion"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">assertResult</span><span class="params">(<span name="expected">expected: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="params">(<span name="actual">actual: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="prettifier">prettifier: <span class="extype" name="org.scalactic.Prettifier">Prettifier</span></span>, <span name="pos">pos: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <span class="extype" name="org.scalatest.Assertion">Assertion</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@assertResult(expected:Any)(actual:Any)(implicitprettifier:org.scalactic.Prettifier,implicitpos:org.scalactic.source.Position):org.scalatest.Assertion" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="org.scalatest.Assertions#assertResult" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="assertResult(expected:Any,clue:Any)(actual:Any)(implicitprettifier:org.scalactic.Prettifier,implicitpos:org.scalactic.source.Position):org.scalatest.Assertion"></a>
+      <a id="assertResult(Any,Any)(Any)(Prettifier,Position):Assertion"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">assertResult</span><span class="params">(<span name="expected">expected: <span class="extype" name="scala.Any">Any</span></span>, <span name="clue">clue: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="params">(<span name="actual">actual: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="prettifier">prettifier: <span class="extype" name="org.scalactic.Prettifier">Prettifier</span></span>, <span name="pos">pos: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <span class="extype" name="org.scalatest.Assertion">Assertion</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@assertResult(expected:Any,clue:Any)(actual:Any)(implicitprettifier:org.scalactic.Prettifier,implicitpos:org.scalactic.source.Position):org.scalatest.Assertion" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="org.scalatest.Assertions#assertThrows" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="assertThrows[T&lt;:AnyRef](f:=&gt;Any)(implicitclassTag:scala.reflect.ClassTag[T],implicitpos:org.scalactic.source.Position):org.scalatest.Assertion"></a>
+      <a id="assertThrows[T&lt;:AnyRef](⇒Any)(ClassTag[T],Position):Assertion"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">assertThrows</span><span class="tparams">[<span name="T">T &lt;: <span class="extype" name="scala.AnyRef">AnyRef</span></span>]</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="scala.Any">Any</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="classTag">classTag: <span class="extype" name="scala.reflect.ClassTag">ClassTag</span>[<span class="extype" name="org.scalatest.Assertions.assertThrows.T">T</span>]</span>, <span name="pos">pos: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <span class="extype" name="org.scalatest.Assertion">Assertion</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@assertThrows[T&lt;:AnyRef](f:=&gt;Any)(implicitclassTag:scala.reflect.ClassTag[T],implicitpos:org.scalactic.source.Position):org.scalatest.Assertion" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="org.scalatest.Assertions#assertTypeError" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="assertTypeError(code:String)(implicitpos:org.scalactic.source.Position):org.scalatest.Assertion"></a>
+      <a id="assertTypeError(String)(Position):Assertion"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">macro </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">assertTypeError</span><span class="params">(<span name="code">code: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="pos">pos: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <span class="extype" name="org.scalatest.Assertion">Assertion</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@assertTypeError(code:String)(implicitpos:org.scalactic.source.Position):org.scalatest.Assertion" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="org.scalatest.Assertions#assertionsHelper" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="assertionsHelper:Assertions.this.AssertionsHelper"></a>
+      <a id="assertionsHelper:AssertionsHelper"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">assertionsHelper</span><span class="result">: <a href="#AssertionsHelperextendsAnyRef" class="extmbr" name="TestPartitionCopy.AssertionsHelper">AssertionsHelper</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@assertionsHelper:Assertions.this.AssertionsHelper" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="org.scalatest.Assertions#assume" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="assume(condition:Boolean,clue:Any)(implicitprettifier:org.scalactic.Prettifier,implicitpos:org.scalactic.source.Position):org.scalatest.Assertion"></a>
+      <a id="assume(Boolean,Any)(Prettifier,Position):Assertion"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">macro </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">assume</span><span class="params">(<span name="condition">condition: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="clue">clue: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="prettifier">prettifier: <span class="extype" name="org.scalactic.Prettifier">Prettifier</span></span>, <span name="pos">pos: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <span class="extype" name="org.scalatest.Assertion">Assertion</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@assume(condition:Boolean,clue:Any)(implicitprettifier:org.scalactic.Prettifier,implicitpos:org.scalactic.source.Position):org.scalatest.Assertion" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="org.scalatest.Assertions#assume" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="assume(condition:Boolean)(implicitprettifier:org.scalactic.Prettifier,implicitpos:org.scalactic.source.Position):org.scalatest.Assertion"></a>
+      <a id="assume(Boolean)(Prettifier,Position):Assertion"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">macro </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">assume</span><span class="params">(<span name="condition">condition: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="prettifier">prettifier: <span class="extype" name="org.scalactic.Prettifier">Prettifier</span></span>, <span name="pos">pos: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <span class="extype" name="org.scalatest.Assertion">Assertion</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@assume(condition:Boolean)(implicitprettifier:org.scalactic.Prettifier,implicitpos:org.scalactic.source.Position):org.scalatest.Assertion" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="org.scalatest.BeforeAndAfterAll#beforeAll" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="beforeAll():Unit"></a>
+      <a id="beforeAll():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">beforeAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@beforeAll():Unit" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>BeforeAndAfterAll</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike#behave" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="behave:org.scalatest.words.BehaveWord"></a>
+      <a id="behave:BehaveWord"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">behave</span><span class="result">: <span class="extype" name="org.scalatest.words.BehaveWord">BehaveWord</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@behave:org.scalatest.words.BehaveWord" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike#behavior" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="behavior:FlatSpecLike.this.BehaviorWord"></a>
+      <a id="behavior:BehaviorWord"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">behavior</span><span class="result">: <a href="#BehaviorWordextendsAnyRef" class="extmbr" name="TestPartitionCopy.BehaviorWord">BehaviorWord</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@behavior:FlatSpecLike.this.BehaviorWord" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike</dd></dl></div>
+    </li><li name="TestPartitionCopy#c" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="c:org.apache.hadoop.conf.Configuration"></a>
+      <a id="c:Configuration"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">c</span><span class="result">: <span class="extype" name="org.apache.hadoop.conf.Configuration">Configuration</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@c:org.apache.hadoop.conf.Configuration" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="org.scalatest.Assertions#cancel" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cancel(cause:Throwable)(implicitpos:org.scalactic.source.Position):Nothing"></a>
+      <a id="cancel(Throwable)(Position):Nothing"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cancel</span><span class="params">(<span name="cause">cause: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="pos">pos: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <span class="extype" name="scala.Nothing">Nothing</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@cancel(cause:Throwable)(implicitpos:org.scalactic.source.Position):Nothing" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="org.scalatest.Assertions#cancel" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cancel(message:String,cause:Throwable)(implicitpos:org.scalactic.source.Position):Nothing"></a>
+      <a id="cancel(String,Throwable)(Position):Nothing"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cancel</span><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="cause">cause: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="pos">pos: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <span class="extype" name="scala.Nothing">Nothing</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@cancel(message:String,cause:Throwable)(implicitpos:org.scalactic.source.Position):Nothing" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="org.scalatest.Assertions#cancel" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cancel(message:String)(implicitpos:org.scalactic.source.Position):Nothing"></a>
+      <a id="cancel(String)(Position):Nothing"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cancel</span><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="pos">pos: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <span class="extype" name="scala.Nothing">Nothing</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@cancel(message:String)(implicitpos:org.scalactic.source.Position):Nothing" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="org.scalatest.Assertions#cancel" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cancel()(implicitpos:org.scalactic.source.Position):Nothing"></a>
+      <a id="cancel()(Position):Nothing"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cancel</span><span class="params">()</span><span class="params">(<span class="implicit">implicit </span><span name="pos">pos: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <span class="extype" name="scala.Nothing">Nothing</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@cancel()(implicitpos:org.scalactic.source.Position):Nothing" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clone():Object"></a>
+      <a id="clone():AnyRef"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@clone():Object" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="org.scalactic.TripleEquals#conversionCheckedConstraint" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="conversionCheckedConstraint[A,B](implicitequivalenceOfA:org.scalactic.Equivalence[A],implicitcnv:B=&gt;A):org.scalactic.CanEqual[A,B]"></a>
+      <a id="conversionCheckedConstraint[A,B](Equivalence[A],(B)⇒A):CanEqual[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">conversionCheckedConstraint</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="equivalenceOfA">equivalenceOfA: <span class="extype" name="org.scalactic.Equivalence">Equivalence</span>[<span class="extype" name="org.scalactic.TripleEquals.conversionCheckedConstraint.A">A</span>]</span>, <span name="cnv">cnv: (<span class="extype" name="org.scalactic.TripleEquals.conversionCheckedConstraint.B">B</span>) ⇒ <span class="extype" name="org.scalactic.TripleEquals.conversionCheckedConstraint.A">A</span></span>)</span><span class="result">: <span class="extype" name="org.scalactic.CanEqual">CanEqual</span>[<span class="extype" name="org.scalactic.TripleEquals.conversionCheckedConstraint.A">A</span>, <span class="extype" name="org.scalactic.TripleEquals.conversionCheckedConstraint.B">B</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@conversionCheckedConstraint[A,B](implicitequivalenceOfA:org.scalactic.Equivalence[A],implicitcnv:B=&gt;A):org.scalactic.CanEqual[A,B]" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TripleEquals → TripleEqualsSupport</dd></dl></div>
+    </li><li name="org.scalactic.TripleEquals#convertEquivalenceToAToBConstraint" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="convertEquivalenceToAToBConstraint[A,B](equivalenceOfB:org.scalactic.Equivalence[B])(implicitev:&lt;:&lt;[A,B]):org.scalactic.CanEqual[A,B]"></a>
+      <a id="convertEquivalenceToAToBConstraint[A,B](Equivalence[B])(&lt;:&lt;[A,B]):CanEqual[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">convertEquivalenceToAToBConstraint</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="equivalenceOfB">equivalenceOfB: <span class="extype" name="org.scalactic.Equivalence">Equivalence</span>[<span class="extype" name="org.scalactic.TripleEquals.convertEquivalenceToAToBConstraint.B">B</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span class="extype" name="scala.Predef.&lt;:&lt;">&lt;:&lt;</span>[<span class="extype" name="org.scalactic.TripleEquals.convertEquivalenceToAToBConstraint.A">A</span>, <span class="extype" name="org.scalactic.TripleEquals.convertEquivalenceToAToBConstraint.B">B</span>]</span>)</span><span class="result">: <span class="extype" name="org.scalactic.CanEqual">CanEqual</span>[<span class="extype" name="org.scalactic.TripleEquals.convertEquivalenceToAToBConstraint.A">A</span>, <span class="extype" name="org.scalactic.TripleEquals.convertEquivalenceToAToBConstraint.B">B</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@convertEquivalenceToAToBConstraint[A,B](equivalenceOfB:org.scalactic.Equivalence[B])(implicitev:&lt;:&lt;[A,B]):org.scalactic.CanEqual[A,B]" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TripleEquals → TripleEqualsSupport</dd></dl></div>
+    </li><li name="org.scalactic.TripleEquals#convertEquivalenceToAToBConversionConstraint" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="convertEquivalenceToAToBConversionConstraint[A,B](equivalenceOfB:org.scalactic.Equivalence[B])(implicitev:A=&gt;B):org.scalactic.CanEqual[A,B]"></a>
+      <a id="convertEquivalenceToAToBConversionConstraint[A,B](Equivalence[B])((A)⇒B):CanEqual[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">convertEquivalenceToAToBConversionConstraint</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="equivalenceOfB">equivalenceOfB: <span class="extype" name="org.scalactic.Equivalence">Equivalence</span>[<span class="extype" name="org.scalactic.TripleEquals.convertEquivalenceToAToBConversionConstraint.B">B</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: (<span class="extype" name="org.scalactic.TripleEquals.convertEquivalenceToAToBConversionConstraint.A">A</span>) ⇒ <span class="extype" name="org.scalactic.TripleEquals.convertEquivalenceToAToBConversionConstraint.B">B</span></span>)</span><span class="result">: <span class="extype" name="org.scalactic.CanEqual">CanEqual</span>[<span class="extype" name="org.scalactic.TripleEquals.convertEquivalenceToAToBConversionConstraint.A">A</span>, <span class="extype" name="org.scalactic.TripleEquals.convertEquivalenceToAToBConversionConstraint.B">B</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@convertEquivalenceToAToBConversionConstraint[A,B](equivalenceOfB:org.scalactic.Equivalence[B])(implicitev:A=&gt;B):org.scalactic.CanEqual[A,B]" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TripleEquals → TripleEqualsSupport</dd></dl></div>
+    </li><li name="org.scalactic.TripleEquals#convertEquivalenceToBToAConstraint" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="convertEquivalenceToBToAConstraint[A,B](equivalenceOfA:org.scalactic.Equivalence[A])(implicitev:&lt;:&lt;[B,A]):org.scalactic.CanEqual[A,B]"></a>
+      <a id="convertEquivalenceToBToAConstraint[A,B](Equivalence[A])(&lt;:&lt;[B,A]):CanEqual[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">convertEquivalenceToBToAConstraint</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="equivalenceOfA">equivalenceOfA: <span class="extype" name="org.scalactic.Equivalence">Equivalence</span>[<span class="extype" name="org.scalactic.TripleEquals.convertEquivalenceToBToAConstraint.A">A</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: <span class="extype" name="scala.Predef.&lt;:&lt;">&lt;:&lt;</span>[<span class="extype" name="org.scalactic.TripleEquals.convertEquivalenceToBToAConstraint.B">B</span>, <span class="extype" name="org.scalactic.TripleEquals.convertEquivalenceToBToAConstraint.A">A</span>]</span>)</span><span class="result">: <span class="extype" name="org.scalactic.CanEqual">CanEqual</span>[<span class="extype" name="org.scalactic.TripleEquals.convertEquivalenceToBToAConstraint.A">A</span>, <span class="extype" name="org.scalactic.TripleEquals.convertEquivalenceToBToAConstraint.B">B</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@convertEquivalenceToBToAConstraint[A,B](equivalenceOfA:org.scalactic.Equivalence[A])(implicitev:&lt;:&lt;[B,A]):org.scalactic.CanEqual[A,B]" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TripleEquals → TripleEqualsSupport</dd></dl></div>
+    </li><li name="org.scalactic.TripleEquals#convertEquivalenceToBToAConversionConstraint" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="convertEquivalenceToBToAConversionConstraint[A,B](equivalenceOfA:org.scalactic.Equivalence[A])(implicitev:B=&gt;A):org.scalactic.CanEqual[A,B]"></a>
+      <a id="convertEquivalenceToBToAConversionConstraint[A,B](Equivalence[A])((B)⇒A):CanEqual[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">convertEquivalenceToBToAConversionConstraint</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span name="equivalenceOfA">equivalenceOfA: <span class="extype" name="org.scalactic.Equivalence">Equivalence</span>[<span class="extype" name="org.scalactic.TripleEquals.convertEquivalenceToBToAConversionConstraint.A">A</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ev">ev: (<span class="extype" name="org.scalactic.TripleEquals.convertEquivalenceToBToAConversionConstraint.B">B</span>) ⇒ <span class="extype" name="org.scalactic.TripleEquals.convertEquivalenceToBToAConversionConstraint.A">A</span></span>)</span><span class="result">: <span class="extype" name="org.scalactic.CanEqual">CanEqual</span>[<span class="extype" name="org.scalactic.TripleEquals.convertEquivalenceToBToAConversionConstraint.A">A</span>, <span class="extype" name="org.scalactic.TripleEquals.convertEquivalenceToBToAConversionConstraint.B">B</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@convertEquivalenceToBToAConversionConstraint[A,B](equivalenceOfA:org.scalactic.Equivalence[A])(implicitev:B=&gt;A):org.scalactic.CanEqual[A,B]" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TripleEquals → TripleEqualsSupport</dd></dl></div>
+    </li><li name="org.scalactic.TripleEquals#convertToCheckingEqualizer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="convertToCheckingEqualizer[T](left:T):TripleEquals.this.CheckingEqualizer[T]"></a>
+      <a id="convertToCheckingEqualizer[T](T):CheckingEqualizer[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">convertToCheckingEqualizer</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="left">left: <span class="extype" name="org.scalactic.TripleEquals.convertToCheckingEqualizer.T">T</span></span>)</span><span class="result">: <a href="#CheckingEqualizer[L]extendsAnyRef" class="extmbr" name="TestPartitionCopy.CheckingEqualizer">CheckingEqualizer</a>[<span class="extype" name="org.scalactic.TripleEquals.convertToCheckingEqualizer.T">T</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@convertToCheckingEqualizer[T](left:T):TripleEquals.this.CheckingEqualizer[T]" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TripleEquals → TripleEqualsSupport</dd></dl></div>
+    </li><li name="org.scalactic.TripleEquals#convertToEqualizer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="convertToEqualizer[T](left:T):TripleEquals.this.Equalizer[T]"></a>
+      <a id="convertToEqualizer[T](T):Equalizer[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">convertToEqualizer</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="left">left: <span class="extype" name="org.scalactic.TripleEquals.convertToEqualizer.T">T</span></span>)</span><span class="result">: <a href="#Equalizer[L]extendsAnyRef" class="extmbr" name="TestPartitionCopy.Equalizer">Equalizer</a>[<span class="extype" name="org.scalactic.TripleEquals.convertToEqualizer.T">T</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@convertToEqualizer[T](left:T):TripleEquals.this.Equalizer[T]" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TripleEquals → TripleEqualsSupport</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike#convertToInAndIgnoreMethods" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="convertToInAndIgnoreMethods(resultOfStringPassedToVerb:org.scalatest.words.ResultOfStringPassedToVerb):FlatSpecLike.this.InAndIgnoreMethods"></a>
+      <a id="convertToInAndIgnoreMethods(ResultOfStringPassedToVerb):InAndIgnoreMethods"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">convertToInAndIgnoreMethods</span><span class="params">(<span name="resultOfStringPassedToVerb">resultOfStringPassedToVerb: <span class="extype" name="org.scalatest.words.ResultOfStringPassedToVerb">ResultOfStringPassedToVerb</span></span>)</span><span class="result">: <a href="#InAndIgnoreMethodsextendsAnyRef" class="extmbr" name="TestPartitionCopy.InAndIgnoreMethods">InAndIgnoreMethods</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@convertToInAndIgnoreMethods(resultOfStringPassedToVerb:org.scalatest.words.ResultOfStringPassedToVerb):FlatSpecLike.this.InAndIgnoreMethods" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike#convertToInAndIgnoreMethodsAfterTaggedAs" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="convertToInAndIgnoreMethodsAfterTaggedAs(resultOfTaggedAsInvocation:org.scalatest.words.ResultOfTaggedAsInvocation):FlatSpecLike.this.InAndIgnoreMethodsAfterTaggedAs"></a>
+      <a id="convertToInAndIgnoreMethodsAfterTaggedAs(ResultOfTaggedAsInvocation):InAndIgnoreMethodsAfterTaggedAs"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">convertToInAndIgnoreMethodsAfterTaggedAs</span><span class="params">(<span name="resultOfTaggedAsInvocation">resultOfTaggedAsInvocation: <span class="extype" name="org.scalatest.words.ResultOfTaggedAsInvocation">ResultOfTaggedAsInvocation</span></span>)</span><span class="result">: <a href="#InAndIgnoreMethodsAfterTaggedAsextendsAnyRef" class="extmbr" name="TestPartitionCopy.InAndIgnoreMethodsAfterTaggedAs">InAndIgnoreMethodsAfterTaggedAs</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@convertToInAndIgnoreMethodsAfterTaggedAs(resultOfTaggedAsInvocation:org.scalatest.words.ResultOfTaggedAsInvocation):FlatSpecLike.this.InAndIgnoreMethodsAfterTaggedAs" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike</dd></dl></div>
+    </li><li name="org.scalatest.words.CanVerb#convertToStringCanWrapper" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="convertToStringCanWrapper(o:String)(implicitposition:org.scalactic.source.Position):CanVerb.this.StringCanWrapperForVerb"></a>
+      <a id="convertToStringCanWrapper(String)(Position):StringCanWrapperForVerb"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">convertToStringCanWrapper</span><span class="params">(<span name="o">o: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="position">position: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <a href="#StringCanWrapperForVerbextendsAnyRef" class="extmbr" name="TestPartitionCopy.StringCanWrapperForVerb">StringCanWrapperForVerb</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@convertToStringCanWrapper(o:String)(implicitposition:org.scalactic.source.Position):CanVerb.this.StringCanWrapperForVerb" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>CanVerb</dd></dl></div>
+    </li><li name="org.scalatest.words.MustVerb#convertToStringMustWrapperForVerb" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="convertToStringMustWrapperForVerb(o:String)(implicitposition:org.scalactic.source.Position):MustVerb.this.StringMustWrapperForVerb"></a>
+      <a id="convertToStringMustWrapperForVerb(String)(Position):StringMustWrapperForVerb"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">convertToStringMustWrapperForVerb</span><span class="params">(<span name="o">o: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="position">position: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <a href="#StringMustWrapperForVerbextendsAnyRef" class="extmbr" name="TestPartitionCopy.StringMustWrapperForVerb">StringMustWrapperForVerb</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@convertToStringMustWrapperForVerb(o:String)(implicitposition:org.scalactic.source.Position):MustVerb.this.StringMustWrapperForVerb" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MustVerb</dd></dl></div>
+    </li><li name="org.scalatest.words.ShouldVerb#convertToStringShouldWrapperForVerb" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="convertToStringShouldWrapperForVerb(o:String)(implicitposition:org.scalactic.source.Position):ShouldVerb.this.StringShouldWrapperForVerb"></a>
+      <a id="convertToStringShouldWrapperForVerb(String)(Position):StringShouldWrapperForVerb"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">convertToStringShouldWrapperForVerb</span><span class="params">(<span name="o">o: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="position">position: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <a href="#StringShouldWrapperForVerbextendsAnyRef" class="extmbr" name="TestPartitionCopy.StringShouldWrapperForVerb">StringShouldWrapperForVerb</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@convertToStringShouldWrapperForVerb(o:String)(implicitposition:org.scalactic.source.Position):ShouldVerb.this.StringShouldWrapperForVerb" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ShouldVerb</dd></dl></div>
+    </li><li name="org.scalactic.TripleEqualsSupport#defaultEquality" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="defaultEquality[A]:org.scalactic.Equality[A]"></a>
+      <a id="defaultEquality[A]:Equality[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">defaultEquality</span><span class="tparams">[<span name="A">A</span>]</span><span class="result">: <span class="extype" name="org.scalactic.Equality">Equality</span>[<span class="extype" name="org.scalactic.TripleEqualsSupport.defaultEquality.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@defaultEquality[A]:org.scalactic.Equality[A]" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TripleEqualsSupport</dd></dl></div>
+    </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eq(x$1:AnyRef):Boolean"></a>
+      <a id="eq(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eq</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@eq(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a>
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@equals(x$1:Any):Boolean" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="org.scalatest.Suite#execute" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="execute(testName:String,configMap:org.scalatest.ConfigMap,color:Boolean,durations:Boolean,shortstacks:Boolean,fullstacks:Boolean,stats:Boolean):Unit"></a>
+      <a id="execute(String,ConfigMap,Boolean,Boolean,Boolean,Boolean,Boolean):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">execute</span><span class="params">(<span name="testName">testName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="configMap">configMap: <span class="extype" name="org.scalatest.ConfigMap">ConfigMap</span></span>, <span name="color">color: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="durations">durations: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="shortstacks">shortstacks: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="fullstacks">fullstacks: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="stats">stats: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@execute(testName:String,configMap:org.scalatest.ConfigMap,color:Boolean,durations:Boolean,shortstacks:Boolean,fullstacks:Boolean,stats:Boolean):Unit" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Suite</dd></dl></div>
+    </li><li name="org.scalatest.Suite#expectedTestCount" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="expectedTestCount(filter:org.scalatest.Filter):Int"></a>
+      <a id="expectedTestCount(Filter):Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">expectedTestCount</span><span class="params">(<span name="filter">filter: <span class="extype" name="org.scalatest.Filter">Filter</span></span>)</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@expectedTestCount(filter:org.scalatest.Filter):Int" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Suite</dd></dl></div>
+    </li><li name="org.scalatest.Assertions#fail" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fail(cause:Throwable)(implicitpos:org.scalactic.source.Position):Nothing"></a>
+      <a id="fail(Throwable)(Position):Nothing"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fail</span><span class="params">(<span name="cause">cause: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="pos">pos: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <span class="extype" name="scala.Nothing">Nothing</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@fail(cause:Throwable)(implicitpos:org.scalactic.source.Position):Nothing" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="org.scalatest.Assertions#fail" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fail(message:String,cause:Throwable)(implicitpos:org.scalactic.source.Position):Nothing"></a>
+      <a id="fail(String,Throwable)(Position):Nothing"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fail</span><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="cause">cause: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="pos">pos: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <span class="extype" name="scala.Nothing">Nothing</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@fail(message:String,cause:Throwable)(implicitpos:org.scalactic.source.Position):Nothing" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="org.scalatest.Assertions#fail" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fail(message:String)(implicitpos:org.scalactic.source.Position):Nothing"></a>
+      <a id="fail(String)(Position):Nothing"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fail</span><span class="params">(<span name="message">message: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="pos">pos: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <span class="extype" name="scala.Nothing">Nothing</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@fail(message:String)(implicitpos:org.scalactic.source.Position):Nothing" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="org.scalatest.Assertions#fail" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="fail()(implicitpos:org.scalactic.source.Position):Nothing"></a>
+      <a id="fail()(Position):Nothing"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fail</span><span class="params">()</span><span class="params">(<span class="implicit">implicit </span><span name="pos">pos: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <span class="extype" name="scala.Nothing">Nothing</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@fail()(implicitpos:org.scalactic.source.Position):Nothing" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <a id="finalize():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@finalize():Unit" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getClass():Class[_]"></a>
+      <a id="getClass():Class[_]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getClass</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.Class">Class</span>[_]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@getClass():Class[_]" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@hashCode():Int" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike#ignore" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ignore:FlatSpecLike.this.IgnoreWord"></a>
+      <a id="ignore:IgnoreWord"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ignore</span><span class="result">: <a href="#IgnoreWordextendsAnyRef" class="extmbr" name="TestPartitionCopy.IgnoreWord">IgnoreWord</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@ignore:FlatSpecLike.this.IgnoreWord" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike#info" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="info:org.scalatest.Informer"></a>
+      <a id="info:Informer"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">info</span><span class="result">: <span class="extype" name="org.scalatest.Informer">Informer</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@info:org.scalatest.Informer" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike → Informing</dd></dl></div>
+    </li><li name="org.scalatest.Assertions#intercept" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="intercept[T&lt;:AnyRef](f:=&gt;Any)(implicitclassTag:scala.reflect.ClassTag[T],implicitpos:org.scalactic.source.Position):T"></a>
+      <a id="intercept[T&lt;:AnyRef](⇒Any)(ClassTag[T],Position):T"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">intercept</span><span class="tparams">[<span name="T">T &lt;: <span class="extype" name="scala.AnyRef">AnyRef</span></span>]</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="scala.Any">Any</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="classTag">classTag: <span class="extype" name="scala.reflect.ClassTag">ClassTag</span>[<span class="extype" name="org.scalatest.Assertions.intercept.T">T</span>]</span>, <span name="pos">pos: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <span class="extype" name="org.scalatest.Assertions.intercept.T">T</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@intercept[T&lt;:AnyRef](f:=&gt;Any)(implicitclassTag:scala.reflect.ClassTag[T],implicitpos:org.scalactic.source.Position):T" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="org.scalatest.BeforeAndAfterAll#invokeBeforeAllAndAfterAllEvenIfNoTestsAreExpected" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="invokeBeforeAllAndAfterAllEvenIfNoTestsAreExpected:Boolean"></a>
+      <a id="invokeBeforeAllAndAfterAllEvenIfNoTestsAreExpected:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">invokeBeforeAllAndAfterAllEvenIfNoTestsAreExpected</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@invokeBeforeAllAndAfterAllEvenIfNoTestsAreExpected:Boolean" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>BeforeAndAfterAll</dd></dl></div>
+    </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <a id="isInstanceOf[T0]:Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isInstanceOf</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@isInstanceOf[T0]:Boolean" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike#it" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="it:FlatSpecLike.this.ItWord"></a>
+      <a id="it:ItWord"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">it</span><span class="result">: <a href="#ItWordextendsAnyRef" class="extmbr" name="TestPartitionCopy.ItWord">ItWord</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@it:FlatSpecLike.this.ItWord" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike</dd></dl></div>
+    </li><li name="org.scalactic.TripleEquals#lowPriorityConversionCheckedConstraint" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="lowPriorityConversionCheckedConstraint[A,B](implicitequivalenceOfB:org.scalactic.Equivalence[B],implicitcnv:A=&gt;B):org.scalactic.CanEqual[A,B]"></a>
+      <a id="lowPriorityConversionCheckedConstraint[A,B](Equivalence[B],(A)⇒B):CanEqual[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">lowPriorityConversionCheckedConstraint</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="equivalenceOfB">equivalenceOfB: <span class="extype" name="org.scalactic.Equivalence">Equivalence</span>[<span class="extype" name="org.scalactic.TripleEquals.lowPriorityConversionCheckedConstraint.B">B</span>]</span>, <span name="cnv">cnv: (<span class="extype" name="org.scalactic.TripleEquals.lowPriorityConversionCheckedConstraint.A">A</span>) ⇒ <span class="extype" name="org.scalactic.TripleEquals.lowPriorityConversionCheckedConstraint.B">B</span></span>)</span><span class="result">: <span class="extype" name="org.scalactic.CanEqual">CanEqual</span>[<span class="extype" name="org.scalactic.TripleEquals.lowPriorityConversionCheckedConstraint.A">A</span>, <span class="extype" name="org.scalactic.TripleEquals.lowPriorityConversionCheckedConstraint.B">B</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@lowPriorityConversionCheckedConstraint[A,B](implicitequivalenceOfB:org.scalactic.Equivalence[B],implicitcnv:A=&gt;B):org.scalactic.CanEqual[A,B]" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TripleEquals → TripleEqualsSupport</dd></dl></div>
+    </li><li name="org.scalactic.TripleEquals#lowPriorityTypeCheckedConstraint" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="lowPriorityTypeCheckedConstraint[A,B](implicitequivalenceOfB:org.scalactic.Equivalence[B],implicitev:&lt;:&lt;[A,B]):org.scalactic.CanEqual[A,B]"></a>
+      <a id="lowPriorityTypeCheckedConstraint[A,B](Equivalence[B],&lt;:&lt;[A,B]):CanEqual[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">lowPriorityTypeCheckedConstraint</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="equivalenceOfB">equivalenceOfB: <span class="extype" name="org.scalactic.Equivalence">Equivalence</span>[<span class="extype" name="org.scalactic.TripleEquals.lowPriorityTypeCheckedConstraint.B">B</span>]</span>, <span name="ev">ev: <span class="extype" name="scala.Predef.&lt;:&lt;">&lt;:&lt;</span>[<span class="extype" name="org.scalactic.TripleEquals.lowPriorityTypeCheckedConstraint.A">A</span>, <span class="extype" name="org.scalactic.TripleEquals.lowPriorityTypeCheckedConstraint.B">B</span>]</span>)</span><span class="result">: <span class="extype" name="org.scalactic.CanEqual">CanEqual</span>[<span class="extype" name="org.scalactic.TripleEquals.lowPriorityTypeCheckedConstraint.A">A</span>, <span class="extype" name="org.scalactic.TripleEquals.lowPriorityTypeCheckedConstraint.B">B</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@lowPriorityTypeCheckedConstraint[A,B](implicitequivalenceOfB:org.scalactic.Equivalence[B],implicitev:&lt;:&lt;[A,B]):org.scalactic.CanEqual[A,B]" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TripleEquals → TripleEqualsSupport</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike#markup" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="markup:org.scalatest.Documenter"></a>
+      <a id="markup:Documenter"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">markup</span><span class="result">: <span class="extype" name="org.scalatest.Documenter">Documenter</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@markup:org.scalatest.Documenter" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike → Documenting</dd></dl></div>
+    </li><li name="TestPartitionCopy#modifiedDLT" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="modifiedDLT:org.apache.spark.sql.DataFrame"></a>
+      <a id="modifiedDLT:DataFrame"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">modifiedDLT</span><span class="result">: <span class="extype" name="org.apache.spark.sql.DataFrame">DataFrame</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@modifiedDLT:org.apache.spark.sql.DataFrame" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ne(x$1:AnyRef):Boolean"></a>
+      <a id="ne(AnyRef):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ne</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@ne(x$1:AnyRef):Boolean" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="org.scalatest.Suite#nestedSuites" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="nestedSuites:scala.collection.immutable.IndexedSeq[org.scalatest.Suite]"></a>
+      <a id="nestedSuites:IndexedSeq[Suite]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">nestedSuites</span><span class="result">: <span class="extype" name="scala.collection.immutable.IndexedSeq">IndexedSeq</span>[<span class="extype" name="org.scalatest.Suite">Suite</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@nestedSuites:scala.collection.immutable.IndexedSeq[org.scalatest.Suite]" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Suite</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike#note" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="note:org.scalatest.Notifier"></a>
+      <a id="note:Notifier"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">note</span><span class="result">: <span class="extype" name="org.scalatest.Notifier">Notifier</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@note:org.scalatest.Notifier" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike → Notifying</dd></dl></div>
+    </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notify():Unit"></a>
+      <a id="notify():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notify</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@notify():Unit" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#notifyAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="notifyAll():Unit"></a>
+      <a id="notifyAll():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">notifyAll</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@notifyAll():Unit" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="org.scalatest.Assertions#pending" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="pending:org.scalatest.Assertionwithorg.scalatest.PendingStatement"></a>
+      <a id="pending:AssertionwithPendingStatement"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">pending</span><span class="result">: <span class="extype" name="org.scalatest.Assertion">Assertion</span> with <span class="extype" name="org.scalatest.PendingStatement">PendingStatement</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@pending:org.scalatest.Assertionwithorg.scalatest.PendingStatement" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="org.scalatest.Assertions#pendingUntilFixed" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="pendingUntilFixed(f:=&gt;Unit)(implicitpos:org.scalactic.source.Position):org.scalatest.Assertionwithorg.scalatest.PendingStatement"></a>
+      <a id="pendingUntilFixed(⇒Unit)(Position):AssertionwithPendingStatement"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">pendingUntilFixed</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="scala.Unit">Unit</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="pos">pos: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <span class="extype" name="org.scalatest.Assertion">Assertion</span> with <span class="extype" name="org.scalatest.PendingStatement">PendingStatement</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@pendingUntilFixed(f:=&gt;Unit)(implicitpos:org.scalactic.source.Position):org.scalatest.Assertionwithorg.scalatest.PendingStatement" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike#registerIgnoredTest" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="registerIgnoredTest(testText:String,testTags:org.scalatest.Tag*)(testFun:=&gt;Any)(implicitpos:org.scalactic.source.Position):Unit"></a>
+      <a id="registerIgnoredTest(String,Tag*)(⇒Any)(Position):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">registerIgnoredTest</span><span class="params">(<span name="testText">testText: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="testTags">testTags: <span class="extype" name="org.scalatest.Tag">Tag</span>*</span>)</span><span class="params">(<span name="testFun">testFun: ⇒ <span class="extype" name="scala.Any">Any</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="pos">pos: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@registerIgnoredTest(testText:String,testTags:org.scalatest.Tag*)(testFun:=&gt;Any)(implicitpos:org.scalactic.source.Position):Unit" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FlatSpecLike → TestRegistration</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike#registerTest" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="registerTest(testText:String,testTags:org.scalatest.Tag*)(testFun:=&gt;Any)(implicitpos:org.scalactic.source.Position):Unit"></a>
+      <a id="registerTest(String,Tag*)(⇒Any)(Position):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">registerTest</span><span class="params">(<span name="testText">testText: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="testTags">testTags: <span class="extype" name="org.scalatest.Tag">Tag</span>*</span>)</span><span class="params">(<span name="testFun">testFun: ⇒ <span class="extype" name="scala.Any">Any</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="pos">pos: <span class="extype" name="org.scalactic.source.Position">Position</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@registerTest(testText:String,testTags:org.scalatest.Tag*)(testFun:=&gt;Any)(implicitpos:org.scalactic.source.Position):Unit" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FlatSpecLike → TestRegistration</dd></dl></div>
+    </li><li name="org.scalatest.Suite#rerunner" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="rerunner:Option[String]"></a>
+      <a id="rerunner:Option[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rerunner</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@rerunner:Option[String]" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Suite</dd></dl></div>
+    </li><li name="org.scalatest.BeforeAndAfterAll#run" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="run(testName:Option[String],args:org.scalatest.Args):org.scalatest.Status"></a>
+      <a id="run(Option[String],Args):Status"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">run</span><span class="params">(<span name="testName">testName: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="args">args: <span class="extype" name="org.scalatest.Args">Args</span></span>)</span><span class="result">: <span class="extype" name="org.scalatest.Status">Status</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@run(testName:Option[String],args:org.scalatest.Args):org.scalatest.Status" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>BeforeAndAfterAll → SuiteMixin</dd></dl></div>
+    </li><li name="org.scalatest.Suite#runNestedSuites" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="runNestedSuites(args:org.scalatest.Args):org.scalatest.Status"></a>
+      <a id="runNestedSuites(Args):Status"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">runNestedSuites</span><span class="params">(<span name="args">args: <span class="extype" name="org.scalatest.Args">Args</span></span>)</span><span class="result">: <span class="extype" name="org.scalatest.Status">Status</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@runNestedSuites(args:org.scalatest.Args):org.scalatest.Status" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>Suite</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike#runTest" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="runTest(testName:String,args:org.scalatest.Args):org.scalatest.Status"></a>
+      <a id="runTest(String,Args):Status"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">runTest</span><span class="params">(<span name="testName">testName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="args">args: <span class="extype" name="org.scalatest.Args">Args</span></span>)</span><span class="result">: <span class="extype" name="org.scalatest.Status">Status</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@runTest(testName:String,args:org.scalatest.Args):org.scalatest.Status" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike → TestSuite → Suite</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike#runTests" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="runTests(testName:Option[String],args:org.scalatest.Args):org.scalatest.Status"></a>
+      <a id="runTests(Option[String],Args):Status"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">runTests</span><span class="params">(<span name="testName">testName: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="args">args: <span class="extype" name="org.scalatest.Args">Args</span></span>)</span><span class="result">: <span class="extype" name="org.scalatest.Status">Status</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@runTests(testName:Option[String],args:org.scalatest.Args):org.scalatest.Status" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike → Suite</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike#shorthandSharedTestRegistrationFunction" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="shorthandSharedTestRegistrationFunction:org.scalatest.words.StringVerbBehaveLikeInvocation"></a>
+      <a id="shorthandSharedTestRegistrationFunction:StringVerbBehaveLikeInvocation"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">shorthandSharedTestRegistrationFunction</span><span class="result">: <span class="extype" name="org.scalatest.words.StringVerbBehaveLikeInvocation">StringVerbBehaveLikeInvocation</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@shorthandSharedTestRegistrationFunction:org.scalatest.words.StringVerbBehaveLikeInvocation" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike#shorthandTestRegistrationFunction" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="shorthandTestRegistrationFunction:org.scalatest.words.StringVerbStringInvocation"></a>
+      <a id="shorthandTestRegistrationFunction:StringVerbStringInvocation"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">shorthandTestRegistrationFunction</span><span class="result">: <span class="extype" name="org.scalatest.words.StringVerbStringInvocation">StringVerbStringInvocation</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@shorthandTestRegistrationFunction:org.scalatest.words.StringVerbStringInvocation" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike</dd></dl></div>
+    </li><li name="TestPartitionCopy#spark" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="spark:org.apache.spark.sql.SparkSession"></a>
+      <a id="spark:SparkSession"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">spark</span><span class="result">: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@spark:org.apache.spark.sql.SparkSession" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="org.scalatest.FlatSpecLike#styleName" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="styleName:String"></a>
+      <a id="styleName:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">styleName</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@styleName:String" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FlatSpecLike → Suite</dd></dl></div>
+    </li><li name="org.scalatest.Assertions#succeed" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="succeed:org.scalatest.Assertion"></a>
+      <a id="succeed:Assertion"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">succeed</span><span class="result">: <span class="extype" name="org.scalatest.Assertion">Assertion</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@succeed:org.scalatest.Assertion" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="org.scalatest.Suite#suiteId" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="suiteId:String"></a>
+      <a id="suiteId:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">suiteId</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@suiteId:String" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Suite</dd></dl></div>
+    </li><li name="org.scalatest.Suite#suiteName" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="suiteName:String"></a>
+      <a id="suiteName:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">suiteName</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@suiteName:String" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Suite</dd></dl></div>
+    </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
+      <a id="synchronized[T0](⇒T0):T0"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">synchronized</span><span class="tparams">[<span name="T0">T0</span>]</span><span class="params">(<span name="arg0">arg0: ⇒ <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>)</span><span class="result">: <span class="extype" name="java.lang.AnyRef.synchronized.T0">T0</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@synchronized[T0](x$1:=&gt;T0):T0" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="TestPartitionCopy#t" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="t:TestUtils"></a>
+      <a id="t:TestUtils"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">t</span><span class="result">: <a href="TestUtils.html" class="extype" name="TestUtils">TestUtils</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@t:TestUtils" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="org.scalatest.FlatSpecLike#tags" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="tags:Map[String,Set[String]]"></a>
+      <a id="tags:Map[String,Set[String]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">tags</span><span class="result">: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="scala.Predef.String">String</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@tags:Map[String,Set[String]]" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FlatSpecLike → Suite</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike#testDataFor" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="testDataFor(testName:String,theConfigMap:org.scalatest.ConfigMap):org.scalatest.TestData"></a>
+      <a id="testDataFor(String,ConfigMap):TestData"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">testDataFor</span><span class="params">(<span name="testName">testName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="theConfigMap">theConfigMap: <span class="extype" name="org.scalatest.ConfigMap">ConfigMap</span></span>)</span><span class="result">: <span class="extype" name="org.scalatest.TestData">TestData</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@testDataFor(testName:String,theConfigMap:org.scalatest.ConfigMap):org.scalatest.TestData" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FlatSpecLike → Suite</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike#testNames" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="testNames:Set[String]"></a>
+      <a id="testNames:Set[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">testNames</span><span class="result">: <span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@testNames:Set[String]" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FlatSpecLike → Suite</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpecLike#they" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="they:FlatSpecLike.this.TheyWord"></a>
+      <a id="they:TheyWord"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">they</span><span class="result">: <a href="#TheyWordextendsAnyRef" class="extmbr" name="TestPartitionCopy.TheyWord">TheyWord</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@they:FlatSpecLike.this.TheyWord" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>FlatSpecLike</dd></dl></div>
+    </li><li name="org.scalatest.FlatSpec#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <a id="toString():String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@toString():String" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FlatSpec → AnyRef → Any</dd></dl></div>
+    </li><li name="org.scalactic.TripleEquals#typeCheckedConstraint" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="typeCheckedConstraint[A,B](implicitequivalenceOfA:org.scalactic.Equivalence[A],implicitev:&lt;:&lt;[B,A]):org.scalactic.CanEqual[A,B]"></a>
+      <a id="typeCheckedConstraint[A,B](Equivalence[A],&lt;:&lt;[B,A]):CanEqual[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">typeCheckedConstraint</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="equivalenceOfA">equivalenceOfA: <span class="extype" name="org.scalactic.Equivalence">Equivalence</span>[<span class="extype" name="org.scalactic.TripleEquals.typeCheckedConstraint.A">A</span>]</span>, <span name="ev">ev: <span class="extype" name="scala.Predef.&lt;:&lt;">&lt;:&lt;</span>[<span class="extype" name="org.scalactic.TripleEquals.typeCheckedConstraint.B">B</span>, <span class="extype" name="org.scalactic.TripleEquals.typeCheckedConstraint.A">A</span>]</span>)</span><span class="result">: <span class="extype" name="org.scalactic.CanEqual">CanEqual</span>[<span class="extype" name="org.scalactic.TripleEquals.typeCheckedConstraint.A">A</span>, <span class="extype" name="org.scalactic.TripleEquals.typeCheckedConstraint.B">B</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@typeCheckedConstraint[A,B](implicitequivalenceOfA:org.scalactic.Equivalence[A],implicitev:&lt;:&lt;[B,A]):org.scalactic.CanEqual[A,B]" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TripleEquals → TripleEqualsSupport</dd></dl></div>
+    </li><li name="org.scalactic.TripleEquals#unconstrainedEquality" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="unconstrainedEquality[A,B](implicitequalityOfA:org.scalactic.Equality[A]):org.scalactic.CanEqual[A,B]"></a>
+      <a id="unconstrainedEquality[A,B](Equality[A]):CanEqual[A,B]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unconstrainedEquality</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="equalityOfA">equalityOfA: <span class="extype" name="org.scalactic.Equality">Equality</span>[<span class="extype" name="org.scalactic.TripleEquals.unconstrainedEquality.A">A</span>]</span>)</span><span class="result">: <span class="extype" name="org.scalactic.CanEqual">CanEqual</span>[<span class="extype" name="org.scalactic.TripleEquals.unconstrainedEquality.A">A</span>, <span class="extype" name="org.scalactic.TripleEquals.unconstrainedEquality.B">B</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@unconstrainedEquality[A,B](implicitequalityOfA:org.scalactic.Equality[A]):org.scalactic.CanEqual[A,B]" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TripleEquals → TripleEqualsSupport</dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <a id="wait():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@wait():Unit" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long,x$2:Int):Unit"></a>
+      <a id="wait(Long,Int):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>, <span name="arg1">arg1: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@wait(x$1:Long,x$2:Int):Unit" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait(x$1:Long):Unit"></a>
+      <a id="wait(Long):Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@wait(x$1:Long):Unit" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="org.scalatest.Assertions#withClue" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withClue[T](clue:Any)(fun:=&gt;T):T"></a>
+      <a id="withClue[T](Any)(⇒T):T"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withClue</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="clue">clue: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="params">(<span name="fun">fun: ⇒ <span class="extype" name="org.scalatest.Assertions.withClue.T">T</span></span>)</span><span class="result">: <span class="extype" name="org.scalatest.Assertions.withClue.T">T</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@withClue[T](clue:Any)(fun:=&gt;T):T" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd></dl></div>
+    </li><li name="org.scalatest.TestSuite#withFixture" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="withFixture(test:TestSuite.this.NoArgTest):org.scalatest.Outcome"></a>
+      <a id="withFixture(NoArgTest):Outcome"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">withFixture</span><span class="params">(<span name="test">test: <a href="#NoArgTestextends()=&gt;org.scalatest.OutcomewithTestData" class="extmbr" name="TestPartitionCopy.NoArgTest">NoArgTest</a></span>)</span><span class="result">: <span class="extype" name="org.scalatest.Outcome">Outcome</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@withFixture(test:TestSuite.this.NoArgTest):org.scalatest.Outcome" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd>TestSuite</dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="org.scalatest.Suite#execute" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="execute:Unit"></a>
+      <a id="execute:Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: The parameterless execute method has been deprecated and will be removed in a future version of ScalaTest. Please invoke execute with empty parens instead: execute().">execute</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@execute:Unit" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Suite</dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p>The parameterless execute method has been deprecated and will be removed in a future version of ScalaTest. Please invoke execute with empty parens instead: execute().</p></dd></dl></div>
+    </li><li name="org.scalatest.Assertions#trap" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="trap[T](f:=&gt;T):Throwable"></a>
+      <a id="trap[T](⇒T):Throwable"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: The trap method is no longer needed for demos in the REPL, which now abreviates stack traces, and will be removed in a future version of ScalaTest">trap</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="f">f: ⇒ <span class="extype" name="org.scalatest.Assertions.trap.T">T</span></span>)</span><span class="result">: <span class="extype" name="scala.Throwable">Throwable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="index.html#TestPartitionCopy@trap[T](f:=&gt;T):Throwable" title="Permalink" target="_top">
+        <img src="lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Assertions</dd><dt>Annotations</dt><dd>
+                <span class="name">@deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"><p>The trap method is no longer needed for demos in the REPL, which now abreviates stack traces, and will be removed in a future version of ScalaTest</p></dd></dl></div>
+    </li></ol>
+            </div>
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="org.scalatest.BeforeAndAfterAll">
+              <h3>Inherited from <span class="extype" name="org.scalatest.BeforeAndAfterAll">BeforeAndAfterAll</span></h3>
+            </div><div class="parent" name="org.scalatest.SuiteMixin">
+              <h3>Inherited from <span class="extype" name="org.scalatest.SuiteMixin">SuiteMixin</span></h3>
+            </div><div class="parent" name="org.scalatest.FlatSpec">
+              <h3>Inherited from <span class="extype" name="org.scalatest.FlatSpec">FlatSpec</span></h3>
+            </div><div class="parent" name="org.scalatest.FlatSpecLike">
+              <h3>Inherited from <span class="extype" name="org.scalatest.FlatSpecLike">FlatSpecLike</span></h3>
+            </div><div class="parent" name="org.scalatest.Documenting">
+              <h3>Inherited from <span class="extype" name="org.scalatest.Documenting">Documenting</span></h3>
+            </div><div class="parent" name="org.scalatest.Alerting">
+              <h3>Inherited from <span class="extype" name="org.scalatest.Alerting">Alerting</span></h3>
+            </div><div class="parent" name="org.scalatest.Notifying">
+              <h3>Inherited from <span class="extype" name="org.scalatest.Notifying">Notifying</span></h3>
+            </div><div class="parent" name="org.scalatest.Informing">
+              <h3>Inherited from <span class="extype" name="org.scalatest.Informing">Informing</span></h3>
+            </div><div class="parent" name="org.scalatest.words.CanVerb">
+              <h3>Inherited from <span class="extype" name="org.scalatest.words.CanVerb">CanVerb</span></h3>
+            </div><div class="parent" name="org.scalatest.words.MustVerb">
+              <h3>Inherited from <span class="extype" name="org.scalatest.words.MustVerb">MustVerb</span></h3>
+            </div><div class="parent" name="org.scalatest.words.ShouldVerb">
+              <h3>Inherited from <span class="extype" name="org.scalatest.words.ShouldVerb">ShouldVerb</span></h3>
+            </div><div class="parent" name="org.scalatest.TestRegistration">
+              <h3>Inherited from <span class="extype" name="org.scalatest.TestRegistration">TestRegistration</span></h3>
+            </div><div class="parent" name="org.scalatest.TestSuite">
+              <h3>Inherited from <span class="extype" name="org.scalatest.TestSuite">TestSuite</span></h3>
+            </div><div class="parent" name="org.scalatest.Suite">
+              <h3>Inherited from <span class="extype" name="org.scalatest.Suite">Suite</span></h3>
+            </div><div class="parent" name="scala.Serializable">
+              <h3>Inherited from <span class="extype" name="scala.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="java.io.Serializable">
+              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="org.scalatest.Assertions">
+              <h3>Inherited from <span class="extype" name="org.scalatest.Assertions">Assertions</span></h3>
+            </div><div class="parent" name="org.scalactic.TripleEquals">
+              <h3>Inherited from <span class="extype" name="org.scalactic.TripleEquals">TripleEquals</span></h3>
+            </div><div class="parent" name="org.scalactic.TripleEqualsSupport">
+              <h3>Inherited from <span class="extype" name="org.scalactic.TripleEqualsSupport">TripleEqualsSupport</span></h3>
+            </div><div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+
+
+    </body>
+      </html>

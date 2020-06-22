@@ -103,8 +103,8 @@ object AclManager extends Serializable {
                       (implicit conf: Configuration): Array[FsOperationResult] = {
     //todo check if path is a folder
     val fs = getFileSystem(conf, folderUri)
-    val elements = listLevel(fs, Array(new Path(folderUri))) :+ FsElement(folderUri, true, 0)
-    val folders = elements.filter(_.isDirectory).map(_.path) 
+    val elements = listLevel(fs, Array(new Path(folderUri))) :+ FsElement(folderUri, true, 0) //add top level folder to set ACLs on
+    val folders = elements.filter(_.isDirectory).map(_.path)
     val files = elements.filter(!_.isDirectory).map(_.path)
 
     println("Files to process: " + files.length)
@@ -191,7 +191,8 @@ object AclManager extends Serializable {
 
     println("Assigning ACLs on source folders")
 
-    /** This function assigns ACL for the folders. If corresponding folder exists in target as it is in source, source folder gets target object's ACL assigned. If there is no corresponing folder, ACLs from parent folder are inherited
+    /**
+     * This function assigns ACL for the folders. If corresponding folder exists in target as it is in source, source folder gets target object's ACL assigned. If there is no corresponing folder, ACLs from parent folder are inherited
      *
      * @param rootUriPath Folder tree root to apply acls on
      * @param defaultAcl  Root folder ACLs

@@ -1,3 +1,5 @@
+Scaladoc link https://procter-gamble-tech.github.io/octopufs/#com.pg.bigdata.octopufs.package
+
 ## OctopuFS
 OctopuFS is Scala/Spark toolkit to manage cloud storage, especially ADLSgen2 directly from databricks. It provides several capabilities, which internally have retry mechanism built in, which will repeat unsuccessful operations up to 5 times :
 ## File copy 

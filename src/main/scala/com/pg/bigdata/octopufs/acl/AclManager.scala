@@ -101,7 +101,7 @@ object AclManager extends Serializable {
    * @param conf - configuration of hadoop. Best to get it is from spark.sparkContext.hadoopConfiguration
    * @return Array of FsOperationResult objects containing information if operation succeeded for each path.
    */
-  def modifyFolderACLs(folderUri: String, newPermission: FsPermission, overwrite: Boolean = true)
+  def modifyFolderACLs(folderUri: String, newPermission: FsPermission, overwrite: Boolean = false)
                       (implicit conf: Configuration): Array[FsOperationResult] = {
     //todo check if path is a folder
     val fs = getFileSystem(conf, folderUri)

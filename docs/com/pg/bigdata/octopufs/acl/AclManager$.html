@@ -183,6 +183,42 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.pg.bigdata.octopufs.acl.AclManager#clearAcls" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clearAcls(paths:Array[String],attempt:Int)(implicitconf:org.apache.hadoop.conf.Configuration):Array[com.pg.bigdata.octopufs.fs.FsOperationResult]"></a>
+      <a id="clearAcls(Array[String],Int)(Configuration):Array[FsOperationResult]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clearAcls</span><span class="params">(<span name="paths">paths: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="attempt">attempt: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">0</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="conf">conf: <span class="extype" name="org.apache.hadoop.conf.Configuration">Configuration</span></span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<a href="../fs/FsOperationResult.html" class="extype" name="com.pg.bigdata.octopufs.fs.FsOperationResult">FsOperationResult</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.pg.bigdata.octopufs.acl.AclManager$@clearAcls(paths:Array[String],attempt:Int)(implicitconf:org.apache.hadoop.conf.Configuration):Array[com.pg.bigdata.octopufs.fs.FsOperationResult]" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Removes all but the base ACL entries of profided paths</p><div class="fullcomment"><div class="comment cmt"><p>Removes all but the base ACL entries of profided paths</p></div><dl class="paramcmts block"><dt class="param">paths</dt><dd class="cmt"><p>- array of paths (strings) - must be absolute path</p></dd><dt class="param">attempt</dt><dd class="cmt"><p>- retry feature - do not use</p></dd><dt class="param">conf</dt><dd class="cmt"><p>- HadoopConfiguration (spark.sparkContext.hadoopConfiguration)</p></dd><dt>returns</dt><dd class="cmt"><p>Array with information which paths were processed and if successfully.</p></dd></dl></div>
+    </li><li name="com.pg.bigdata.octopufs.acl.AclManager#clearFolderAcls" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="clearFolderAcls(folderUri:String)(implicitconf:org.apache.hadoop.conf.Configuration):Array[com.pg.bigdata.octopufs.fs.FsOperationResult]"></a>
+      <a id="clearFolderAcls(String)(Configuration):Array[FsOperationResult]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clearFolderAcls</span><span class="params">(<span name="folderUri">folderUri: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="conf">conf: <span class="extype" name="org.apache.hadoop.conf.Configuration">Configuration</span></span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<a href="../fs/FsOperationResult.html" class="extype" name="com.pg.bigdata.octopufs.fs.FsOperationResult">FsOperationResult</a>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../../index.html#com.pg.bigdata.octopufs.acl.AclManager$@clearFolderAcls(folderUri:String)(implicitconf:org.apache.hadoop.conf.Configuration):Array[com.pg.bigdata.octopufs.fs.FsOperationResult]" title="Permalink" target="_top">
+        <img src="../../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Removes all but the base ACL entries of files and directories in the folder/file tree of provided folder
+</p><div class="fullcomment"><div class="comment cmt"><p>Removes all but the base ACL entries of files and directories in the folder/file tree of provided folder
+</p></div><dl class="paramcmts block"><dt class="param">folderUri</dt><dd class="cmt"><p>- parent folder of folder tree to remove ACLs from</p></dd><dt class="param">conf</dt><dd class="cmt"><p>- HadoopConfiguration (spark.sparkContext.hadoopConfiguration)</p></dd><dt>returns</dt><dd class="cmt"><p>- Array with information which paths were processed and if successfully.</p></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -366,39 +402,39 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.pg.bigdata.octopufs.acl.AclManager#modifyAcl" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="modifyAcl(paths:Array[String],newFsPermission:com.pg.bigdata.octopufs.acl.AclManager.FsPermission,overwrite:Boolean,attempt:Int)(implicitconf:org.apache.hadoop.conf.Configuration):Array[com.pg.bigdata.octopufs.fs.FsOperationResult]"></a>
-      <a id="modifyAcl(Array[String],FsPermission,Boolean,Int)(Configuration):Array[FsOperationResult]"></a>
+      <a id="modifyAcl(paths:Array[String],newFsPermission:com.pg.bigdata.octopufs.acl.AclManager.FsPermission,attempt:Int)(implicitconf:org.apache.hadoop.conf.Configuration):Array[com.pg.bigdata.octopufs.fs.FsOperationResult]"></a>
+      <a id="modifyAcl(Array[String],FsPermission,Int)(Configuration):Array[FsOperationResult]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">modifyAcl</span><span class="params">(<span name="paths">paths: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="newFsPermission">newFsPermission: <a href="AclManager$$FsPermission.html" class="extype" name="com.pg.bigdata.octopufs.acl.AclManager.FsPermission">FsPermission</a></span>, <span name="overwrite">overwrite: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="attempt">attempt: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">0</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="conf">conf: <span class="extype" name="org.apache.hadoop.conf.Configuration">Configuration</span></span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<a href="../fs/FsOperationResult.html" class="extype" name="com.pg.bigdata.octopufs.fs.FsOperationResult">FsOperationResult</a>]</span>
+        <span class="name">modifyAcl</span><span class="params">(<span name="paths">paths: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="newFsPermission">newFsPermission: <a href="AclManager$$FsPermission.html" class="extype" name="com.pg.bigdata.octopufs.acl.AclManager.FsPermission">FsPermission</a></span>, <span name="attempt">attempt: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">0</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="conf">conf: <span class="extype" name="org.apache.hadoop.conf.Configuration">Configuration</span></span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<a href="../fs/FsOperationResult.html" class="extype" name="com.pg.bigdata.octopufs.fs.FsOperationResult">FsOperationResult</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../../index.html#com.pg.bigdata.octopufs.acl.AclManager$@modifyAcl(paths:Array[String],newFsPermission:com.pg.bigdata.octopufs.acl.AclManager.FsPermission,overwrite:Boolean,attempt:Int)(implicitconf:org.apache.hadoop.conf.Configuration):Array[com.pg.bigdata.octopufs.fs.FsOperationResult]" title="Permalink" target="_top">
+      <a href="../../../../../index.html#com.pg.bigdata.octopufs.acl.AclManager$@modifyAcl(paths:Array[String],newFsPermission:com.pg.bigdata.octopufs.acl.AclManager.FsPermission,attempt:Int)(implicitconf:org.apache.hadoop.conf.Configuration):Array[com.pg.bigdata.octopufs.fs.FsOperationResult]" title="Permalink" target="_top">
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Modifies ACLs for all provided paths (path is absolute like abfss://cont@nameofsa.dfs.microsoft....)</p><div class="fullcomment"><div class="comment cmt"><p>Modifies ACLs for all provided paths (path is absolute like abfss://cont@nameofsa.dfs.microsoft....)</p></div><dl class="paramcmts block"><dt class="param">paths</dt><dd class="cmt"><p>- Array of paths to modify ACLs for</p></dd><dt class="param">newFsPermission</dt><dd class="cmt"><p>- permission which will be set for all paths provided.</p></dd><dt class="param">overwrite</dt><dd class="cmt"><p>- if true, then ALL ACLs will be replaced with this new ACL</p></dd><dt class="param">attempt</dt><dd class="cmt"><p>- retry feature. Keep at 0 (default)</p></dd><dt class="param">conf</dt><dd class="cmt"><p>- configuration of hadoop. Best to get it is from spark.sparkContext.hadoopConfiguration</p></dd><dt>returns</dt><dd class="cmt"><p>Array of FsOperationResult objects containing information if operation succeeded for each path.</p></dd></dl></div>
+      <p class="shortcomment cmt">Modifies ACLs for all provided paths (path is absolute like abfss://cont@nameofsa.dfs.microsoft....)</p><div class="fullcomment"><div class="comment cmt"><p>Modifies ACLs for all provided paths (path is absolute like abfss://cont@nameofsa.dfs.microsoft....)</p></div><dl class="paramcmts block"><dt class="param">paths</dt><dd class="cmt"><p>- Array of paths to modify ACLs for</p></dd><dt class="param">newFsPermission</dt><dd class="cmt"><p>- permission which will be set for all paths provided.</p></dd><dt class="param">attempt</dt><dd class="cmt"><p>- retry feature. Keep at 0 (default)</p></dd><dt class="param">conf</dt><dd class="cmt"><p>- configuration of hadoop. Best to get it is from spark.sparkContext.hadoopConfiguration</p></dd><dt>returns</dt><dd class="cmt"><p>Array of FsOperationResult objects containing information if operation succeeded for each path.</p></dd></dl></div>
     </li><li name="com.pg.bigdata.octopufs.acl.AclManager#modifyFolderACLs" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="modifyFolderACLs(folderUri:String,newPermission:com.pg.bigdata.octopufs.acl.AclManager.FsPermission,overwrite:Boolean)(implicitconf:org.apache.hadoop.conf.Configuration):Array[com.pg.bigdata.octopufs.fs.FsOperationResult]"></a>
-      <a id="modifyFolderACLs(String,FsPermission,Boolean)(Configuration):Array[FsOperationResult]"></a>
+      <a id="modifyFolderACLs(folderUri:String,newPermission:com.pg.bigdata.octopufs.acl.AclManager.FsPermission)(implicitconf:org.apache.hadoop.conf.Configuration):Array[com.pg.bigdata.octopufs.fs.FsOperationResult]"></a>
+      <a id="modifyFolderACLs(String,FsPermission)(Configuration):Array[FsOperationResult]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">modifyFolderACLs</span><span class="params">(<span name="folderUri">folderUri: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="newPermission">newPermission: <a href="AclManager$$FsPermission.html" class="extype" name="com.pg.bigdata.octopufs.acl.AclManager.FsPermission">FsPermission</a></span>, <span name="overwrite">overwrite: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="conf">conf: <span class="extype" name="org.apache.hadoop.conf.Configuration">Configuration</span></span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<a href="../fs/FsOperationResult.html" class="extype" name="com.pg.bigdata.octopufs.fs.FsOperationResult">FsOperationResult</a>]</span>
+        <span class="name">modifyFolderACLs</span><span class="params">(<span name="folderUri">folderUri: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="newPermission">newPermission: <a href="AclManager$$FsPermission.html" class="extype" name="com.pg.bigdata.octopufs.acl.AclManager.FsPermission">FsPermission</a></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="conf">conf: <span class="extype" name="org.apache.hadoop.conf.Configuration">Configuration</span></span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<a href="../fs/FsOperationResult.html" class="extype" name="com.pg.bigdata.octopufs.fs.FsOperationResult">FsOperationResult</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../../index.html#com.pg.bigdata.octopufs.acl.AclManager$@modifyFolderACLs(folderUri:String,newPermission:com.pg.bigdata.octopufs.acl.AclManager.FsPermission,overwrite:Boolean)(implicitconf:org.apache.hadoop.conf.Configuration):Array[com.pg.bigdata.octopufs.fs.FsOperationResult]" title="Permalink" target="_top">
+      <a href="../../../../../index.html#com.pg.bigdata.octopufs.acl.AclManager$@modifyFolderACLs(folderUri:String,newPermission:com.pg.bigdata.octopufs.acl.AclManager.FsPermission)(implicitconf:org.apache.hadoop.conf.Configuration):Array[com.pg.bigdata.octopufs.fs.FsOperationResult]" title="Permalink" target="_top">
         <img src="../../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Modifies ACLs for folder and all it's files.</p><div class="fullcomment"><div class="comment cmt"><p>Modifies ACLs for folder and all it's files.</p></div><dl class="paramcmts block"><dt class="param">folderUri</dt><dd class="cmt"><p>- absolute path to the folder like abfss://cont@nameofsa.dfs.microsoft....</p></dd><dt class="param">newPermission</dt><dd class="cmt"><p>- permission to set</p></dd><dt class="param">overwrite</dt><dd class="cmt"><p>- if true, then ALL ACLs will be replaced with this new ACL</p></dd><dt class="param">conf</dt><dd class="cmt"><p>- configuration of hadoop. Best to get it is from spark.sparkContext.hadoopConfiguration</p></dd><dt>returns</dt><dd class="cmt"><p>Array of FsOperationResult objects containing information if operation succeeded for each path.</p></dd></dl></div>
+      <p class="shortcomment cmt">Modifies ACLs for folder and all it's files.</p><div class="fullcomment"><div class="comment cmt"><p>Modifies ACLs for folder and all it's files.</p></div><dl class="paramcmts block"><dt class="param">folderUri</dt><dd class="cmt"><p>- absolute path to the folder like abfss://cont@nameofsa.dfs.microsoft....</p></dd><dt class="param">newPermission</dt><dd class="cmt"><p>- permission to set</p></dd><dt class="param">conf</dt><dd class="cmt"><p>- configuration of hadoop. Best to get it is from spark.sparkContext.hadoopConfiguration</p></dd><dt>returns</dt><dd class="cmt"><p>Array of FsOperationResult objects containing information if operation succeeded for each path.</p></dd></dl></div>
     </li><li name="com.pg.bigdata.octopufs.acl.AclManager#modifyTableACLs" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="modifyTableACLs(db:String,tableName:String,newPermission:com.pg.bigdata.octopufs.acl.AclManager.FsPermission)(implicitspark:org.apache.spark.sql.SparkSession):Array[com.pg.bigdata.octopufs.fs.FsOperationResult]"></a>
       <a id="modifyTableACLs(String,String,FsPermission)(SparkSession):Array[FsOperationResult]"></a>

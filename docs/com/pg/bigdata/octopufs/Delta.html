@@ -49,7 +49,7 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Object which helps to determine change in file tree and synchronize one with another, if needed</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -279,23 +279,23 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.pg.bigdata.octopufs.Delta#getDelta" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="getDelta(sourceUri:String,targetUri:String,timeoutMin:Int):(org.apache.hadoop.fs.FileSystem,org.apache.hadoop.fs.FileSystem,Array[com.pg.bigdata.octopufs.DeltaEntry],Array[com.pg.bigdata.octopufs.DeltaEntry])"></a>
-      <a id="getDelta(String,String,Int):(FileSystem,FileSystem,Array[DeltaEntry],Array[DeltaEntry])"></a>
+    </li><li name="com.pg.bigdata.octopufs.Delta#getDelta" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getDelta(sourceUri:String,targetUri:String):(Array[com.pg.bigdata.octopufs.DeltaEntry],Array[com.pg.bigdata.octopufs.DeltaEntry])"></a>
+      <a id="getDelta(String,String):(Array[DeltaEntry],Array[DeltaEntry])"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getDelta</span><span class="params">(<span name="sourceUri">sourceUri: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="targetUri">targetUri: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="timeoutMin">timeoutMin: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">10</span></span>)</span><span class="result">: (<span class="extype" name="org.apache.hadoop.fs.FileSystem">FileSystem</span>, <span class="extype" name="org.apache.hadoop.fs.FileSystem">FileSystem</span>, <span class="extype" name="scala.Array">Array</span>[<a href="DeltaEntry.html" class="extype" name="com.pg.bigdata.octopufs.DeltaEntry">DeltaEntry</a>], <span class="extype" name="scala.Array">Array</span>[<a href="DeltaEntry.html" class="extype" name="com.pg.bigdata.octopufs.DeltaEntry">DeltaEntry</a>])</span>
+        <span class="name">getDelta</span><span class="params">(<span name="sourceUri">sourceUri: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="targetUri">targetUri: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: (<span class="extype" name="scala.Array">Array</span>[<a href="DeltaEntry.html" class="extype" name="com.pg.bigdata.octopufs.DeltaEntry">DeltaEntry</a>], <span class="extype" name="scala.Array">Array</span>[<a href="DeltaEntry.html" class="extype" name="com.pg.bigdata.octopufs.DeltaEntry">DeltaEntry</a>])</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.pg.bigdata.octopufs.Delta@getDelta(sourceUri:String,targetUri:String,timeoutMin:Int):(org.apache.hadoop.fs.FileSystem,org.apache.hadoop.fs.FileSystem,Array[com.pg.bigdata.octopufs.DeltaEntry],Array[com.pg.bigdata.octopufs.DeltaEntry])" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.pg.bigdata.octopufs.Delta@getDelta(sourceUri:String,targetUri:String):(Array[com.pg.bigdata.octopufs.DeltaEntry],Array[com.pg.bigdata.octopufs.DeltaEntry])" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Returns tuple which contains: files missing in target, files only in target</p><div class="fullcomment"><div class="comment cmt"><p>Returns tuple which contains: files missing in target, files only in target</p></div><dl class="paramcmts block"><dt class="param">sourceUri</dt><dd class="cmt"><p>- source folder absolute path</p></dd><dt class="param">targetUri</dt><dd class="cmt"><p>- target folder absolute path</p></dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <a id="hashCode():Int"></a>
@@ -381,23 +381,24 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.pg.bigdata.octopufs.Delta#synchronize" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="synchronize(sourceUri:String,targetUri:String,copyParallelism:Int,timeoutMin:Int)(implicitspark:org.apache.spark.sql.SparkSession):Array[com.pg.bigdata.octopufs.fs.FsOperationResult]"></a>
-      <a id="synchronize(String,String,Int,Int)(SparkSession):Array[FsOperationResult]"></a>
+    </li><li name="com.pg.bigdata.octopufs.Delta#synchronize" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="synchronize(sourceUri:String,targetUri:String,taskCount:Int)(implicitspark:org.apache.spark.sql.SparkSession):Array[com.pg.bigdata.octopufs.fs.FsOperationResult]"></a>
+      <a id="synchronize(String,String,Int)(SparkSession):Array[FsOperationResult]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">synchronize</span><span class="params">(<span name="sourceUri">sourceUri: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="targetUri">targetUri: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="copyParallelism">copyParallelism: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>, <span name="timeoutMin">timeoutMin: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">10</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<a href="fs/FsOperationResult.html" class="extype" name="com.pg.bigdata.octopufs.fs.FsOperationResult">FsOperationResult</a>]</span>
+        <span class="name">synchronize</span><span class="params">(<span name="sourceUri">sourceUri: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="targetUri">targetUri: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="taskCount">taskCount: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<a href="fs/FsOperationResult.html" class="extype" name="com.pg.bigdata.octopufs.fs.FsOperationResult">FsOperationResult</a>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.pg.bigdata.octopufs.Delta@synchronize(sourceUri:String,targetUri:String,copyParallelism:Int,timeoutMin:Int)(implicitspark:org.apache.spark.sql.SparkSession):Array[com.pg.bigdata.octopufs.fs.FsOperationResult]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.pg.bigdata.octopufs.Delta@synchronize(sourceUri:String,targetUri:String,taskCount:Int)(implicitspark:org.apache.spark.sql.SparkSession):Array[com.pg.bigdata.octopufs.fs.FsOperationResult]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <p class="shortcomment cmt">Executes synchronization of two folders.</p><div class="fullcomment"><div class="comment cmt"><p>Executes synchronization of two folders. First it detects the difference, then deletes paths from target folder, which do not have corresponding
+files in source folder. Then it uses distributed copy to copy new files to the target folder.</p></div><dl class="paramcmts block"><dt class="param">sourceUri</dt><dd class="cmt"><p>- folder which function will copy from</p></dd><dt class="param">targetUri</dt><dd class="cmt"><p>- folder which function will alignt to match source folder</p></dd><dt class="param">taskCount</dt><dd class="cmt"><p>- task count of spark copy operation. Keep it default (-1) to have best distribution - one file per park, unless you have a lot of small files)</p></dd><dt>returns</dt><dd class="cmt"><p>- list of paths processed together with operation result</p></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

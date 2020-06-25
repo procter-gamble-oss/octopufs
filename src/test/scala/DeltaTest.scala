@@ -36,7 +36,7 @@ class DeltaTest extends FlatSpec with BeforeAndAfterAll{
 
   "File trees" should "be synchronized" in {
     val delta = new Delta(spark.sparkContext.hadoopConfiguration)
-    delta.synchronize(source, target, 1, 2)
+    delta.synchronize(source, target)
     refreshMetadata(t.db, "STORE_SALES_FCT")(spark)
   }
 

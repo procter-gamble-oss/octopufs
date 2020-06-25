@@ -48,27 +48,28 @@ object AclManager extends Serializable {
    * Modifies ACLs for all provided paths (path is absolute like abfss://cont@nameofsa.dfs.microsoft....)
    * @param paths - Array of paths to modify ACLs for
    * @param newFsPermission - permission which will be set for all paths provided.
+   * @param overwrite - if true, then ALL ACLs will be replaced with this new ACL
    * @param attempt - retry feature. Keep at 0 (default)
    * @param conf - configuration of hadoop. Best to get it is from spark.sparkContext.hadoopConfiguration
    * @return Array of FsOperationResult objects containing information if operation succeeded for each path.
    */
-  def modifyAcl(paths: Array[String], newFsPermission: FsPermission, attempt: Int = 0)
+  def modifyAcl(paths: Array[String], newFsPermission: FsPermission, overwrite: Boolean = false, attempt: Int = 0)
                (implicit conf: Configuration): Array[FsOperationResult] = {
     println("Modifying ACLs - attempt " + attempt)
 
     val y = AclManager.getAclEntry(newFsPermission)
     val fs = getFileSystem(conf, paths.head)
-
+    val aclFunc: (Path, java.util.List[AclEntry]) => Unit = if(overwrite) fs.setAcl else fs.modifyAclEntries
     val res = paths.map(x => Future {
       Try({
-        fs.modifyAclEntries(new Path(x), Seq(y).asJava)
+        aclFunc(new Path(x), Seq(y).asJava)
         FsOperationResult(x, true)
       }).getOrElse(FsOperationResult(x, false))
     }).map(x => Await.result(x, fsOperationTimeoutMinutes.minute))
     val failed = res.filter(!_.success).filter(x => fs.exists(new Path(x.path))).map(_.path)
     if (failed.isEmpty) res
     else if (failed.length == paths.length || attempt > 4) throw new Exception("Some paths failed - showing 10 of them " + failed.slice(0, 10).mkString("\n"))
-    else modifyAcl(failed, newFsPermission, attempt + 1)
+    else modifyAcl(failed, newFsPermission, overwrite, attempt + 1)
   }
 
 
@@ -96,10 +97,11 @@ object AclManager extends Serializable {
    * Modifies ACLs for folder and all it's files.
    * @param folderUri - absolute path to the folder like abfss://cont@nameofsa.dfs.microsoft....
    * @param newPermission - permission to set
+   * @param overwrite - if true, then ALL ACLs will be replaced with this new ACL
    * @param conf - configuration of hadoop. Best to get it is from spark.sparkContext.hadoopConfiguration
    * @return Array of FsOperationResult objects containing information if operation succeeded for each path.
    */
-  def modifyFolderACLs(folderUri: String, newPermission: FsPermission)
+  def modifyFolderACLs(folderUri: String, newPermission: FsPermission, overwrite: Boolean = true)
                       (implicit conf: Configuration): Array[FsOperationResult] = {
     //todo check if path is a folder
     val fs = getFileSystem(conf, folderUri)
@@ -111,9 +113,9 @@ object AclManager extends Serializable {
     println("Folders to process: " + folders.length)
 
     println("Changing file and folders ACCESS ACLs: " + files.length)
-    val resAccess = modifyAcl(elements.map(_.path), newPermission)
+    val resAccess = modifyAcl(elements.map(_.path), newPermission, overwrite)
     println("Changing folders Default ACLs: " + folders.length)
-    val resDefault = modifyAcl(folders, newPermission.getDefaultLevelPerm())
+    val resDefault = modifyAcl(folders, newPermission.getDefaultLevelPerm(), overwrite)
     resAccess.union(resDefault)
   }
 

@@ -66,6 +66,7 @@ object AclManager extends Serializable {
       }).getOrElse(FsOperationResult(x, false))
     }).map(x => Await.result(x, fsOperationTimeoutMinutes.minute))
     val failed = res.filter(!_.success).filter(x => fs.exists(new Path(x.path))).map(_.path)
+    //todo printout information that setting acls failed but it is because paths do not exist
     if (failed.isEmpty) res
     else if (failed.length == paths.length || attempt > 4) throw new Exception("Some paths failed - showing 10 of them " + failed.slice(0, 10).mkString("\n"))
     else modifyAcl(failed, newFsPermission, attempt + 1)

@@ -1,23 +1,24 @@
-name := "Promotor"
+name := "Octopufs"
 
 version := "0.1.{xxbuildversionxx}"
 
 scalaVersion := "2.11.12"
 
 val hadoopVersion = "2.7.3"
-val sparkVersion = "2.4.4"
+val sparkVersion = "2.4.6"
 
-//unmanagedBase := file("/Users/jacektokar/miniconda3/lib/python3.7/site-packages/pyspark/jars")
+//MAKE SURE YOU DOWNLOAD SPARK LIBRARIES USING DATABRICKS CONNECT FOR YOUR RUNTIME VERSION AS SPARK VERSIONS OF
+// DATABRICKS DO NOT MATCH OFFICIAL NUMBERING
+unmanagedBase := file("/Users/jacektokar/miniconda3/lib/python3.7/site-packages/pyspark/jars")
 
 libraryDependencies ++= Seq(
- "org.apache.spark" % "spark-sql_2.11" % sparkVersion % "provided",
- "org.apache.spark" % "spark-core_2.11" % sparkVersion % "provided",
+// "org.apache.spark" % "spark-sql_2.11" % sparkVersion % "provided",
+// "org.apache.spark" % "spark-core_2.11" % sparkVersion % "provided",
  "org.pegdown" % "pegdown" % "1.6.0" % Test,
  "org.scalatest" %% "scalatest" % "3.0.5" % "provided",
   "org.apache.hadoop" % "hadoop-common" % hadoopVersion % "provided" ,
   "org.apache.hadoop" % "hadoop-hdfs" % hadoopVersion % "provided",
-  "com.databricks" % "dbutils-api_2.11" % "0.0.4" % "provided",
- "com.microsoft.azure" % "azure-data-lake-store-sdk" % "2.2.8"
+  "com.databricks" % "dbutils-api_2.11" % "0.0.4" % "provided"
 )
 
 parallelExecution in Test := false

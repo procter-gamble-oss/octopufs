@@ -47,7 +47,8 @@ object DistributedExecution extends Serializable {
                (implicit spark: SparkSession): Array[FsOperationResult] = {
 
     val requestProcessed = spark.sparkContext.longAccumulator("CopyFilesProcessedCount")
-    val confBroadcast = spark.sparkContext.broadcast(new SerializableWritable(spark.sparkContext.hadoopConfiguration))
+    val c = new org.apache.spark.util.SerializableConfiguration(spark.sparkContext.hadoopConfiguration)
+    val confBroadcast = spark.sparkContext.broadcast(c)
 
     class PromotorPartitioner(override val numPartitions: Int) extends Partitioner {
       override def getPartition(key: Any): Int = key match {
@@ -57,6 +58,7 @@ object DistributedExecution extends Serializable {
 
     val partCnt = if(taskCount == -1) paths.length else taskCount
     val rdd = spark.sparkContext.parallelize(paths.indices.map(i => (i,paths(i))), partCnt).keyBy(x => x._1).partitionBy(new PromotorPartitioner(partCnt)).values.values //todo sprawdz czy potreba jest ilosc partycji w parallelize
+
     //val res = spark.sparkContext.parallelize(paths, partitionCount)
     val res = rdd.mapPartitions(x => {
       //val conf = confsd.get()

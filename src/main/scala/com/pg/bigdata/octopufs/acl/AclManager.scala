@@ -28,8 +28,8 @@ object AclManager extends Serializable {
    * @param spark - SparkSession needed to access hive metastore.
    * @return Array of FsOperationResult objects containing information if operation succeeded for each path.
    */
-  def modifyTableACLs(db: String, tableName: String, newPermission: FsPermission)
-                     (implicit spark: SparkSession): Array[FsOperationResult] = {
+  def modifyTableAcl(db: String, tableName: String, newPermission: FsPermission)
+                    (implicit spark: SparkSession): Array[FsOperationResult] = {
     import collection.JavaConverters._
     implicit val conf = spark.sparkContext.hadoopConfiguration
     val loc = getTableLocation(db, tableName)
@@ -100,8 +100,8 @@ object AclManager extends Serializable {
    * @param conf - configuration of hadoop. Best to get it is from spark.sparkContext.hadoopConfiguration
    * @return Array of FsOperationResult objects containing information if operation succeeded for each path.
    */
-  def modifyFolderACLs(folderUri: String, newPermission: FsPermission)
-                      (implicit conf: Configuration): Array[FsOperationResult] = {
+  def modifyFolderAcl(folderUri: String, newPermission: FsPermission)
+                     (implicit conf: Configuration): Array[FsOperationResult] = {
     //todo check if path is a folder
     val fs = getFileSystem(conf, folderUri)
     val elements = listLevel(fs, Array(new Path(folderUri))) :+ FsElement(folderUri, true, 0) //add top level folder to set ACLs on
@@ -125,13 +125,13 @@ object AclManager extends Serializable {
    * @param conf - HadoopConfiguration (spark.sparkContext.hadoopConfiguration)
    * @return - Array with information which paths were processed and if successfully.
    */
-  def clearFolderAcls(folderUri: String)(implicit conf: Configuration): Array[FsOperationResult] = {
+  def clearFolderAcl(folderUri: String)(implicit conf: Configuration): Array[FsOperationResult] = {
     //todo check if path is a folder
     val fs = getFileSystem(conf, folderUri)
     val elements = listLevel(fs, Array(new Path(folderUri))) :+ FsElement(folderUri, true, 0) //add top level folder to set ACLs on
 
     println("Paths to process: " + elements.length)
-    clearAcls(elements.map(_.path))
+    clearAcl(elements.map(_.path))
   }
 
   /**
@@ -141,7 +141,7 @@ object AclManager extends Serializable {
    * @param conf - HadoopConfiguration (spark.sparkContext.hadoopConfiguration)
    * @return Array with information which paths were processed and if successfully.
    */
-  def clearAcls(paths: Array[String], attempt: Int = 0)(implicit conf: Configuration): Array[FsOperationResult] = {
+  def clearAcl(paths: Array[String], attempt: Int = 0)(implicit conf: Configuration): Array[FsOperationResult] = {
     println("Modifying ACLs - attempt " + attempt)
     val fs = getFileSystem(conf, paths.head)
     val res = paths.map(x => Future {
@@ -153,7 +153,7 @@ object AclManager extends Serializable {
     val failed = res.filter(!_.success).filter(x => fs.exists(new Path(x.path))).map(_.path)
     if (failed.isEmpty) res
     else if (failed.length == paths.length || attempt > 4) throw new Exception("Some operations failed - showing 10 of them " + failed.slice(0, 10).mkString("\n"))
-    else clearAcls(failed, attempt + 1)
+    else clearAcl(failed, attempt + 1)
   }
 
   /**

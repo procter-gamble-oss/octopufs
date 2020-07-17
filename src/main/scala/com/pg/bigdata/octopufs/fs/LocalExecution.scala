@@ -48,7 +48,7 @@ object LocalExecution extends Serializable {
     val targetFileList = sourceFileList.map(_.replaceAll(sourceFolderUri, targetFolderUri))
     val paths = sourceFileList.zip(targetFileList).map(x => Paths(x._1, x._2))
 
-    println("Files to be moved: (10 first only)")
+    println("Files to be moved: (first 10 only)")
     paths.slice(0, 10).foreach(println)
 
     val res = movePaths(paths)(conf)
@@ -77,9 +77,10 @@ object LocalExecution extends Serializable {
       print(".")
       FsOperationResult(x.sourcePath, srcFs.rename(new Path(x.sourcePath), new Path(x.targetPath)))
     }).map(x => Await.result(x, fsOperationTimeoutMinutes.minutes))
-
+    println("\n==================================")
     println("Number of files moved properly: " + res.count(_.success))
     println("Files with errors: " + res.count(!_.success))
+    println("==================================")
 
     val failed = res.filter(!_.success)
     val pathsOfFailed = paths.filter(x => failed.map(_.path).contains(x.sourcePath))

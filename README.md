@@ -1,3 +1,5 @@
+Checkout examples in databricks_notebooks_examples branch
+<BR>
 Scaladoc link https://procter-gamble-tech.github.io/octopufs/#com.pg.bigdata.octopufs.package
 
 ## OctopuFS

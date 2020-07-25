@@ -8,7 +8,7 @@ class TestCopyOverwriteNonpartitionedTable extends FlatSpec with BeforeAndAfterA
     appName("NAS_").
     master("local[1]").
     getOrCreate()
-  spark.conf.set("spark.speculation", "false")
+//  spark.conf.set("spark.speculation", "false")
   implicit val c = spark.sparkContext.hadoopConfiguration
   val t = new TestUtils("TestCopyOverwriteNonpartitionedTable")
   t.setupTestEnv()

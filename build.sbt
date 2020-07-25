@@ -2,18 +2,18 @@ name := "Octopufs"
 
 version := "0.1.{xxbuildversionxx}"
 
-scalaVersion := "2.11.12"
+scalaVersion := "2.12.3"
 
 val hadoopVersion = "2.7.3"
-val sparkVersion = "2.4.6"
+val sparkVersion = "3.0.0"
 
 //MAKE SURE YOU DOWNLOAD SPARK LIBRARIES USING DATABRICKS CONNECT FOR YOUR RUNTIME VERSION AS SPARK VERSIONS OF
 // DATABRICKS DO NOT MATCH OFFICIAL NUMBERING
-unmanagedBase := file("/Users/jacektokar/miniconda3/lib/python3.7/site-packages/pyspark/jars")
+//unmanagedBase := file("/Users/jacektokar/miniconda3/lib/python3.7/site-packages/pyspark/jars")
 
 libraryDependencies ++= Seq(
-// "org.apache.spark" % "spark-sql_2.11" % sparkVersion % "provided",
-// "org.apache.spark" % "spark-core_2.11" % sparkVersion % "provided",
+ "org.apache.spark" % "spark-sql_2.12" % sparkVersion % "provided",
+ "org.apache.spark" % "spark-core_2.12" % sparkVersion % "provided",
  "org.pegdown" % "pegdown" % "1.6.0" % Test,
  "org.scalatest" %% "scalatest" % "3.0.5" % "provided",
   "org.apache.hadoop" % "hadoop-common" % hadoopVersion % "provided" ,
@@ -48,9 +48,3 @@ buildInfoKeys ++= Seq[BuildInfoKey](
 //get git commit id
 val gitCommitString = SettingKey[String]("gitCommit")
 */
-credentials += Credentials(Path.userHome / "credentials.txt")
-
-publishMavenStyle := true
-publishArtifact in Test := false
-publishTo := Some("app-nas-utils" at "https://pkgs.dev.azure.com/dh-platforms-devops/app-deng-nas_us/_packaging/anthill/maven/v1")
-

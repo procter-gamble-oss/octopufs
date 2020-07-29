@@ -35,6 +35,7 @@ object AclManager extends Serializable {
     val loc = getTableLocation(db, tableName)
     val files = getListOfTableFiles(db, tableName)
 
+    getFileSystem(conf, loc).modifyAclEntries(new Path(loc), Seq(AclManager.getAclEntry(newPermission)).asJava)
     getFileSystem(conf, loc).modifyAclEntries(new Path(loc), Seq(AclManager.getAclEntry(newPermission.getDefaultLevelPerm())).asJava)
 
     println(files.head)

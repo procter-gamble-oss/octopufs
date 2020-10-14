@@ -8,7 +8,7 @@ import org.scalatest.{BeforeAndAfterAll, FlatSpec}
 
 import scala.collection.JavaConverters._
 import scala.util.Random
-/*
+
 class AclTest extends FlatSpec with BeforeAndAfterAll {
 
   import com.pg.bigdata.octopufs.acl.AclManager
@@ -126,4 +126,3 @@ class AclTest extends FlatSpec with BeforeAndAfterAll {
 
 
 }
-*/

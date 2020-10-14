@@ -261,14 +261,17 @@ object AclManager extends Serializable {
     def applyFolderSecurity(objects: Array[AclSetting], attempt: Int = 0): Array[FsOperationResult] = {
       val res = aclsOnTargetFolders.map(x => Future {
         targetFs.removeAcl(new Path(x.path))
-        val exec = Try(targetFs.modifyAclEntries(new Path(x.path), x.aclStatus.getEntries))
-        if (exec.isFailure) println(x.path + " ### " + x.aclStatus + "\n" + exec.failed.get.getMessage)
-        FsOperationResult(x.path, exec.isSuccess)
+        if(x.aclStatus.getEntries.isEmpty) FsOperationResult(x.path, true)
+        else {
+          val exec = Try(targetFs.modifyAclEntries(new Path(x.path), x.aclStatus.getEntries))
+          if (exec.isFailure) println(x.path + " ### " + x.aclStatus + "\n" + exec.failed.get.getMessage)
+          FsOperationResult(x.path, exec.isSuccess)
+        }
       }).map(x => Await.result(x, 10.minute))
       val failed = res.filter(!_.success)
       if (failed.isEmpty) res
       else if (failed.length == objects.length || attempt > 4)
-        throw new Exception("Setting of ACLs did not succeed - please check why and here are some of them: \n" + failed.map(_.path).slice(0, 10).mkString("\n"))
+        throw new Exception("Setting of ACLs did not succeed - please check why and here are some paths, which failed: \n" + failed.map(_.path).slice(0, 10).mkString("\n"))
       else
         res.filter(_.success) ++ applyFolderSecurity(objects.filter(x => failed.map(_.path).contains(x.path)), attempt + 1)
     }

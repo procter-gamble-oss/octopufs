@@ -21,7 +21,7 @@ package object fs {
    * @return FileSystem object
    */
   def getFileSystem(hadoopConf: Configuration, absoluteTargetLocation: String): FileSystem = {
-    FileSystem.get(new URI(absoluteTargetLocation), hadoopConf)
+    FileSystem.get(new URI(absoluteTargetLocation.replace(' ','_')), hadoopConf) //replace is needed in case path contains a space - and it doesn't matter to determine with FS (space cannot be in fs name)
   }
 
   /**

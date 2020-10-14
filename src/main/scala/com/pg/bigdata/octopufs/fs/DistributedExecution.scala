@@ -47,8 +47,8 @@ object DistributedExecution extends Serializable {
                (implicit spark: SparkSession): Array[FsOperationResult] = {
 
     val requestProcessed = spark.sparkContext.longAccumulator("CopyFilesProcessedCount")
-    val c = new org.apache.spark.util.SerializableConfiguration(spark.sparkContext.hadoopConfiguration)// ##change for runtime>6.4
-    //val c = new SerializableWritable[Configuration](spark.sparkContext.hadoopConfiguration)
+    //val c = new org.apache.spark.util.SerializableConfiguration(spark.sparkContext.hadoopConfiguration)// ##change for runtime>6.4
+    val c = new SerializableWritable[Configuration](spark.sparkContext.hadoopConfiguration)
     val confBroadcast = spark.sparkContext.broadcast(c)
 
     class PromotorPartitioner(override val numPartitions: Int) extends Partitioner {

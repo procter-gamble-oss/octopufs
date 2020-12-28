@@ -28,13 +28,14 @@ object AclManager extends Serializable {
    * @param spark - SparkSession needed to access hive metastore.
    * @return Array of FsOperationResult objects containing information if operation succeeded for each path.
    */
-  def modifyTableACLs(db: String, tableName: String, newPermission: FsPermission)
-                     (implicit spark: SparkSession): Array[FsOperationResult] = {
+  def modifyTableAcl(db: String, tableName: String, newPermission: FsPermission)
+                    (implicit spark: SparkSession): Array[FsOperationResult] = {
     import collection.JavaConverters._
     implicit val conf = spark.sparkContext.hadoopConfiguration
     val loc = getTableLocation(db, tableName)
     val files = getListOfTableFiles(db, tableName)
 
+    getFileSystem(conf, loc).modifyAclEntries(new Path(loc), Seq(AclManager.getAclEntry(newPermission)).asJava)
     getFileSystem(conf, loc).modifyAclEntries(new Path(loc), Seq(AclManager.getAclEntry(newPermission.getDefaultLevelPerm())).asJava)
 
     println(files.head)
@@ -100,8 +101,8 @@ object AclManager extends Serializable {
    * @param conf - configuration of hadoop. Best to get it is from spark.sparkContext.hadoopConfiguration
    * @return Array of FsOperationResult objects containing information if operation succeeded for each path.
    */
-  def modifyFolderACLs(folderUri: String, newPermission: FsPermission)
-                      (implicit conf: Configuration): Array[FsOperationResult] = {
+  def modifyFolderAcl(folderUri: String, newPermission: FsPermission)
+                     (implicit conf: Configuration): Array[FsOperationResult] = {
     //todo check if path is a folder
     val fs = getFileSystem(conf, folderUri)
     val elements = listLevel(fs, Array(new Path(folderUri))) :+ FsElement(folderUri, true, 0) //add top level folder to set ACLs on
@@ -125,13 +126,13 @@ object AclManager extends Serializable {
    * @param conf - HadoopConfiguration (spark.sparkContext.hadoopConfiguration)
    * @return - Array with information which paths were processed and if successfully.
    */
-  def clearFolderAcls(folderUri: String)(implicit conf: Configuration): Array[FsOperationResult] = {
+  def clearFolderAcl(folderUri: String)(implicit conf: Configuration): Array[FsOperationResult] = {
     //todo check if path is a folder
     val fs = getFileSystem(conf, folderUri)
     val elements = listLevel(fs, Array(new Path(folderUri))) :+ FsElement(folderUri, true, 0) //add top level folder to set ACLs on
 
     println("Paths to process: " + elements.length)
-    clearAcls(elements.map(_.path))
+    clearAcl(elements.map(_.path))
   }
 
   /**
@@ -141,7 +142,7 @@ object AclManager extends Serializable {
    * @param conf - HadoopConfiguration (spark.sparkContext.hadoopConfiguration)
    * @return Array with information which paths were processed and if successfully.
    */
-  def clearAcls(paths: Array[String], attempt: Int = 0)(implicit conf: Configuration): Array[FsOperationResult] = {
+  def clearAcl(paths: Array[String], attempt: Int = 0)(implicit conf: Configuration): Array[FsOperationResult] = {
     println("Modifying ACLs - attempt " + attempt)
     val fs = getFileSystem(conf, paths.head)
     val res = paths.map(x => Future {
@@ -153,7 +154,7 @@ object AclManager extends Serializable {
     val failed = res.filter(!_.success).filter(x => fs.exists(new Path(x.path))).map(_.path)
     if (failed.isEmpty) res
     else if (failed.length == paths.length || attempt > 4) throw new Exception("Some operations failed - showing 10 of them " + failed.slice(0, 10).mkString("\n"))
-    else clearAcls(failed, attempt + 1)
+    else clearAcl(failed, attempt + 1)
   }
 
   /**
@@ -260,14 +261,17 @@ object AclManager extends Serializable {
     def applyFolderSecurity(objects: Array[AclSetting], attempt: Int = 0): Array[FsOperationResult] = {
       val res = aclsOnTargetFolders.map(x => Future {
         targetFs.removeAcl(new Path(x.path))
-        val exec = Try(targetFs.modifyAclEntries(new Path(x.path), x.aclStatus.getEntries))
-        if (exec.isFailure) println(x.path + " ### " + x.aclStatus + "\n" + exec.failed.get.getMessage)
-        FsOperationResult(x.path, exec.isSuccess)
+        if(x.aclStatus.getEntries.isEmpty) FsOperationResult(x.path, true)
+        else {
+          val exec = Try(targetFs.modifyAclEntries(new Path(x.path), x.aclStatus.getEntries))
+          if (exec.isFailure) println(x.path + " ### " + x.aclStatus + "\n" + exec.failed.get.getMessage)
+          FsOperationResult(x.path, exec.isSuccess)
+        }
       }).map(x => Await.result(x, 10.minute))
       val failed = res.filter(!_.success)
       if (failed.isEmpty) res
       else if (failed.length == objects.length || attempt > 4)
-        throw new Exception("Setting of ACLs did not succeed - please check why and here are some of them: \n" + failed.map(_.path).slice(0, 10).mkString("\n"))
+        throw new Exception("Setting of ACLs did not succeed - please check why and here are some paths, which failed: \n" + failed.map(_.path).slice(0, 10).mkString("\n"))
       else
         res.filter(_.success) ++ applyFolderSecurity(objects.filter(x => failed.map(_.path).contains(x.path)), attempt + 1)
     }

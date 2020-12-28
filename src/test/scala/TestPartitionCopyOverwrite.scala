@@ -3,7 +3,7 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions.lit
 import org.scalatest.{BeforeAndAfterAll, FlatSpec}
 
-class TestPartitionCopyOverwrite extends FlatSpec with BeforeAndAfterAll{
+class qTestPartitionCopyOverwrite extends FlatSpec with BeforeAndAfterAll{
   implicit val spark: SparkSession = SparkSession.builder().
     appName("NAS_").
     master("local").

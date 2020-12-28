@@ -1,72 +1,160 @@
 <!DOCTYPE html >
 <html>
         <head>
-          <title>Octopufs documentation</title>
-          <meta name="description" content="Octopufs documentation" />
-          <meta name="keywords" content="Octopufs documentation" />
+          <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+          <title>Octopufs documentation </title>
+          <meta name="description" content="Octopufs documentation " />
+          <meta name="keywords" content="Octopufs documentation " />
           <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
           
       <link href="lib/index.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
       <script type="text/javascript" src="lib/jquery.js"></script>
-      <script type="text/javascript" src="lib/jquery-ui.js"></script>
-      <script type="text/javascript" src="lib/jquery.layout.js"></script>
+      <script type="text/javascript" src="lib/jquery.panzoom.min.js"></script>
+      <script type="text/javascript" src="lib/jquery.mousewheel.min.js"></script>
       <script type="text/javascript" src="lib/index.js"></script>
+      <script type="text/javascript" src="index.js"></script>
       <script type="text/javascript" src="lib/scheduler.js"></script>
+      <script type="text/javascript" src="lib/template.js"></script>
+      <script type="text/javascript" src="lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+        /* this variable can be used by the JS to determine the path to the root document */
+        var toRoot = '';
+      </script>
     
         </head>
         <body>
-      <div id="library">
-        <img class="class icon" alt="class icon" src="lib/class.png" />
-        <img class="trait icon" alt="trait icon" src="lib/trait.png" />
-        <img class="object icon" alt="trait icon" src="lib/object.png" />
-        <img class="package icon" alt="trait icon" src="lib/package.png" />
-      </div>
-      <div id="browser" class="ui-layout-west">
-      <div class="ui-west-center">
-      <div id="filter">
-          <div id="textfilter"></div>
-          <div id="letters"><span>#</span><a target="template" href="index/index-a.html">A</a><a target="template" href="index/index-b.html">B</a><a target="template" href="index/index-c.html">C</a><a target="template" href="index/index-d.html">D</a><a target="template" href="index/index-e.html">E</a><a target="template" href="index/index-f.html">F</a><a target="template" href="index/index-g.html">G</a><a target="template" href="index/index-h.html">H</a><a target="template" href="index/index-i.html">I</a><span>J</span><span>K</span><a target="template" href="index/index-l.html">L</a><a target="template" href="index/index-m.html">M</a><span>N</span><a target="template" href="index/index-o.html">O</a><a target="template" href="index/index-p.html">P</a><span>Q</span><a target="template" href="index/index-r.html">R</a><a target="template" href="index/index-s.html">S</a><a target="template" href="index/index-t.html">T</a><a target="template" href="index/index-u.html">U</a><a target="template" href="index/index-v.html">V</a><span>W</span><span>X</span><span>Y</span><span>Z</span> – <span>deprecated</span></div>
-      </div>
-      <div class="pack" id="tpl">
-            
-            <ol class="templates"><li title="AclTest"><div class="placeholder"></div><a class="tplshow" href="AclTest.html" target="template"><span class="class">(class)</span><span class="tplLink">AclTest</span></a></li><li title="DataMockup"><a class="tplshow" href="DataMockup$.html" target="template"><span class="object">(object)</span><div class="placeholder"></div><span class="tplLink">DataMockup</span></a></li><li title="DeltaTest"><div class="placeholder"></div><a class="tplshow" href="DeltaTest.html" target="template"><span class="class">(class)</span><span class="tplLink">DeltaTest</span></a></li><li title="ModifyACLsTest"><div class="placeholder"></div><a class="tplshow" href="ModifyACLsTest.html" target="template"><span class="class">(class)</span><span class="tplLink">ModifyACLsTest</span></a></li><li title="SafetyFuseTest"><div class="placeholder"></div><a class="tplshow" href="SafetyFuseTest.html" target="template"><span class="class">(class)</span><span class="tplLink">SafetyFuseTest</span></a></li><li title="Test"><a class="tplshow" href="Test$.html" target="template"><span class="object">(object)</span><div class="placeholder"></div><span class="tplLink">Test</span></a></li><li title="Test2"><a class="tplshow" href="Test2$.html" target="template"><span class="object">(object)</span><div class="placeholder"></div><span class="tplLink">Test2</span></a></li><li title="TestCopyOverwriteNonpartitionedTable"><div class="placeholder"></div><a class="tplshow" href="TestCopyOverwriteNonpartitionedTable.html" target="template"><span class="class">(class)</span><span class="tplLink">TestCopyOverwriteNonpartitionedTable</span></a></li><li title="TestGetSize"><div class="placeholder"></div><a class="tplshow" href="TestGetSize.html" target="template"><span class="class">(class)</span><span class="tplLink">TestGetSize</span></a></li><li title="TestPartitionCopy"><div class="placeholder"></div><a class="tplshow" href="TestPartitionCopy.html" target="template"><span class="class">(class)</span><span class="tplLink">TestPartitionCopy</span></a></li><li title="TestPartitionCopyOverwrite"><div class="placeholder"></div><a class="tplshow" href="TestPartitionCopyOverwrite.html" target="template"><span class="class">(class)</span><span class="tplLink">TestPartitionCopyOverwrite</span></a></li><li title="TestPartitionDelete"><div class="placeholder"></div><a class="tplshow" href="TestPartitionDelete.html" target="template"><span class="class">(class)</span><span class="tplLink">TestPartitionDelete</span></a></li><li title="TestPartitionMoveFolders"><div class="placeholder"></div><a class="tplshow" href="TestPartitionMoveFolders.html" target="template"><span class="class">(class)</span><span class="tplLink">TestPartitionMoveFolders</span></a></li><li title="TestTableContentMove"><div class="placeholder"></div><a class="tplshow" href="TestTableContentMove.html" target="template"><span class="class">(class)</span><span class="tplLink">TestTableContentMove</span></a></li><li title="TestUtils"><a class="tplshow" href="TestUtils$.html" target="template"><span class="object">(object)</span></a><a class="tplshow" href="TestUtils.html" target="template"><span class="class">(class)</span><span class="tplLink">TestUtils</span></a></li></ol>
-            <ol class="packages"> <li class="pack" title="com">
-            <a class="tplshow" href="com/package.html" target="template">com</a>
-            <ol class="templates"></ol>
-            <ol class="packages"> <li class="pack" title="com.pg">
-            <a class="tplshow" href="com/pg/package.html" target="template">com.pg</a>
-            <ol class="templates"></ol>
-            <ol class="packages"> <li class="pack" title="com.pg.bigdata">
-            <a class="tplshow" href="com/pg/bigdata/package.html" target="template">com.pg.bigdata</a>
-            <ol class="templates"></ol>
-            <ol class="packages"> <li class="pack" title="com.pg.bigdata.octopufs">
-            <a class="tplshow" href="com/pg/bigdata/octopufs/package.html" target="template">com.pg.bigdata.octopufs</a>
-            <ol class="templates"><li title="com.pg.bigdata.octopufs.Assistant"><a class="tplshow" href="com/pg/bigdata/octopufs/Assistant$.html" target="template"><span class="object">(object)</span><div class="placeholder"></div><span class="tplLink">Assistant</span></a></li><li title="com.pg.bigdata.octopufs.Delta"><div class="placeholder"></div><a class="tplshow" href="com/pg/bigdata/octopufs/Delta.html" target="template"><span class="class">(class)</span><span class="tplLink">Delta</span></a></li><li title="com.pg.bigdata.octopufs.DeltaEntry"><a class="tplshow" href="com/pg/bigdata/octopufs/DeltaEntry$.html" target="template"><span class="object">(object)</span></a><a class="tplshow" href="com/pg/bigdata/octopufs/DeltaEntry.html" target="template"><span class="case class">(case class)</span><span class="tplLink">DeltaEntry</span></a></li><li title="com.pg.bigdata.octopufs.Promotor"><a class="tplshow" href="com/pg/bigdata/octopufs/Promotor$.html" target="template"><span class="object">(object)</span><div class="placeholder"></div><span class="tplLink">Promotor</span></a></li><li title="com.pg.bigdata.octopufs.SafetyFuse"><a class="tplshow" href="com/pg/bigdata/octopufs/SafetyFuse$.html" target="template"><span class="object">(object)</span></a><a class="tplshow" href="com/pg/bigdata/octopufs/SafetyFuse.html" target="template"><span class="class">(class)</span><span class="tplLink">SafetyFuse</span></a></li></ol>
-            <ol class="packages"> <li class="pack" title="com.pg.bigdata.octopufs.acl">
-            <a class="tplshow" href="com/pg/bigdata/octopufs/acl/package.html" target="template">com.pg.bigdata.octopufs.acl</a>
-            <ol class="templates"><li title="com.pg.bigdata.octopufs.acl.AclManager"><a class="tplshow" href="com/pg/bigdata/octopufs/acl/AclManager$.html" target="template"><span class="object">(object)</span><div class="placeholder"></div><span class="tplLink">AclManager</span></a></li><li title="com.pg.bigdata.octopufs.acl.AclSetting"><div class="placeholder"></div><a class="tplshow" href="com/pg/bigdata/octopufs/acl/AclSetting.html" target="template"><span class="case class">(case class)</span><span class="tplLink">AclSetting</span></a></li></ol>
-            <ol class="packages"> </ol>
-          </li><li class="pack" title="com.pg.bigdata.octopufs.fs">
-            <a class="tplshow" href="com/pg/bigdata/octopufs/fs/package.html" target="template">com.pg.bigdata.octopufs.fs</a>
-            <ol class="templates"><li title="com.pg.bigdata.octopufs.fs.DistributedExecution"><a class="tplshow" href="com/pg/bigdata/octopufs/fs/DistributedExecution$.html" target="template"><span class="object">(object)</span><div class="placeholder"></div><span class="tplLink">DistributedExecution</span></a></li><li title="com.pg.bigdata.octopufs.fs.FsElement"><div class="placeholder"></div><a class="tplshow" href="com/pg/bigdata/octopufs/fs/FsElement.html" target="template"><span class="case class">(case class)</span><span class="tplLink">FsElement</span></a></li><li title="com.pg.bigdata.octopufs.fs.FsOperationResult"><div class="placeholder"></div><a class="tplshow" href="com/pg/bigdata/octopufs/fs/FsOperationResult.html" target="template"><span class="case class">(case class)</span><span class="tplLink">FsOperationResult</span></a></li><li title="com.pg.bigdata.octopufs.fs.FsSizes"><div class="placeholder"></div><a class="tplshow" href="com/pg/bigdata/octopufs/fs/package$$FsSizes.html" target="template"><span class="case class">(case class)</span><span class="tplLink">FsSizes</span></a></li><li title="com.pg.bigdata.octopufs.fs.LocalExecution"><a class="tplshow" href="com/pg/bigdata/octopufs/fs/LocalExecution$.html" target="template"><span class="object">(object)</span><div class="placeholder"></div><span class="tplLink">LocalExecution</span></a></li><li title="com.pg.bigdata.octopufs.fs.Paths"><div class="placeholder"></div><a class="tplshow" href="com/pg/bigdata/octopufs/fs/Paths.html" target="template"><span class="case class">(case class)</span><span class="tplLink">Paths</span></a></li></ol>
-            <ol class="packages"> </ol>
-          </li><li class="pack" title="com.pg.bigdata.octopufs.helpers">
-            <a class="tplshow" href="com/pg/bigdata/octopufs/helpers/package.html" target="template">com.pg.bigdata.octopufs.helpers</a>
-            <ol class="templates"><li title="com.pg.bigdata.octopufs.helpers.implicits"><a class="tplshow" href="com/pg/bigdata/octopufs/helpers/implicits$.html" target="template"><span class="object">(object)</span><div class="placeholder"></div><span class="tplLink">implicits</span></a></li></ol>
-            <ol class="packages"> </ol>
-          </li><li class="pack" title="com.pg.bigdata.octopufs.metastore">
-            <a class="tplshow" href="com/pg/bigdata/octopufs/metastore/package.html" target="template">com.pg.bigdata.octopufs.metastore</a>
-            <ol class="templates"><li title="com.pg.bigdata.octopufs.metastore.TableMetadataValidator"><a class="tplshow" href="com/pg/bigdata/octopufs/metastore/TableMetadataValidator$.html" target="template"><span class="object">(object)</span><div class="placeholder"></div><span class="tplLink">TableMetadataValidator</span></a></li></ol>
-            <ol class="packages"> </ol>
-          </li></ol>
-          </li></ol>
-          </li></ol>
-          </li></ol>
-          </li></ol>
-          </div></div><script src="index.js"></script>
+      <div id="search">
+        <span id="doc-title">Octopufs documentation<span id="doc-version"></span></span>
+        <span class="close-results"><span class="left">&lt;</span> Back</span>
+        <div id="textfilter">
+          <span class="input">
+            <input autocapitalize="none" placeholder="Search" id="index-input" type="text" accesskey="/" />
+            <i class="clear material-icons"></i>
+            <i id="search-icon" class="material-icons"></i>
+          </span>
+        </div>
     </div>
-      <div id="content" class="ui-layout-center">
-        <iframe id="template" name="template" src="package.html"></iframe>
+      <div id="search-results">
+        <div id="search-progress">
+          <div id="progress-fill"></div>
+        </div>
+        <div id="results-content">
+          <div id="entity-results"></div>
+          <div id="member-results"></div>
+        </div>
+      </div>
+      <div id="content-scroll-container" style="-webkit-overflow-scrolling: touch;">
+        <div id="content-container" style="-webkit-overflow-scrolling: touch;">
+          <div id="subpackage-spacer">
+            <div id="packages">
+              <h1>Packages</h1>
+              <ul>
+                <li name="_root_.root" visbl="pub" class="indented0 current" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="_root_"></a><a id="root:_root_"></a>
+      <span class="permalink">
+      <a href="index.html#_root_" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">root</span>
+      </span>
+      
+      
+    </li><li name="_root_.com" visbl="pub" class="indented1 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="com"></a><a id="com:com"></a>
+      <span class="permalink">
+      <a href="index.html#com" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="com/index.html">
+              <span class="name">com</span>
+            </a>
+      </span>
+      
+      
+    </li>
+              </ul>
+            </div>
+          </div>
+          <div id="content">
+            <body class="package value">
+      <div id="definition">
+        <div class="big-circle package">p</div>
+        
+        <h1>root package<span class="permalink">
+      <a href="index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span></h1>
+        
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">root</span>
+      </span>
+      </h4>
+
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        
+
+        
+
+        
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+    </body>
+          </div>
+        </div>
       </div>
     </body>
       </html>

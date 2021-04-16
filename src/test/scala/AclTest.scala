@@ -95,7 +95,7 @@ class AclTest extends FlatSpec with BeforeAndAfterAll {
     // targetFolders.map(x => fs.modifyAclEntries(new Path(x),List(buildRandomAclForPath(x, "DEFAULT")).asJava))
 
   "File trees" should "be the different before the test" in {
-    assert(listLevel(fs, Array(new Path(toTakeAclsFrom))) != listLevel(fs, Array(new Path(toApplyOn))))
+    assert(listLevel(fs, new Path(toTakeAclsFrom)) != listLevel(fs, new Path(toApplyOn)))
   }
 
   "ACLs before test" should "be the different in both folder trees" in {
@@ -117,7 +117,7 @@ class AclTest extends FlatSpec with BeforeAndAfterAll {
     //assert(initAcls != targetAcls)
   }
   "File trees" should "be the different AFTER the test" in {
-    assert(listLevel(fs, Array(new Path(toTakeAclsFrom))) != listLevel(fs, Array(new Path(toApplyOn))))
+    assert(listLevel(fs, new Path(toTakeAclsFrom)) != listLevel(fs, new Path(toApplyOn)))
     println("cleanup")
     folders.map(x => fs.delete(new Path(x), true))
     folders.map(x => fs.delete(new Path(basePath + "hereIsTheNewOne"), true))

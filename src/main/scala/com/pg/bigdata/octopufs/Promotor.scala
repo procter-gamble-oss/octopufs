@@ -145,7 +145,7 @@ object Promotor extends Serializable {
     val targetAbsTblLoc = getTableLocation(targetDbName, targetTableName)
     val fs = getFileSystem(spark.sparkContext.hadoopConfiguration, sourceAbsTblLoc)
 
-    val allSourceFiles = paths.map(x => listLevel(fs, Array(new Path(x))).filter(!_.isDirectory)).reduce(_ union _)
+    val allSourceFiles = paths.map(x => listLevel(fs, new Path(x)).filter(!_.isDirectory)).reduce(_ union _)
     println("Total number of files to be copied: " + allSourceFiles.length)
     val sourceTargetPaths = allSourceFiles.map(x => Paths(x.path, x.path.replace(sourceAbsTblLoc, targetAbsTblLoc)))
     println("Partitions of table " + sourceDbName + "." + sourceTableName + " which are going to be copied to " + targetDbName + "." + targetTableName + ":")

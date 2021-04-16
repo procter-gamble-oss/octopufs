@@ -19,7 +19,7 @@ class TestUtils(testName: String) {
     master("local").
     getOrCreate()
 
-  def setupTestEnv()() = {
+  def setupTestEnv() = {
     spark.sparkContext.setLogLevel("ERROR")
 
     spark.sql("create database " + db)

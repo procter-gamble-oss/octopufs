@@ -27,7 +27,7 @@ object DistributedExecution extends Serializable {
   def copyFolder(sourceFolderUri: String, targetLocationUri: String, taskCount: Int = -1)(implicit spark: SparkSession): Array[FsOperationResult] = {
     implicit val conf = spark.sparkContext.hadoopConfiguration
     val srcFs = getFileSystem(conf, sourceFolderUri)
-    val sourceFileList = listLevel(srcFs, Array(new Path(sourceFolderUri))).filter(!_.isDirectory).map(_.path) //filter is to avoid copying folders (folders will get created where copying files). Caveat: empty folders will not be copied
+    val sourceFileList = listLevel(srcFs, new Path(sourceFolderUri)).filter(!_.isDirectory).map(_.path) //filter is to avoid copying folders (folders will get created where copying files). Caveat: empty folders will not be copied
     val targetFileList = sourceFileList.map(_.replaceAll(sourceFolderUri, targetLocationUri)) //uri to work on differnt fikle systems
     val paths = sourceFileList.zip(targetFileList).map(x => Paths(x._1, x._2))
     println("First path is: " +paths.head)

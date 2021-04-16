@@ -28,18 +28,23 @@ package object fs {
    * Gets all files and folders (recursively)
    * @param fs - FileSystem instance
    * @param folders - list of folders to get the files for. Usually one-element array is used as a starting point.
-   * @param level - do not use
    * @return - returns list of FsElement objects
    */
-  def listLevel(fs: FileSystem, folders: Array[Path], level: Int = 0): Array[FsElement] = {
-    val elements = folders.map(x => Future {
-      fs.listStatus(x)
-    }).flatMap(x => Await.result(x, fsOperationTimeoutMinutes.minutes))
-    val folderPaths = elements.filter(_.isDirectory).map(_.getPath)
-    val fsElements = elements.map(x => FsElement(x.getPath.toString, x.isDirectory, x.getLen))
-    if (folderPaths.isEmpty) fsElements
-    else fsElements ++ listLevel(fs, folderPaths, level + 1)
+
+  def listLevel(fs: FileSystem, folder: Path): Array[FsElement] = {
+    def getFsElementList(fs: FileSystem, startingPoints: Array[Path],acc: Array[FsElement]): Array[FsElement] = {
+      val elements = startingPoints.map(x => Future {
+        fs.listStatus(x)
+      }).flatMap(x => Await.result(x, fsOperationTimeoutMinutes.minutes))
+      val folderPaths = elements.filter(_.isDirectory).map(_.getPath)
+      val fsElements = elements.map(x => FsElement(x.getPath.toString, x.isDirectory, x.getLen))
+      if (folderPaths.isEmpty) acc ++ fsElements
+      else getFsElementList(fs, folderPaths, acc ++ fsElements)
+    }
+    getFsElementList(fs,Array(folder), Array[FsElement]())
+
   }
+
 
   /**
    * Formats size of the files nicely
@@ -86,7 +91,7 @@ package object fs {
    */
   def getSize(path: String)(implicit conf: Configuration): FsSizes = {
     val fs = getFileSystem(conf, path)
-    val files = listLevel(fs, Array(new Path(path)))
+    val files = listLevel(fs, new Path(path))
     displayNumberOfFiles(path, files.length)
     val size = files.map(_.byteSize).sum.toDouble
     displaySize(path, size)

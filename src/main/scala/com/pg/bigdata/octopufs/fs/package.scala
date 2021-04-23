@@ -27,9 +27,8 @@ package object fs {
   /**
    * Gets all files and folders (recursively)
    * @param fs - FileSystem instance
-   * @param folder - the folder to get the files for
-   * @param dropFileDetails - If set to true, it will aggregate information about files to single element.
-   *                        Use it to save memory if individual file details are not need. Default - false
+   * @param folder - the foldeffe files for
+   * @param dropFileDetails - If set to true, it will aggregate information about files to single element
    * @return - returns list of FsElement objects
    */
 

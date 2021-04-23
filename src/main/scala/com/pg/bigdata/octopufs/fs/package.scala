@@ -1,10 +1,10 @@
 package com.pg.bigdata.octopufs
 
 import com.pg.bigdata.octopufs.helpers.implicits._
-import java.net.URI
 
+import java.net.URI
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{FileSystem, Path}
+import org.apache.hadoop.fs.{FileStatus, FileSystem, Path}
 
 import scala.concurrent.duration._
 import scala.concurrent.forkjoin.ForkJoinPool
@@ -28,17 +28,31 @@ package object fs {
    * Gets all files and folders (recursively)
    * @param fs - FileSystem instance
    * @param folders - list of folders to get the files for. Usually one-element array is used as a starting point.
-   * @param level - do not use
    * @return - returns list of FsElement objects
    */
-  def listLevel(fs: FileSystem, folders: Array[Path], level: Int = 0): Array[FsElement] = {
-    val elements = folders.map(x => Future {
-      fs.listStatus(x)
-    }).flatMap(x => Await.result(x, fsOperationTimeoutMinutes.minutes))
-    val folderPaths = elements.filter(_.isDirectory).map(_.getPath)
-    val fsElements = elements.map(x => FsElement(x.getPath.toString, x.isDirectory, x.getLen))
-    if (folderPaths.isEmpty) fsElements
-    else fsElements ++ listLevel(fs, folderPaths, level + 1)
+
+  def listLevel(fs: FileSystem, folder: Path, dropFileDetails: Boolean = false): Array[FsElement] = {
+    def getFsElementList(fs: FileSystem, startingPoints: Array[Path],acc: Array[FsElement]): Array[FsElement] = {
+      val fsElements = startingPoints.map(x => Future {
+        fs.listStatus(x)
+      }.map( elements => {
+        if(dropFileDetails && elements.nonEmpty)
+          elements.filter(_.isDirectory).map(FilesStatusToFsElement) :+ sumUpFiles(elements)
+        else elements.map(FilesStatusToFsElement)
+      })).flatMap(x => Await.result(x, fsOperationTimeoutMinutes.minutes))
+
+      if (fsElements.filter(_.isDirectory).isEmpty) acc ++ fsElements
+      else getFsElementList(fs, fsElements.filter(_.isDirectory).map(p => new Path(p.path)), acc ++ fsElements)
+    }
+    getFsElementList(fs,Array(folder), Array[FsElement]())
+
+  }
+
+  private def FilesStatusToFsElement(x: FileStatus) = FsElement(x.getPath.toString, x.isDirectory, x.getLen)
+
+  private def sumUpFiles(elements: Array[FileStatus]): FsElement = {
+    val path = elements.head.getPath.getParent.toString + "/summed_up_files"
+    FsElement(path,false, elements.filter(!_.isDirectory).map(_.getLen).sum)
   }
 
   /**
@@ -56,11 +70,11 @@ package object fs {
    * Simple class to allow checking folder size without repeated querying of storage account
    * @param sizes - array of FsElement objects from listLevel function (for example)
    */
-  case class FsSizes(sizes: Array[FsElement]) {
+  case class FsSizes(sizes: Array[FsElement], simplified: Boolean) {
     def getSizeOfPath(absolutePath: String): Double = {
       val list = sizes.filter(_.path.startsWith(absolutePath))
       val size = list.map(_.byteSize).sum.toDouble
-      displayNumberOfFiles(absolutePath, list.length)
+      displayNumberOfFiles(absolutePath, list.length, simplified)
       displaySize(absolutePath, size)
       size
     }
@@ -76,7 +90,11 @@ package object fs {
     println("Size of " + path + " is " + toNiceSizeString(units, size))
   }
 
-  def displayNumberOfFiles(path: String, numberOfFiles: Long) = println("Number of files in " + path + " is " + numberOfFiles)
+  def displayNumberOfFiles(path: String, numberOfFiles: Long, simplified: Boolean) = {
+    println("Number of elements in " + path + " is " + numberOfFiles)
+    if(simplified)
+      println("File details have been skipped. Set skipFileDetails to false if you need individual file sizes")
+  }
 
   /**
    * Gets size of all elements in the folder tree (assuming path is a folder).
@@ -84,13 +102,13 @@ package object fs {
    * @param conf - hadoop configuration
    * @return FsSizes which allow to browse through the elements of the filesystem without querying the storage account
    */
-  def getSize(path: String)(implicit conf: Configuration): FsSizes = {
+  def getSize(path: String, skipFileDetails: Boolean = true)(implicit conf: Configuration): FsSizes = {
     val fs = getFileSystem(conf, path)
-    val files = listLevel(fs, Array(new Path(path)))
-    displayNumberOfFiles(path, files.length)
+    val files = listLevel(fs, new Path(path),skipFileDetails)
+    displayNumberOfFiles(path, files.length, skipFileDetails)
     val size = files.map(_.byteSize).sum.toDouble
     displaySize(path, size)
-    FsSizes(files)
+    FsSizes(files, skipFileDetails)
   }
 
   /**

@@ -105,7 +105,7 @@ object AclManager extends Serializable {
                      (implicit conf: Configuration): Array[FsOperationResult] = {
     //todo check if path is a folder
     val fs = getFileSystem(conf, folderUri)
-    val elements = listLevel(fs, Array(new Path(folderUri))) :+ FsElement(folderUri, true, 0) //add top level folder to set ACLs on
+    val elements = listLevel(fs, new Path(folderUri)) :+ FsElement(folderUri, true, 0) //add top level folder to set ACLs on
     val folders = elements.filter(_.isDirectory).map(_.path)
     val files = elements.filter(!_.isDirectory).map(_.path)
 
@@ -129,7 +129,7 @@ object AclManager extends Serializable {
   def clearFolderAcl(folderUri: String)(implicit conf: Configuration): Array[FsOperationResult] = {
     //todo check if path is a folder
     val fs = getFileSystem(conf, folderUri)
-    val elements = listLevel(fs, Array(new Path(folderUri))) :+ FsElement(folderUri, true, 0) //add top level folder to set ACLs on
+    val elements = listLevel(fs, new Path(folderUri)) :+ FsElement(folderUri, true, 0) //add top level folder to set ACLs on
 
     println("Paths to process: " + elements.length)
     clearAcl(elements.map(_.path))
@@ -212,7 +212,7 @@ object AclManager extends Serializable {
     val sourceFs = getFileSystem(conf, uriOfFolderToTakeAclsFrom)
 
     println("Getting files from " + uriOfFolderToTakeAclsFrom)
-    val sourceObjectList = listLevel(sourceFs, Array(new Path(uriOfFolderToTakeAclsFrom)))
+    val sourceObjectList = listLevel(sourceFs, new Path(uriOfFolderToTakeAclsFrom))
     println(sourceObjectList.length.toString + " objects found in " + uriOfFolderToTakeAclsFrom)
     val nSourceFolders = sourceObjectList.filter(_.isDirectory)
 
@@ -221,7 +221,7 @@ object AclManager extends Serializable {
     println("Target folder ACL is: " + topAcl)
 
     println("Getting files from " + uriOfFolderToApplyAclsTo)
-    val targetObjectList = listLevel(targetFs, Array(new Path(uriOfFolderToApplyAclsTo))) :+ FsElement(uriOfFolderToApplyAclsTo, true, 0) //adding top level folder
+    val targetObjectList = listLevel(targetFs, new Path(uriOfFolderToApplyAclsTo)) :+ FsElement(uriOfFolderToApplyAclsTo, true, 0) //adding top level folder
     println(targetObjectList.length.toString + " objects found in " + uriOfFolderToApplyAclsTo)
     val nTargetFiles = targetObjectList.filter(!_.isDirectory)
 

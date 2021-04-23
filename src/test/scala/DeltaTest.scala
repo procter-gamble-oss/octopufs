@@ -29,8 +29,8 @@ class DeltaTest extends FlatSpec with BeforeAndAfterAll{
   val fs = getFileSystem(spark.sparkContext.hadoopConfiguration, source)
 
   "File trees" should "be the different before the test" in {
-    val s = listLevel(fs, Array(new Path(source))).map(x => x.path.replace(source, target))
-    val t = listLevel(fs, Array(new Path(target))).map(_.path)
+    val s = listLevel(fs, new Path(source)).map(x => x.path.replace(source, target))
+    val t = listLevel(fs, new Path(target)).map(_.path)
     assert(s.diff(t).nonEmpty || t.diff(s).nonEmpty, "Sales before synchro: "+salesFCT +" vs "+salesSFCT)
   }
 
@@ -41,8 +41,8 @@ class DeltaTest extends FlatSpec with BeforeAndAfterAll{
   }
 
   "File trees" should "be the the same after the test" in {
-    val s = listLevel(fs, Array(new Path(source))).map(x => x.path.replace(source, target))
-    val t = listLevel(fs, Array(new Path(target))).map(_.path)
+    val s = listLevel(fs, new Path(source)).map(x => x.path.replace(source, target))
+    val t = listLevel(fs, new Path(target)).map(_.path)
     assert(s.diff(t).isEmpty && t.diff(s).isEmpty)
   }
 

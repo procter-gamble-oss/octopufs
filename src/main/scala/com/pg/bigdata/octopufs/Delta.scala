@@ -40,8 +40,8 @@ class Delta(config: Configuration) {
   def getDelta(sourceUri: String, targetUri: String): (Array[DeltaEntry],Array[DeltaEntry]) = {
     val srcFs = getFileSystem(config, sourceUri)
     val trgFs = getFileSystem(config, targetUri)
-    val sourceFiles = listLevel(srcFs, Array(new Path(sourceUri))).filter(!_.isDirectory)
-    val targetFiles = listLevel(trgFs, Array(new Path(targetUri))).filter(!_.isDirectory)
+    val sourceFiles = listLevel(srcFs, new Path(sourceUri)).filter(!_.isDirectory)
+    val targetFiles = listLevel(trgFs, new Path(targetUri)).filter(!_.isDirectory)
     val srcLocalPaths =  sourceFiles.map(x => FsElement(x.path.replaceAll(sourceUri,""),x.isDirectory,x.byteSize))
     val trgLocalPaths =  targetFiles.map(x => FsElement(x.path.replaceAll(targetUri,""),x.isDirectory,x.byteSize))
     val missingInTarget = srcLocalPaths.diff(trgLocalPaths).map(x => DeltaEntry(sourceUri+x.path,DeltaEntry.MISSING_IN_TARGET))

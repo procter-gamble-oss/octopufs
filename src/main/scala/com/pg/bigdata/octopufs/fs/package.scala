@@ -27,7 +27,8 @@ package object fs {
   /**
    * Gets all files and folders (recursively)
    * @param fs - FileSystem instance
-   * @param folders - list of folders to get the files for. Usually one-element array is used as a starting point.
+   * @param folder - the foldeffe files for
+   * @param dropFileDetails - If set to true, it will aggregate information about files to single element
    * @return - returns list of FsElement objects
    */
 
@@ -99,6 +100,7 @@ package object fs {
   /**
    * Gets size of all elements in the folder tree (assuming path is a folder).
    * @param path - absolute path
+   * @param skipFileDetails - if set to true (default), it will not return individual files information, just summaries for the folders
    * @param conf - hadoop configuration
    * @return FsSizes which allow to browse through the elements of the filesystem without querying the storage account
    */

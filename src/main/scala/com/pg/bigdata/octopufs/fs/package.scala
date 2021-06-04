@@ -28,16 +28,16 @@ package object fs {
    * Gets all files and folders (recursively)
    * @param fs - FileSystem instance
    * @param folder - the foldeffe files for
-   * @param dropFileDetails - If set to true, it will aggregate information about files to single element
+   * @param dropFileDetail - If set to true, it will aggregate information about files to single element
    * @return - returns list of FsElement objects
    */
 
-  def listLevel(fs: FileSystem, folder: Path, dropFileDetails: Boolean = false): Array[FsElement] = {
+  def listLevel(fs: FileSystem, folder: Path, dropFileDetail: Boolean = false): Array[FsElement] = {
     def getFsElementList(fs: FileSystem, startingPoints: Array[Path],acc: Array[FsElement]): Array[FsElement] = {
       val fsElements = startingPoints.map(x => Future {
         fs.listStatus(x)
       }.map( elements => {
-        if(dropFileDetails && elements.nonEmpty)
+        if(dropFileDetail && elements.nonEmpty)
           elements.filter(_.isDirectory).map(FilesStatusToFsElement) :+ sumUpFiles(elements)
         else elements.map(FilesStatusToFsElement)
       })).flatMap(x => Await.result(x, fsOperationTimeoutMinutes.minutes))

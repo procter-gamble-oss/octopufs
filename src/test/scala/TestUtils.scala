@@ -88,9 +88,9 @@ object TestUtils{
   def createRandomFolderStructure(parentFolderUri: String, depth: Int = 3, level: Int = 0)(implicit conf: Configuration) = {
 
     def generatePathTree(level: Int, parents: Array[String]): Array[String] = {
-      val children = parents.flatMap(parent => new Random().alphanumeric.take(new Random().nextInt(4) + 1).map(x => parent + "/" + Random.alphanumeric.take(6).mkString))
+      val children = parents.flatMap(parent => new Random().alphanumeric.take(new Random().nextInt(2) + 3).map(x => parent + "/" + Random.alphanumeric.take(6).mkString))
       if (children.isEmpty) throw new Exception("puste dzieci")
-      if (level > depth) return children
+      if (level > depth) children
       else children ++ generatePathTree(level + 1, children)
     }
 

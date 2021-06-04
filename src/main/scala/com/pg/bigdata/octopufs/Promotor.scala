@@ -1,7 +1,7 @@
 package com.pg.bigdata.octopufs
 
 import com.pg.bigdata.octopufs.Assistant._
-import com.pg.bigdata.octopufs.fs.{DistributedExecution, FsOperationResult, Paths, _}
+import com.pg.bigdata.octopufs.fs._
 import com.pg.bigdata.octopufs.metastore._
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
@@ -143,16 +143,45 @@ object Promotor extends Serializable {
     println("Partitions to be copied: " + paths.mkString("\n"))
     val sourceAbsTblLoc = getTableLocation(sourceDbName, sourceTableName)
     val targetAbsTblLoc = getTableLocation(targetDbName, targetTableName)
-    val fs = getFileSystem(spark.sparkContext.hadoopConfiguration, sourceAbsTblLoc)
 
-    val allSourceFiles = paths.map(x => listLevel(fs, new Path(x)).filter(!_.isDirectory)).reduce(_ union _)
-    println("Total number of files to be copied: " + allSourceFiles.length)
+    val fs = getFileSystem(spark.sparkContext.hadoopConfiguration, sourceAbsTblLoc)
+    val allSourceFiles = getFilesOnlyOfFolders(paths)(fs)
+
     val sourceTargetPaths = allSourceFiles.map(x => Paths(x.path, x.path.replace(sourceAbsTblLoc, targetAbsTblLoc)))
-    println("Partitions of table " + sourceDbName + "." + sourceTableName + " which are going to be copied to " + targetDbName + "." + targetTableName + ":")
+    println("Files of partitions of table " + sourceDbName + "." + sourceTableName + " which are going to be copied to " + targetDbName + "." + targetTableName + ":")
     sourceTargetPaths.slice(0, 5).foreach(x => println(x)) //debug
     val res = DistributedExecution.copyFiles(sourceTargetPaths, taskCount)
     refreshMetadata(targetDbName, targetTableName)
     res
+  }
+//todo: scaladoc
+  def copySelectedSubFoldersContent(sourcePathUri: String, targetPathUri: String, matchStringPaths: Seq[String],
+                          taskCount: Int = -1)
+                         (implicit spark: SparkSession): Array[FsOperationResult] = {
+
+    val subFolders = getSubfolderPaths(sourcePathUri)
+    val filteredPaths = filterPaths(subFolders,matchStringPaths)
+    if (filteredPaths.isEmpty)
+      throw new Exception("There are no files to be copied. Please check your input parameters or table content")
+
+    println("Sub-folders to be copied: " + filteredPaths.mkString(", "))
+
+    implicit val fs = getFileSystem(spark.sparkContext.hadoopConfiguration, sourcePathUri)
+    val allSourceFiles = getFilesOnlyOfFolders(filteredPaths)
+    val sourceTargetPaths = allSourceFiles.map(x => Paths(x.path, x.path.replace(sourcePathUri, targetPathUri)))
+    println("Files of " + sourcePathUri + " which are going to be copied to " + targetPathUri + ":")
+    sourceTargetPaths.slice(0, 5).foreach(x => println(x))
+    DistributedExecution.copyFiles(sourceTargetPaths, taskCount)
+  }
+  //todo: scaladoc
+  def copyOverwriteSelectedSubfoldersContent(sourcePathUri: String, targetPathUri: String, matchStringPaths: Seq[String],
+                                             taskCount: Int = -1)(implicit spark: SparkSession) = {
+    val subFolders = getSubfolderPaths(targetPathUri)
+    val filteredPaths = filterPaths(subFolders,matchStringPaths)
+    println("Subfolders of " + targetPathUri + " which are going to be deleted:")
+    filteredPaths.foreach(println)
+    LocalExecution.deletePaths(filteredPaths)(spark.sparkContext.hadoopConfiguration)
+    copySelectedSubFoldersContent(sourcePathUri,targetPathUri, matchStringPaths, taskCount)
   }
 
   /**

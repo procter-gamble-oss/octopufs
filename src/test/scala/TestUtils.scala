@@ -88,7 +88,8 @@ object TestUtils{
   def createRandomFolderStructure(parentFolderUri: String, depth: Int = 3, level: Int = 0)(implicit conf: Configuration) = {
 
     def generatePathTree(level: Int, parents: Array[String]): Array[String] = {
-      val children = parents.flatMap(parent => new Random().alphanumeric.take(new Random().nextInt(2) + 3).map(x => parent + "/" + Random.alphanumeric.take(6).mkString))
+      val numberOfElements = if(level==0) 5 else new Random().nextInt(2) + 3
+      val children = parents.flatMap(parent => new Random().alphanumeric.take(numberOfElements).map(_ => parent + "/" + Random.alphanumeric.take(6).mkString))
       if (children.isEmpty) throw new Exception("puste dzieci")
       if (level > depth) children
       else children ++ generatePathTree(level + 1, children)
@@ -116,5 +117,26 @@ object TestUtils{
     val toTakeAclsFromFiles = new Random().shuffle(files.toList).take((files.length * 0.5).toInt)
     toTakeAclsFromFiles.map(x => org.apache.hadoop.fs.FileUtil.copy(fs, new Path(x), fs, new Path(x.replace(sourceRootFolder, targetRootFolder)), false, conf))
     toTakeAclsFromFiles
+  }
+
+  def createFolderStructureForTest(testName: String)(implicit conf: Configuration): (String, String, Array[String], Path, Path) = {
+    val currentDirectory = new java.io.File(".").getCanonicalPath
+    val startPath = currentDirectory + s"/data/$testName"
+    val destPath = currentDirectory + s"/data/${testName}target"
+    TestUtils.createRandomFolderStructure(startPath)
+    val fs = getFileSystem(conf, startPath)
+
+    val subFoldersToBeCopied = fs.listStatus(new Path(startPath)).filter(_.isDirectory).take(2).map(_.getPath.getName)
+
+    println(subFoldersToBeCopied.mkString(", "))
+    val sourceFolderListing = fs.listStatus(new Path(startPath))
+    val simulatedOldFileToBeOverwritten = new Path(sourceFolderListing.head.getPath.toString.replace(startPath, destPath))
+    val simulatedOldFolderToBeKept = new Path(destPath + "/folderTobeKept")
+    if(!fs.mkdirs(simulatedOldFolderToBeKept)) throw new Exception("Cannot create new folder")
+    val dummyFile = new Path(destPath + "/folderTobeKept/dummyFile")
+    if(!fs.createNewFile(dummyFile)) throw new Exception("Cannot create new file")
+    if(!fs.mkdirs(simulatedOldFileToBeOverwritten)) throw new Exception("Cannot create folder")
+
+    (startPath, destPath, subFoldersToBeCopied, dummyFile, simulatedOldFolderToBeKept)
   }
 }

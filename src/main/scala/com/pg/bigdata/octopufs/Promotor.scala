@@ -162,13 +162,15 @@ object Promotor extends Serializable {
     val subFolders = getSubfolderPaths(sourcePathUri)
     val filteredPaths = filterPaths(subFolders,matchStringPaths)
     if (filteredPaths.isEmpty)
-      throw new Exception("There are no files to be copied. Please check your input parameters or table content")
+      throw new Exception("There are no partitions to be copied. Please check your input parameters or table content")
 
     println("Sub-folders to be copied: " + filteredPaths.mkString(", "))
 
     implicit val fs = getFileSystem(spark.sparkContext.hadoopConfiguration, sourcePathUri)
     val allSourceFiles = getFilesOnlyOfFolders(filteredPaths)
     val sourceTargetPaths = allSourceFiles.map(x => Paths(x.path, x.path.replace(sourcePathUri, targetPathUri)))
+    if (sourceTargetPaths.isEmpty)
+      throw new Exception("There are no files to be copied. Please check your input parameters or table content")
     println("Files of " + sourcePathUri + " which are going to be copied to " + targetPathUri + ":")
     sourceTargetPaths.slice(0, 5).foreach(x => println(x))
     DistributedExecution.copyFiles(sourceTargetPaths, taskCount)
@@ -176,12 +178,27 @@ object Promotor extends Serializable {
   //todo: scaladoc
   def copyOverwriteSelectedSubfoldersContent(sourcePathUri: String, targetPathUri: String, matchStringPaths: Seq[String],
                                              taskCount: Int = -1)(implicit spark: SparkSession) = {
-    val subFolders = getSubfolderPaths(targetPathUri)
+    val subFolders = getSubfolderPaths(sourcePathUri)
     val filteredPaths = filterPaths(subFolders,matchStringPaths)
-    println("Subfolders of " + targetPathUri + " which are going to be deleted:")
-    filteredPaths.foreach(println)
-    LocalExecution.deletePaths(filteredPaths)(spark.sparkContext.hadoopConfiguration)
+
+    val fs = getFileSystem(spark.sparkContext.hadoopConfiguration, targetPathUri)
+    val pathsToBeDeleted = filteredPaths.map(x => x.replace(sourcePathUri, targetPathUri)).filter(x => fs.exists(new Path(x)))
+
+    println("Subfolders of " + targetPathUri + " which are going to be deleted (if exist):")
+    pathsToBeDeleted.foreach(println)
+
+    LocalExecution.deletePaths(pathsToBeDeleted)(spark.sparkContext.hadoopConfiguration)
     copySelectedSubFoldersContent(sourcePathUri,targetPathUri, matchStringPaths, taskCount)
+  }
+
+  //todo: scaladoc
+  def moveSelectedSubFolders(sourcePathUri: String, targetPathUri: String, matchStringPaths: Seq[String])
+                            (implicit spark: SparkSession) = {
+    val subFolders = getSubfolderPaths(sourcePathUri)
+    val filteredPaths = filterPaths(subFolders, matchStringPaths)
+    println("Subfolders of " + sourcePathUri + " which are going to be moved:")
+    filteredPaths.foreach(println)
+    moveFolders(filteredPaths, targetPathUri)
   }
 
   /**
@@ -216,6 +233,44 @@ object Promotor extends Serializable {
     moveTablePartitions(db, sourceTableName, db, targetTableName, matchStringPartitions)(spark)
   }
 
+  private def moveFolders(foldersToBeMovedUri: Array[String], destinationUri: String)(implicit spark: SparkSession): Array[FsOperationResult] = {
+    if(foldersToBeMovedUri.isEmpty){
+      throw new Exception("There is nothing to be moved (array provided is empty)")
+    }
+    val sourceBaseUri = new Path(foldersToBeMovedUri.head).getParent.toString
+    implicit val conf: Configuration = spark.sparkContext.hadoopConfiguration
+    implicit val fs = getFileSystem(conf, foldersToBeMovedUri.head)
+    val trgFs = getFileSystem(conf, destinationUri)
+    val sourceTargetUriPaths = foldersToBeMovedUri.map(x => Paths(x, x.replace(sourceBaseUri, destinationUri)))
+    sourceTargetUriPaths.foreach(x =>
+      if (!doesMoveLookSafe(fs, x.sourcePath, x.targetPath)) {
+        throw new Exception("It looks like there is a path in source " + x.sourcePath + " which is empty, but target folder " + x.targetPath + " is not. " +
+          "Promotor tries to protect you from unintentional deletion of your data in the target. If you want to avoid this exception, " +
+          "place at least one empty file in the source folder to avoid run interruption")
+      }
+    )
+
+    checkIfFsIsTheSame(fs, trgFs) //throws exception in case of discrepancy
+
+    val existingTargetFolders = sourceTargetUriPaths.map(_.targetPath).
+      filter(folder => fs.exists(new Path(folder)))
+
+    val transaction = new SafetyFuse(sourceBaseUri)
+    if (!transaction.isInProgress()) {
+      transaction.startTransaction()
+      println("Deleting targets... (showing 10 sample paths")
+      existingTargetFolders.slice(0, 10).foreach(println)
+      LocalExecution.deletePaths(existingTargetFolders)
+    }
+
+    println("Now moving source... Showing first 10 paths")
+    sourceTargetUriPaths.slice(0, 10).foreach(println)
+    val res = LocalExecution.movePaths(sourceTargetUriPaths)
+    transaction.endTransaction()
+
+    res
+  }
+
   /**
    * Function will delete existing (and overlapping) partitions from the target table and move partitions from source to the target. Please note that
    * move operation does NOT modify ACLs, so you may want to assign ACLs after the move. Function runs on driver node, because move and delete operations
@@ -235,11 +290,6 @@ object Promotor extends Serializable {
     val partitionFoldersUriPaths = filterPartitions(sourceDbName, sourceTableName, matchStringPartitions)
     val sourceAbsTblLoc = getTableLocation(sourceDbName, sourceTableName)
     val targetAbsTblLoc = getTableLocation(targetDbName, targetTableName)
-    val sourceTargetUriPaths = partitionFoldersUriPaths.map(x => Paths(x, x.replace(sourceAbsTblLoc, targetAbsTblLoc)))
-    implicit val srcFs = getFileSystem(conf, sourceAbsTblLoc)
-    val trgFs = getFileSystem(conf, targetAbsTblLoc)
-
-    checkIfFsIsTheSame(srcFs, trgFs) //throws exception in case of discrepancy
 
     if (partitionFoldersUriPaths.isEmpty) {
       println("There is nothing to be moved (source " + sourceAbsTblLoc + "is empty)")
@@ -248,33 +298,11 @@ object Promotor extends Serializable {
 
     println("Partitions of table " + sourceDbName + "." + sourceTableName + " which are going to be moved to " + targetDbName + "." + targetTableName + ":")
 
-    //check if it is safe to move folders
-    sourceTargetUriPaths.foreach(x =>
-      if (!doesMoveLookSafe(srcFs, x.sourcePath, x.targetPath)) {
-        throw new Exception("It looks like there is a path in source " + x.sourcePath + " which is empty, but target folder " + x.targetPath + " is not. " +
-          "Promotor tries to protect you from unintentional deletion of your data in the target. If you want to avoid this exception, " +
-          "place at least one empty file in the source folder to avoid run interruption")
-      }
-    )
-
-    val existingTargetFolders = partitionFoldersUriPaths.map(_.replace(sourceAbsTblLoc, targetAbsTblLoc)).
-      filter(folder => srcFs.exists(new Path(folder)))
-    //make backup
-    val transaction = new SafetyFuse(sourceAbsTblLoc)
-    if (!transaction.isInProgress()) {
-      transaction.startTransaction()
-      println("Deleting targets... (showing 10 sample paths")
-      existingTargetFolders.slice(0, 10).foreach(println)
-      LocalExecution.deletePaths(existingTargetFolders)
-    }
-
-    println("Now moving source... Showing first 10 paths")
-    sourceTargetUriPaths.slice(0, 10).foreach(println)
-    val res = LocalExecution.movePaths(sourceTargetUriPaths)
+    val res = moveFolders(partitionFoldersUriPaths, targetAbsTblLoc)
 
     refreshMetadata(sourceDbName, sourceTableName)
     refreshMetadata(targetDbName, targetTableName)
-    transaction.endTransaction()
+
     res
   }
 

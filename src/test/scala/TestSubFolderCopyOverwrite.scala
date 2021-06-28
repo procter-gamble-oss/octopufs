@@ -12,16 +12,8 @@ class TestSubFolderCopyOverwrite extends FlatSpec with BeforeAndAfterAll {
   spark.sparkContext.setLogLevel("ERROR")
   implicit val c = spark.sparkContext.hadoopConfiguration
 
-  val currentDirectory = new java.io.File(".").getCanonicalPath
-  val startPath = currentDirectory + "/data/FolderCopyTest"
-  val destPath = currentDirectory + "/data/copysubfolderstarget"
-  TestUtils.createRandomFolderStructure(startPath)
-  val fs = getFileSystem(spark.sparkContext.hadoopConfiguration, startPath)
-
-  val subFoldersToBeCopied = fs.listStatus(new Path(startPath)).filter(_.isDirectory).take(2).map(_.getPath.getName)
-  println(subFoldersToBeCopied.mkString(", "))
-
-  fs.create(new Path(destPath + "/" + subFoldersToBeCopied.head + "/somedummyFIle"))
+  val (startPath, destPath, subFoldersToBeCopied, dummyFile, simulatedFolderToBeKept) = TestUtils.createFolderStructureForTest("FolderCopyOverwrite")
+  val fs = getFileSystem(c, startPath)
   Promotor.copyOverwriteSelectedSubfoldersContent(startPath, destPath, subFoldersToBeCopied)
 
   "Source folder" should "contain more than 2 subfolders (precheck)" in {
@@ -29,7 +21,14 @@ class TestSubFolderCopyOverwrite extends FlatSpec with BeforeAndAfterAll {
   }
 
   "After partition copy, STORE_SALES_SFCT" should "contain new partition as well as the other ones which existed there before" in {
-    assert(fs.listStatus(new Path(destPath)).map(_.getPath.getName).sameElements(subFoldersToBeCopied))
+    val destFolders = fs.listStatus(new Path(destPath)).map(_.getPath.getName)
+    destFolders.foreach(println)
+    assert(destFolders.filter(_ != simulatedFolderToBeKept.getName).sameElements(subFoldersToBeCopied))
+  }
+
+  "After subfolders move, folder" should "contain dummy file" in {
+    assert(fs.exists(dummyFile))
+    assert(fs.exists(simulatedFolderToBeKept))
   }
 
   "Content after copy" should "match the source" in {

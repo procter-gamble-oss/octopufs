@@ -4,7 +4,7 @@ import com.pg.bigdata.octopufs.Assistant._
 import com.pg.bigdata.octopufs.fs._
 import com.pg.bigdata.octopufs.metastore._
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.Path
+import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.SparkSession
 
 //val magicPrefix = ".dfs.core.windows.net"
@@ -153,7 +153,7 @@ object Promotor extends Serializable {
 
     println("Sub-folders to be copied: " + filteredPaths.mkString(", "))
 
-    implicit val fs = getFileSystem(spark.sparkContext.hadoopConfiguration, sourcePathUri)
+    implicit val fs: FileSystem = getFileSystem(spark.sparkContext.hadoopConfiguration, sourcePathUri)
     val allSourceFiles = getFilesOnlyOfFolders(filteredPaths)
     val sourceTargetPaths = allSourceFiles.map(x => Paths(x.path, x.path.replace(sourcePathUri, targetPathUri)))
     if (sourceTargetPaths.isEmpty)
@@ -179,7 +179,7 @@ object Promotor extends Serializable {
     }
     val sourceBaseUri = new Path(foldersToBeMovedUri.head).getParent.toString
     implicit val conf: Configuration = spark.sparkContext.hadoopConfiguration
-    implicit val fs = getFileSystem(conf, foldersToBeMovedUri.head)
+    implicit val fs: FileSystem = getFileSystem(conf, foldersToBeMovedUri.head)
     val trgFs = getFileSystem(conf, destinationUri)
     val destFolderPath = new Path(destinationUri)
     if(!trgFs.isDirectory(destFolderPath))

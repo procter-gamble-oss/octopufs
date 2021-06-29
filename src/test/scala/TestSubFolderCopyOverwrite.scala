@@ -50,7 +50,7 @@ class TestSubFolderCopyOverwrite extends FlatSpec with BeforeAndAfterAll {
     assert(x.sameElements(y))
   }
 
-  override def afterAll() = {
+  override def afterAll(): Unit = {
     fs.delete(new Path(startPath), true)
     fs.delete(new Path(destPath), true)
     fs.delete(new Path(newPath), true)

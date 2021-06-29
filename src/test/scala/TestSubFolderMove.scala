@@ -13,10 +13,18 @@ class TestSubFolderMove extends FlatSpec with BeforeAndAfterAll {
   implicit val c = spark.sparkContext.hadoopConfiguration
 
   val (startPath, destPath, subFoldersToBeCopied, dummyFile, simulatedFolderToBeKept) = TestUtils.createFolderStructureForTest("FolderMoveOverwrite")
+  val (startPath2, destPath2, subFoldersToBeCopied2, dummyFile2, simulatedFolderToBeKept2) = TestUtils.createFolderStructureForTest("FolderMoveOverwrite2")
 
   val fs = getFileSystem(c, startPath)
 
-  Promotor.moveSelectedSubFolders(startPath, destPath, subFoldersToBeCopied)
+  "Copy operation" should "succeed" in {
+    Promotor.moveSelectedSubFolders(startPath, destPath, subFoldersToBeCopied)
+  }
+
+  "Copy operation to path which does not exist" should "succeed" in {
+    Promotor.moveSelectedSubFolders(startPath2, new java.io.File(".").getCanonicalPath + "data/someFolderWhichDoesNotExist2", subFoldersToBeCopied2)
+  }
+
 
   "Source folder" should "contain other folders after the move (2 ouf of 5 are to me moved)" in {
     assert(fs.listStatus(new Path(startPath)).length == 3,"start folder has 5 subfolders. 2 of them were moved. 3 should remain")
@@ -40,7 +48,6 @@ class TestSubFolderMove extends FlatSpec with BeforeAndAfterAll {
   "Folders on target side" should "exist and should not be empty" in {
     val y = subFoldersToBeCopied.map(f => listLevel(fs, new Path(s"$destPath/$f")).map(_.path.replace(destPath, ""))).reduce(_ ++ _)
     assert(y.length > 4, "there should be at least 2 folders and 2 files")
-
   }
 
   override def afterAll() = {

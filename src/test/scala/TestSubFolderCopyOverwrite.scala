@@ -14,13 +14,20 @@ class TestSubFolderCopyOverwrite extends FlatSpec with BeforeAndAfterAll {
 
   val (startPath, destPath, subFoldersToBeCopied, dummyFile, simulatedFolderToBeKept) = TestUtils.createFolderStructureForTest("FolderCopyOverwrite")
   val fs = getFileSystem(c, startPath)
-  Promotor.copyOverwriteSelectedSubfoldersContent(startPath, destPath, subFoldersToBeCopied)
+
+  "Copy operation" should "succeed" in {
+    Promotor.copyOverwriteSelectedSubfoldersContent(startPath, destPath, subFoldersToBeCopied)
+  }
+
+  "Copy operation to path which does not exist" should "succeed" in {
+    Promotor.copyOverwriteSelectedSubfoldersContent(startPath, new java.io.File(".").getCanonicalPath + "/data/someFolderWhichDoesNotExist", subFoldersToBeCopied)
+  }
 
   "Source folder" should "contain more than 2 subfolders (precheck)" in {
     assert(fs.listStatus(new Path(startPath)).length > 2, "If source does not have more than 2 sub-folders, than sub-folders filtering test is limited and may be false positive")
   }
 
-  "After partition copy, STORE_SALES_SFCT" should "contain new partition as well as the other ones which existed there before" in {
+  "After subfolder copy" should "contain new partition as well as the other ones which existed there before" in {
     val destFolders = fs.listStatus(new Path(destPath)).map(_.getPath.getName)
     destFolders.foreach(println)
     assert(destFolders.filter(_ != simulatedFolderToBeKept.getName).sameElements(subFoldersToBeCopied))

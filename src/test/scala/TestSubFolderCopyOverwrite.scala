@@ -13,6 +13,7 @@ class TestSubFolderCopyOverwrite extends FlatSpec with BeforeAndAfterAll {
   implicit val c = spark.sparkContext.hadoopConfiguration
 
   val (startPath, destPath, subFoldersToBeCopied, dummyFile, simulatedFolderToBeKept) = TestUtils.createFolderStructureForTest("FolderCopyOverwrite")
+  val newPath = new java.io.File(".").getCanonicalPath + "/data/someFolderWhichDoesNotExist"
   val fs = getFileSystem(c, startPath)
 
   "Copy operation" should "succeed" in {
@@ -20,7 +21,7 @@ class TestSubFolderCopyOverwrite extends FlatSpec with BeforeAndAfterAll {
   }
 
   "Copy operation to path which does not exist" should "succeed" in {
-    Promotor.copyOverwriteSelectedSubfoldersContent(startPath, new java.io.File(".").getCanonicalPath + "/data/someFolderWhichDoesNotExist", subFoldersToBeCopied)
+    Promotor.copyOverwriteSelectedSubfoldersContent(startPath, newPath, subFoldersToBeCopied)
   }
 
   "Source folder" should "contain more than 2 subfolders (precheck)" in {
@@ -52,5 +53,6 @@ class TestSubFolderCopyOverwrite extends FlatSpec with BeforeAndAfterAll {
   override def afterAll() = {
     fs.delete(new Path(startPath), true)
     fs.delete(new Path(destPath), true)
+    fs.delete(new Path(newPath), true)
   }
 }

@@ -14,7 +14,7 @@ class TestSubFolderMove extends FlatSpec with BeforeAndAfterAll {
 
   val (startPath, destPath, subFoldersToBeCopied, dummyFile, simulatedFolderToBeKept) = TestUtils.createFolderStructureForTest("FolderMoveOverwrite")
   val (startPath2, destPath2, subFoldersToBeCopied2, dummyFile2, simulatedFolderToBeKept2) = TestUtils.createFolderStructureForTest("FolderMoveOverwrite2")
-
+  val newPath = new java.io.File(".").getCanonicalPath + "data/someFolderWhichDoesNotExist2"
   val fs = getFileSystem(c, startPath)
 
   "Copy operation" should "succeed" in {
@@ -22,7 +22,7 @@ class TestSubFolderMove extends FlatSpec with BeforeAndAfterAll {
   }
 
   "Copy operation to path which does not exist" should "succeed" in {
-    Promotor.moveSelectedSubFolders(startPath2, new java.io.File(".").getCanonicalPath + "data/someFolderWhichDoesNotExist2", subFoldersToBeCopied2)
+    Promotor.moveSelectedSubFolders(startPath2, newPath, subFoldersToBeCopied2)
   }
 
 
@@ -53,5 +53,7 @@ class TestSubFolderMove extends FlatSpec with BeforeAndAfterAll {
   override def afterAll() = {
     fs.delete(new Path(startPath), true)
     fs.delete(new Path(destPath), true)
+    fs.delete(new Path(newPath), true)
+
   }
 }

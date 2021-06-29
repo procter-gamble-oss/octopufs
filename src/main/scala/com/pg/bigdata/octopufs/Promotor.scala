@@ -181,6 +181,9 @@ object Promotor extends Serializable {
     implicit val conf: Configuration = spark.sparkContext.hadoopConfiguration
     implicit val fs = getFileSystem(conf, foldersToBeMovedUri.head)
     val trgFs = getFileSystem(conf, destinationUri)
+    val destFolderPath = new Path(destinationUri)
+    if(!trgFs.isDirectory(destFolderPath))
+      trgFs.mkdirs(destFolderPath)
     val sourceTargetUriPaths = foldersToBeMovedUri.map(x => Paths(x, x.replace(sourceBaseUri, destinationUri)))
     sourceTargetUriPaths.foreach(x =>
       if (!doesMoveLookSafe(fs, x.sourcePath, x.targetPath)) {

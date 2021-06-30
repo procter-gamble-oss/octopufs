@@ -125,7 +125,16 @@ object Promotor extends Serializable {
     DistributedExecution.copyFolder(srcLoc, trgLoc, taskCount)
   }
 
-  //todo: scaladoc
+  /**
+   * Works similarly to copyOverwritePartition, but it doesn't require the source to be hive table. The function will first delete subfolders of the
+   * target folder (if they exist) and then it will copy folders from the source to target
+   * @param sourcePathUri - absolute path of source folder (which has sub-folders)
+   * @param targetPathUri - absolute path of target folder (to copy folders to)
+   * @param matchStringPaths - sequence of strings - if sub-folder name contains one of the strings in the sequence, it will be copied. Otherwise, it will be skipped.
+   * @param taskCount - number of threads to distribute the load to. Value -1 ensures best distribution (one file per task), however it may trigger a lot of small tasks if your files are small.   * @param spark
+   * @param spark - (implicit) spark session
+   * @return - Array of operation result [FsOperationResult]
+   */
   def copyOverwriteSelectedSubfoldersContent(sourcePathUri: String, targetPathUri: String, matchStringPaths: Seq[String],
                                              taskCount: Int = -1)(implicit spark: SparkSession) = {
     val subFolders = getSubfolderPaths(sourcePathUri)
@@ -141,7 +150,16 @@ object Promotor extends Serializable {
     copySelectedSubFoldersContent(sourcePathUri, targetPathUri, matchStringPaths, taskCount)
   }
 
-  //todo: scaladoc
+  /**
+   * Copies content of selected sub-folders to destination folders (will also create corresponding sub-folders if they are missing). It will NOT delete
+   * any folder from the target
+   * @param sourcePathUri - absolute path of source folder (which has sub-folders)
+   * @param targetPathUri - absolute path of target folder (to copy folders to)
+   * @param matchStringPaths - sequence of strings - if sub-folder name contains one of the strings in the sequence, it will be copied. Otherwise, it will be skipped.
+   * @param taskCount - number of threads to distribute the load to. Value -1 ensures best distribution (one file per task), however it may trigger a lot of small tasks if your files are small.   * @param spark
+   * @param spark - (implicit) spark session
+   * @return
+   */
   def copySelectedSubFoldersContent(sourcePathUri: String, targetPathUri: String, matchStringPaths: Seq[String],
                                     taskCount: Int = -1)
                                    (implicit spark: SparkSession): Array[FsOperationResult] = {
@@ -163,7 +181,17 @@ object Promotor extends Serializable {
     DistributedExecution.copyFiles(sourceTargetPaths, taskCount)
   }
 
-  //todo: scaladoc
+  /**
+   * Moves (sub)folders from source folder to target folder. The function will first delete subfolders of the
+   * target folder (if they exist) and then it will move folders from the source to target. Because this is move operation, files must be on the same
+   * file system (i.e. blob container)
+   * @param sourcePathUri - absolute path of source folder (which has sub-folders)
+   * @param targetPathUri - absolute path of target folder (to copy folders to)
+   * @param matchStringPaths - sequence of strings - if sub-folder name contains one of the strings in the sequence, it will be copied. Otherwise, it will be skipped.
+   * @param taskCount - number of threads to distribute the load to. Value -1 ensures best distribution (one file per task), however it may trigger a lot of small tasks if your files are small.   * @param spark
+   * @param spark - (implicit) spark session
+   * @return - Array of operation result [FsOperationResult]
+   */
   def moveSelectedSubFolders(sourcePathUri: String, targetPathUri: String, matchStringPaths: Seq[String])
                             (implicit spark: SparkSession) = {
     val subFolders = getSubfolderPaths(sourcePathUri)

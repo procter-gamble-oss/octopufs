@@ -1,5 +1,6 @@
 package com.pg.bigdata.octopufs.acl
 
+import com.pg.bigdata.octopufs.acl.AclManager.FsPermission
 import com.pg.bigdata.octopufs.fs.{FsOperationResult, _}
 import com.pg.bigdata.octopufs.helpers.implicits._
 import com.pg.bigdata.octopufs.metastore._
@@ -53,24 +54,29 @@ object AclManager extends Serializable {
    * @param conf - configuration of hadoop. Best to get it is from spark.sparkContext.hadoopConfiguration
    * @return Array of FsOperationResult objects containing information if operation succeeded for each path.
    */
-  def modifyAcl(paths: Array[String], newFsPermission: FsPermission, attempt: Int = 0)
+  def modifyAcl(paths: Array[String], newFsPermission: Array[FsPermission], attempt: Int = 0)
                (implicit conf: Configuration): Array[FsOperationResult] = {
     println("Modifying ACLs - attempt " + attempt)
 
-    val y = AclManager.getAclEntry(newFsPermission)
+    val permissions = newFsPermission.map(perm => AclManager.getAclEntry(perm))
     val fs = getFileSystem(conf, paths.head)
 
-    val res = paths.map(x => Future {
+    val res = paths.map(path => Future {
       Try({
-        fs.modifyAclEntries(new Path(x), Seq(y).asJava)
-        FsOperationResult(x, true)
-      }).getOrElse(FsOperationResult(x, false))
+        fs.modifyAclEntries(new Path(path), permissions.toSeq.asJava)
+        FsOperationResult(path, true)
+      }).getOrElse(FsOperationResult(path, false))
     }).map(x => Await.result(x, fsOperationTimeoutMinutes.minute))
     val failed = res.filter(!_.success).filter(x => fs.exists(new Path(x.path))).map(_.path)
     //todo printout information that setting acls failed but it is because paths do not exist
     if (failed.isEmpty) res
     else if (failed.length == paths.length || attempt > 4) throw new Exception("Some paths failed - showing 10 of them " + failed.slice(0, 10).mkString("\n"))
     else modifyAcl(failed, newFsPermission, attempt + 1)
+  }
+
+  def modifyAcl(paths: Array[String], newFsPermission: FsPermission, attempt: Int = 0)
+               (implicit conf: Configuration): Array[FsOperationResult] = {
+    modifyAcl(paths, Array(newFsPermission), attempt)
   }
 
 

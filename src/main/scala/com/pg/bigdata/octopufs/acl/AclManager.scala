@@ -54,7 +54,7 @@ object AclManager extends Serializable {
    * @param conf - configuration of hadoop. Best to get it is from spark.sparkContext.hadoopConfiguration
    * @return Array of FsOperationResult objects containing information if operation succeeded for each path.
    */
-  def modifyAcl(paths: Array[String], newFsPermission: Array[FsPermission], attempt: Int = 0)
+  def modifyAcls(paths: Array[String], newFsPermission: Array[FsPermission], attempt: Int = 0)
                (implicit conf: Configuration): Array[FsOperationResult] = {
     println("Modifying ACLs - attempt " + attempt)
 
@@ -71,12 +71,12 @@ object AclManager extends Serializable {
     //todo printout information that setting acls failed but it is because paths do not exist
     if (failed.isEmpty) res
     else if (failed.length == paths.length || attempt > 4) throw new Exception("Some paths failed - showing 10 of them " + failed.slice(0, 10).mkString("\n"))
-    else modifyAcl(failed, newFsPermission, attempt + 1)
+    else modifyAcls(failed, newFsPermission, attempt + 1)
   }
 
   def modifyAcl(paths: Array[String], newFsPermission: FsPermission, attempt: Int = 0)
                (implicit conf: Configuration): Array[FsOperationResult] = {
-    modifyAcl(paths, Array(newFsPermission), attempt)
+    modifyAcls(paths, Array(newFsPermission), attempt)
   }
 
 

@@ -135,7 +135,7 @@ object Promotor extends Serializable {
    * @param spark - (implicit) spark session
    * @return - Array of operation result [FsOperationResult]
    */
-  def copyOverwriteSelectedSubfoldersContent(sourcePathUri: String, targetPathUri: String, matchStringPaths: Seq[String],
+    def copyOverwriteSelectedSubfoldersContent(sourcePathUri: String, targetPathUri: String, matchStringPaths: Seq[String],
                                              taskCount: Int = -1)(implicit spark: SparkSession) = {
     val subFolders = getSubfolderPaths(sourcePathUri)
     val filteredPaths = filterPaths(subFolders, matchStringPaths)

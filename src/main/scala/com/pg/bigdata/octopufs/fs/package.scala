@@ -49,6 +49,11 @@ package object fs {
 
   }
 
+  def list(absolutePath: String)(configuration: Configuration): Array[FsElement] = {
+    val fs = getFileSystem(configuration, absolutePath)
+    listLevel(fs, new Path(absolutePath),false)
+  }
+
   private def FilesStatusToFsElement(x: FileStatus) = FsElement(x.getPath.toString, x.isDirectory, x.getLen)
 
   private def sumUpFiles(elements: Array[FileStatus]): FsElement = {

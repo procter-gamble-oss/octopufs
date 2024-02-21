@@ -1,7 +1,7 @@
 package com.pg.bigdata.octopufs
 
 import com.pg.bigdata.octopufs.fs._
-import org.apache.hadoop.fs.Path
+import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.catalyst.TableIdentifier
 import org.apache.spark.sql.catalyst.catalog.CatalogTable
@@ -42,9 +42,22 @@ package object metastore {
     val m = getTableMetadata(db, tableName).partitionColumnNames
     if (m.isEmpty) throw new Exception("Table " + db + "." + tableName + " is not partitioned")
     val absTblLoc = getTableLocation(db, tableName)
-    val fs = getFileSystem(spark.sparkContext.hadoopConfiguration, absTblLoc)
-    val partList = fs.listStatus(new Path(absTblLoc))
-    partList.filter(_.isDirectory).map(absTblLoc + "/" + _.getPath.getName)
+    getSubfolderPaths(absTblLoc)
+  }
+
+  def getSubfolderPaths(sourcePathUri: String)(implicit spark: SparkSession): Array[String] = { //todo: test it and scaladoc
+    val fs = getFileSystem(spark.sparkContext.hadoopConfiguration, sourcePathUri)
+    val partList = fs.listStatus(new Path(sourcePathUri))
+    partList.filter(_.isDirectory).map(sourcePathUri + "/" + _.getPath.getName)
+  }
+
+  def filterPaths(paths: Array[String], matchStringPaths: Seq[String]): Array[String]  = { //todo: test it and scaladoc
+    paths.filter(x => matchStringPaths.exists(y => x.contains(y))) //match by substring
+  }
+
+  def getFilesOnlyOfFolders(folderPathUris: Array[String])(implicit fs: FileSystem): Array[FsElement] = { //todo: test it and scaladoc
+    folderPathUris.map(x => listLevel(fs, new Path(x)).filter(!_.isDirectory)).reduce(_ union _) //get all files from the subfolders (remove folder paths)
+
   }
 
   /**
@@ -97,7 +110,6 @@ package object metastore {
    */
   def getListOfTableFiles(sourceDbName: String, sourceTableName: String)(implicit spark: SparkSession): Array[String] = {
     spark.table(sourceDbName + "." + sourceTableName).inputFiles
-
   }
 
 }

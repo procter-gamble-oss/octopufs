@@ -304,6 +304,38 @@
       <p class="shortcomment cmt">Returns a list of paths to partitions which name corresponds (contains) string(s) included in partitionsToKeepLike collection
 </p><div class="fullcomment"><div class="comment cmt"><p>Returns a list of paths to partitions which name corresponds (contains) string(s) included in partitionsToKeepLike collection
 </p></div><dl class="paramcmts block"><dt class="param">db</dt><dd class="cmt"><p>- hive database name</p></dd><dt class="param">tableName</dt><dd class="cmt"><p>- hive table name</p></dd><dt class="param">partitionsToKeepLike</dt><dd class="cmt"><p>- collection of partition names part for filtering</p></dd></dl></div>
+    </li><li name="com.pg.bigdata.octopufs.metastore#filterPaths" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="filterPaths(paths:Array[String],matchStringPaths:Seq[String]):Array[String]"></a><a id="filterPaths(Array[String],Seq[String]):Array[String]"></a>
+      <span class="permalink">
+      <a href="../../../../../com/pg/bigdata/octopufs/metastore/index.html#filterPaths(paths:Array[String],matchStringPaths:Seq[String]):Array[String]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">filterPaths</span><span class="params">(<span name="paths">paths: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="matchStringPaths">matchStringPaths: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      
+      
+    </li><li name="com.pg.bigdata.octopufs.metastore#getFilesOnlyOfFolders" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="getFilesOnlyOfFolders(folderPathUris:Array[String])(implicitfs:org.apache.hadoop.fs.FileSystem):Array[com.pg.bigdata.octopufs.fs.FsElement]"></a><a id="getFilesOnlyOfFolders(Array[String])(FileSystem):Array[FsElement]"></a>
+      <span class="permalink">
+      <a href="../../../../../com/pg/bigdata/octopufs/metastore/index.html#getFilesOnlyOfFolders(folderPathUris:Array[String])(implicitfs:org.apache.hadoop.fs.FileSystem):Array[com.pg.bigdata.octopufs.fs.FsElement]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getFilesOnlyOfFolders</span><span class="params">(<span name="folderPathUris">folderPathUris: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="fs">fs: <span class="extype" name="org.apache.hadoop.fs.FileSystem">FileSystem</span></span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<a href="../fs/FsElement.html" class="extype" name="com.pg.bigdata.octopufs.fs.FsElement">FsElement</a>]</span>
+      </span>
+      
+      
     </li><li name="com.pg.bigdata.octopufs.metastore#getListOfTableFiles" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getListOfTableFiles(sourceDbName:String,sourceTableName:String)(implicitspark:org.apache.spark.sql.SparkSession):Array[String]"></a><a id="getListOfTableFiles(String,String)(SparkSession):Array[String]"></a>
       <span class="permalink">
@@ -320,6 +352,22 @@
       </span>
       
       <p class="shortcomment cmt">Gets array of paths to files of a table.</p><div class="fullcomment"><div class="comment cmt"><p>Gets array of paths to files of a table. The list of files comes from hive metastore cache.</p></div></div>
+    </li><li name="com.pg.bigdata.octopufs.metastore#getSubfolderPaths" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="getSubfolderPaths(sourcePathUri:String)(implicitspark:org.apache.spark.sql.SparkSession):Array[String]"></a><a id="getSubfolderPaths(String)(SparkSession):Array[String]"></a>
+      <span class="permalink">
+      <a href="../../../../../com/pg/bigdata/octopufs/metastore/index.html#getSubfolderPaths(sourcePathUri:String)(implicitspark:org.apache.spark.sql.SparkSession):Array[String]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getSubfolderPaths</span><span class="params">(<span name="sourcePathUri">sourcePathUri: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+      </span>
+      
+      
     </li><li name="com.pg.bigdata.octopufs.metastore#getTableL1PartitionsPaths" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getTableL1PartitionsPaths(db:String,tableName:String)(implicitspark:org.apache.spark.sql.SparkSession):Array[String]"></a><a id="getTableL1PartitionsPaths(String,String)(SparkSession):Array[String]"></a>
       <span class="permalink">

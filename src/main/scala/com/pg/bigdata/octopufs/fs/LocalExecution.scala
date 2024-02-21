@@ -104,22 +104,27 @@ object LocalExecution extends Serializable {
    * @return - information about all processed paths together with information of operation was successful or not
    */
   def deletePaths(paths: Array[String], attempt: Int = 0)(implicit conf: Configuration): Array[FsOperationResult] = {
-    //todo add check if all paths are from the same fs
-    val fs = getFileSystem(conf, paths(0))
-    val res = paths.map(x =>
-      Future {
-        FsOperationResult(x, fs.delete(new Path(x), true))
-      }
-    ).map(x => Await.result(x, fsOperationTimeoutMinutes.minutes))
+    if(paths.nonEmpty){
+       //todo add check if all paths are from the same fs
+      val fs = getFileSystem(conf, paths(0))
+      val res = paths.map(x =>
+        Future {
+          FsOperationResult(x, fs.delete(new Path(x), true))
+        }
+      ).map(x => Await.result(x, fsOperationTimeoutMinutes.minutes))
 
-    val failed = res.filter(!_.success)
-    println("Number of paths deleted properly: " + res.count(_.success == true))
-    println("Files with errors: " + res.count(!_.success))
-    if (failed.isEmpty) res
-    else if (failed.length == paths.length || attempt > 4)
-      throw new Exception("Delete of some paths did not succeed - please check why and here are some of them: \n" + failed.map(_.path).slice(0, 10).mkString("\n"))
-    else
-      res.filter(_.success) ++ deletePaths(paths.filter(x => failed.map(_.path).contains(x)), attempt + 1)
+      val failed = res.filter(!_.success)
+      println("Number of paths deleted properly: " + res.count(_.success == true))
+      println("Files with errors: " + res.count(!_.success))
+      if (failed.isEmpty) res
+      else if (failed.length == paths.length || attempt > 4)
+        throw new Exception("Delete of some paths did not succeed - please check why and here are some of them: \n" + failed.map(_.path).slice(0, 10).mkString("\n"))
+      else
+        res.filter(_.success) ++ deletePaths(paths.filter(x => failed.map(_.path).contains(x)), attempt + 1)
+    } else {
+      println("deletePaths will do nothing, becasue empty paths array was provided")
+      Array[FsOperationResult]()
+    }
   }
 
   /**

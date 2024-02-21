@@ -487,9 +487,9 @@ as it will effectively perform delete operation on the target folder.</p></div><
       
       <p class="shortcomment cmt">Gets size of all elements in the folder tree (assuming path is a folder).</p><div class="fullcomment"><div class="comment cmt"><p>Gets size of all elements in the folder tree (assuming path is a folder).</p></div><dl class="paramcmts block"><dt class="param">path</dt><dd class="cmt"><p>- absolute path</p></dd><dt class="param">skipFileDetails</dt><dd class="cmt"><p>- if set to true (default), it will not return individual files information, just summaries for the folders</p></dd><dt class="param">conf</dt><dd class="cmt"><p>- hadoop configuration</p></dd><dt>returns</dt><dd class="cmt"><p>FsSizes which allow to browse through the elements of the filesystem without querying the storage account</p></dd></dl></div>
     </li><li name="com.pg.bigdata.octopufs.fs#listLevel" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="listLevel(fs:org.apache.hadoop.fs.FileSystem,folder:org.apache.hadoop.fs.Path,dropFileDetails:Boolean):Array[com.pg.bigdata.octopufs.fs.FsElement]"></a><a id="listLevel(FileSystem,Path,Boolean):Array[FsElement]"></a>
+      <a id="listLevel(fs:org.apache.hadoop.fs.FileSystem,folder:org.apache.hadoop.fs.Path,dropFileDetail:Boolean):Array[com.pg.bigdata.octopufs.fs.FsElement]"></a><a id="listLevel(FileSystem,Path,Boolean):Array[FsElement]"></a>
       <span class="permalink">
-      <a href="../../../../../com/pg/bigdata/octopufs/fs/index.html#listLevel(fs:org.apache.hadoop.fs.FileSystem,folder:org.apache.hadoop.fs.Path,dropFileDetails:Boolean):Array[com.pg.bigdata.octopufs.fs.FsElement]" title="Permalink">
+      <a href="../../../../../com/pg/bigdata/octopufs/fs/index.html#listLevel(fs:org.apache.hadoop.fs.FileSystem,folder:org.apache.hadoop.fs.Path,dropFileDetail:Boolean):Array[com.pg.bigdata.octopufs.fs.FsElement]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -498,11 +498,10 @@ as it will effectively perform delete operation on the target folder.</p></div><
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">listLevel</span><span class="params">(<span name="fs">fs: <span class="extype" name="org.apache.hadoop.fs.FileSystem">FileSystem</span></span>, <span name="folder">folder: <span class="extype" name="org.apache.hadoop.fs.Path">Path</span></span>, <span name="dropFileDetails">dropFileDetails: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<a href="FsElement.html" class="extype" name="com.pg.bigdata.octopufs.fs.FsElement">FsElement</a>]</span>
+        <span class="name">listLevel</span><span class="params">(<span name="fs">fs: <span class="extype" name="org.apache.hadoop.fs.FileSystem">FileSystem</span></span>, <span name="folder">folder: <span class="extype" name="org.apache.hadoop.fs.Path">Path</span></span>, <span name="dropFileDetail">dropFileDetail: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<a href="FsElement.html" class="extype" name="com.pg.bigdata.octopufs.fs.FsElement">FsElement</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">Gets all files and folders (recursively)</p><div class="fullcomment"><div class="comment cmt"><p>Gets all files and folders (recursively)</p></div><dl class="paramcmts block"><dt class="param">fs</dt><dd class="cmt"><p>- FileSystem instance</p></dd><dt class="param">folder</dt><dd class="cmt"><p>- the folder to get the files for</p></dd><dt class="param">dropFileDetails</dt><dd class="cmt"><p>- If set to true, it will aggregate information about files to single element.
-                       Use it to save memory if individual file details are not need. Default - false</p></dd><dt>returns</dt><dd class="cmt"><p>- returns list of FsElement objects</p></dd></dl></div>
+      <p class="shortcomment cmt">Gets all files and folders (recursively)</p><div class="fullcomment"><div class="comment cmt"><p>Gets all files and folders (recursively)</p></div><dl class="paramcmts block"><dt class="param">fs</dt><dd class="cmt"><p>- FileSystem instance</p></dd><dt class="param">folder</dt><dd class="cmt"><p>- the foldeffe files for</p></dd><dt class="param">dropFileDetail</dt><dd class="cmt"><p>- If set to true, it will aggregate information about files to single element</p></dd><dt>returns</dt><dd class="cmt"><p>- returns list of FsElement objects</p></dd></dl></div>
     </li><li name="com.pg.bigdata.octopufs.fs.DistributedExecution" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DistributedExecution"></a><a id="DistributedExecution:DistributedExecution"></a>
       <span class="permalink">

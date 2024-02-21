@@ -33,23 +33,29 @@ class Coalesce(numOfThreads: Int = 10)(implicit spark: SparkSession) {
   def doAutoCoalesce(source: String, requestedSizeOfFileMB: Long) = {
     implicit val conf: Configuration = spark.sparkContext.hadoopConfiguration
     val paths: Paths = prepareFolder(source)
-    val df = spark.read.parquet(paths.sourcePath)
-    val numOfFiles = figureOutNumberOfPartition(source,requestedSizeOfFileMB)(spark.sparkContext.hadoopConfiguration)
-    println("Calculated coalesce count for " + source + " is " + numOfFiles)
-    df.coalesce(numOfFiles).write.mode("overwrite").parquet(paths.targetPath)
-    replaceFolder(paths.sourcePath, paths.targetPath)
+    try {
+      val df = spark.read.parquet(paths.sourcePath)
+      val numOfFiles = figureOutNumberOfPartition(source,requestedSizeOfFileMB)(spark.sparkContext.hadoopConfiguration)
+      println("Calculated coalesce count for " + source + " is " + numOfFiles)
+      df.coalesce(numOfFiles).write.mode("overwrite").parquet(paths.targetPath)
+      replaceFolder(paths.sourcePath, paths.targetPath)
+    } catch {
+        case e: org.apache.spark.sql.AnalysisException =>
+         println(s"Doing nothing for ${source} as there is no data in the folder. Message: " + e.getMessage())
+       }
   }
 
   def getLowestFoldersPaths(fs: FileSystem, topLevelPath: String): Array[String] = {
     //fs val fs = getFileSystem(spark.sparkContext.hadoopConfiguration, topLevelPath)
-    val partitionFolders: Array[Path] = fs.listStatus(new Path(topLevelPath)).filter(_.isDirectory).map(_.getPath)
+    val partitionFolders: Array[Path] = fs.listStatus(new Path(topLevelPath))
+      .filter(_.isDirectory).map(_.getPath)
     //check if there is another level of folders - if yes, run recursive call
     if (partitionFolders.nonEmpty) {
-      val subFolders = partitionFolders.flatMap(pf => fs.listStatus(pf).filter(_.isDirectory))
+      val subFolders = partitionFolders.par.flatMap(pf => fs.listStatus(pf).filter(_.isDirectory))
       if (subFolders.isEmpty) //if there are no subfolders, it means we are at the lowest level of folder structure
         partitionFolders.map(_.toString)
       else
-        subFolders.flatMap(x => getLowestFoldersPaths(fs, x.getPath.toString))
+        subFolders.par.flatMap(x => getLowestFoldersPaths(fs, x.getPath.toString)).toArray
     }
     else Array(topLevelPath)
     //no need for tail recursion as there will be only few recursive calls (usually 1-2)

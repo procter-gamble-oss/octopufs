@@ -1,20 +1,17 @@
 import com.pg.bigdata.octopufs.Promotor
 import com.pg.bigdata.octopufs.fs._
 import org.apache.hadoop.fs.Path
-import org.apache.spark.sql.SparkSession
-import org.scalatest.{BeforeAndAfterAll, FlatSpec}
+import org.scalatest.flatspec.AnyFlatSpec
+import testsupport.{HadoopSimpleAuth, LocalSparkSuite, TempFsHelper}
 
-class TestSubFolderCopyOverwrite extends FlatSpec with BeforeAndAfterAll {
-  implicit val spark: SparkSession = SparkSession.builder().
-    appName("NAS_").
-    master("local").
-    getOrCreate()
-  spark.sparkContext.setLogLevel("ERROR")
+class TestSubFolderCopyOverwrite extends AnyFlatSpec with LocalSparkSuite with HadoopSimpleAuth with TempFsHelper {
   implicit val c = spark.sparkContext.hadoopConfiguration
-
-  val (startPath, destPath, subFoldersToBeCopied, dummyFile, simulatedFolderToBeKept) = TestUtils.createFolderStructureForTest("FolderCopyOverwrite")
-  val newPath = new java.io.File(".").getCanonicalPath + "/data/someFolderWhichDoesNotExist"
-  val fs = getFileSystem(c, startPath)
+  private val base = tempDir("subfolders-copy-overwrite").toString
+  private val (startPath, destPath, subFoldersToBeCopied, dummyFile, simulatedFolderToBeKept) = TestUtils.createFolderStructureForTest("FolderCopyOverwrite")(c)
+  private val newPath = base + "/someFolderWhichDoesNotExist"
+  private val fs = getFileSystem(c, startPath)
+  implicit val conf = spark.sparkContext.hadoopConfiguration
+  implicit val sparkSession = spark
 
   "Copy operation" should "succeed" in {
     Promotor.copyOverwriteSelectedSubfoldersContent(startPath, destPath, subFoldersToBeCopied)
@@ -30,7 +27,6 @@ class TestSubFolderCopyOverwrite extends FlatSpec with BeforeAndAfterAll {
 
   "After subfolder copy" should "contain new partition as well as the other ones which existed there before" in {
     val destFolders = fs.listStatus(new Path(destPath)).map(_.getPath.getName)
-    destFolders.foreach(println)
     assert(destFolders.filter(_ != simulatedFolderToBeKept.getName).sameElements(subFoldersToBeCopied))
   }
 
@@ -44,15 +40,6 @@ class TestSubFolderCopyOverwrite extends FlatSpec with BeforeAndAfterAll {
     val y = subFoldersToBeCopied.map(f => listLevel(fs, new Path(s"$destPath/$f")).map(_.path.replace(destPath, ""))).reduce(_ ++ _)
     assert(x.length > 0, "source folders should not be empty for the test to make sense")
     assert(x.length == y.length)
-    println(x.diff(y).mkString(", "))
-    println("------------")
-    println(y.diff(x).mkString(", "))
     assert(x.sameElements(y))
-  }
-
-  override def afterAll(): Unit = {
-    fs.delete(new Path(startPath), true)
-    fs.delete(new Path(destPath), true)
-    fs.delete(new Path(newPath), true)
   }
 }

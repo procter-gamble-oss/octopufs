@@ -1,6 +1,5 @@
 package com.pg.bigdata.octopufs.acl
 
-import com.pg.bigdata.octopufs.acl.AclManager.FsPermission
 import com.pg.bigdata.octopufs.fs.{FsOperationResult, _}
 import com.pg.bigdata.octopufs.helpers.implicits._
 import com.pg.bigdata.octopufs.metastore._
@@ -10,14 +9,14 @@ import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.sql.SparkSession
 import com.pg.bigdata.octopufs.helpers.implicits._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.immutable.HashMap
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.util.Try
 
 /**
- * Object provides useful functions for seting up ACLs on files on ADLSgen2. Since package is using standard libraries, it is expected to work on all FSes supporting ACLs.
+ * Object provides useful functions for setting up ACLs on files on ADLSgen2. Since package is using standard libraries, it is expected to work on all FSes supporting ACLs.
  */
 object AclManager extends Serializable {
 
@@ -31,7 +30,6 @@ object AclManager extends Serializable {
    */
   def modifyTableAcl(db: String, tableName: String, newPermission: FsPermission)
                     (implicit spark: SparkSession): Array[FsOperationResult] = {
-    import collection.JavaConverters._
     implicit val conf = spark.sparkContext.hadoopConfiguration
     val loc = getTableLocation(db, tableName)
     val files = getListOfTableFiles(db, tableName)
@@ -122,7 +120,7 @@ object AclManager extends Serializable {
     val resAccess = modifyAcl(elements.map(_.path), newPermission)
     println("Changing folders Default ACLs: " + folders.length)
     val resDefault = modifyAcl(folders, newPermission.getDefaultLevelPerm())
-    resAccess.union(resDefault)
+    (resAccess ++ resDefault).toArray
   }
 
   /**
@@ -329,9 +327,9 @@ object AclManager extends Serializable {
   }
 
   private def getAccessScopeAclFromDefault(aclStatus: AclStatus): Seq[AclEntry] = {
-    aclStatus.getEntries.asScala.filter(_.getScope == AclEntryScope.DEFAULT).map(x =>
-      new AclEntry.Builder().setName(x.getName).setPermission(x.getPermission).setType(x.getType).
-        setScope(AclEntryScope.ACCESS).build()
-    )
+    aclStatus.getEntries.asScala.toSeq.filter(_.getScope == AclEntryScope.DEFAULT).map { x =>
+      new AclEntry.Builder().setName(x.getName).setPermission(x.getPermission).setType(x.getType)
+        .setScope(AclEntryScope.ACCESS).build()
+    }
   }
 }

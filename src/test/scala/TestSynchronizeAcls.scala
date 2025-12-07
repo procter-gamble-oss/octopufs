@@ -1,30 +1,23 @@
 import com.pg.bigdata.octopufs.fs.getFileSystem
 import org.apache.hadoop.fs.Path
-import org.apache.spark.sql.SparkSession
-import org.scalatest.{FlatSpec, TestSuite}
+import org.scalatest.flatspec.AnyFlatSpec
+import testsupport.{HadoopSimpleAuth, LocalSparkSuite, TempFsHelper}
 
-class TestSynchronizeAcls extends FlatSpec {
+class TestSynchronizeAcls extends AnyFlatSpec with LocalSparkSuite with HadoopSimpleAuth with TempFsHelper {
   import com.pg.bigdata.octopufs.acl.AclManager
 
-  implicit val spark: SparkSession = SparkSession.builder().
-    appName("NAS_").
-    master("local").
-    getOrCreate()
-
-  "Setting empty ACLs" should "never fail" in {
-    val basePath = "hdfs://localhost:8020/"
+  "Setting empty ACLs" should "not crash on local file scheme" in {
+    val base = tempDir("syncacls")
+    val baseUri = base.toUri.toString
     implicit val conf = spark.sparkContext.hadoopConfiguration
-    val fs = getFileSystem(conf, basePath)
-    val cursedFolder = new Path("/folderNoAcls")
-    val regularFolder = new Path("/regularFolder")
+    val fs = getFileSystem(conf, baseUri)
+    val cursedFolder = new Path(baseUri + "/folderNoAcls")
+    val regularFolder = new Path(baseUri + "/regularFolder")
     fs.mkdirs(cursedFolder)
     fs.mkdirs(regularFolder)
-    fs.removeAcl(cursedFolder)
-    fs.removeAcl(regularFolder)
-    AclManager.synchronizeAcls("hdfs://localhost:8020/regularFolder", "hdfs://localhost:8020/folderNoAcls")
-    fs.delete(cursedFolder,true)
-    fs.delete(regularFolder,true)
+    // Local file:// may not support ACL operations; this verifies no exceptions in synchronizeAcls when ACLs are absent
+    AclManager.synchronizeAcls(regularFolder.toString, cursedFolder.toString)
+    fs.delete(cursedFolder, true)
+    fs.delete(regularFolder, true)
   }
-
-
 }

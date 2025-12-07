@@ -2,32 +2,50 @@ import com.pg.bigdata.octopufs.Promotor
 import com.pg.bigdata.octopufs.fs._
 import org.apache.hadoop.fs.Path
 import org.apache.spark.sql.SparkSession
-import org.scalatest.{BeforeAndAfterAll, FlatSpec}
+import testsupport._
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class TestSubFolderMove extends FlatSpec with BeforeAndAfterAll {
-  implicit val spark: SparkSession = SparkSession.builder().
-    appName("NAS_").
-    master("local").
-    getOrCreate()
-  spark.sparkContext.setLogLevel("ERROR")
-  implicit val c = spark.sparkContext.hadoopConfiguration
+class TestSubFolderMove extends AnyFlatSpec with Matchers with LocalSparkSuite with HadoopSimpleAuth with TempFsHelper { self: org.scalatest.Suite =>
+  implicit def ss: SparkSession = spark
+  implicit def c: org.apache.hadoop.conf.Configuration = spark.sparkContext.hadoopConfiguration
 
-  val (startPath, destPath, subFoldersToBeCopied, dummyFile, simulatedFolderToBeKept) = TestUtils.createFolderStructureForTest("FolderMoveOverwrite")
-  val (startPath2, destPath2, subFoldersToBeCopied2, dummyFile2, simulatedFolderToBeKept2) = TestUtils.createFolderStructureForTest("FolderMoveOverwrite2")
-  val newPath = new java.io.File(".").getCanonicalPath + "data/someFolderWhichDoesNotExist2"
-  val fs = getFileSystem(c, startPath)
+  private var startPath: String = _
+  private var destPath: String = _
+  private var subFoldersToBeCopied: Array[String] = _
+  private var dummyFile: org.apache.hadoop.fs.Path = _
+  private var simulatedFolderToBeKept: org.apache.hadoop.fs.Path = _
+
+  private var startPath2: String = _
+  private var destPath2: String = _
+  private var subFoldersToBeCopied2: Array[String] = _
+
+  private var newPath: String = _
+  private var fs: org.apache.hadoop.fs.FileSystem = _
+
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
+    val base = tempDir("subfolder-move").toString
+    val s1 = TestUtils.createFolderStructureForTest("FolderMoveOverwrite")
+    startPath = s1._1; destPath = s1._2; subFoldersToBeCopied = s1._3; dummyFile = s1._4; simulatedFolderToBeKept = s1._5
+    val s2 = TestUtils.createFolderStructureForTest("FolderMoveOverwrite2")
+    startPath2 = s2._1; destPath2 = s2._2; subFoldersToBeCopied2 = s2._3
+    newPath = base + "/someFolderWhichDoesNotExist2"
+    fs = getFileSystem(c, startPath)
+  }
 
   "Copy operation" should "succeed" in {
-    Promotor.moveSelectedSubFolders(startPath, destPath, subFoldersToBeCopied)
+    Promotor.moveSelectedSubFolders(startPath, destPath, subFoldersToBeCopied)(spark)
   }
 
   "Copy operation to path which does not exist" should "succeed" in {
-    Promotor.moveSelectedSubFolders(startPath2, newPath, subFoldersToBeCopied2)
+    Promotor.moveSelectedSubFolders(startPath2, newPath, subFoldersToBeCopied2)(spark)
   }
 
 
   "Source folder" should "contain other folders after the move (2 ouf of 5 are to me moved)" in {
-    assert(fs.listStatus(new Path(startPath)).length == 3,"start folder has 5 subfolders. 2 of them were moved. 3 should remain")
+    assert(fs.listStatus(new Path(startPath)).length == 3, "start folder has 5 subfolders. 2 of them were moved. 3 should remain")
   }
 
   "After partition copy destination foler" should "contain folder which should not be impacted" in {
@@ -50,7 +68,7 @@ class TestSubFolderMove extends FlatSpec with BeforeAndAfterAll {
     assert(y.length > 4, "there should be at least 2 folders and 2 files")
   }
 
-  override def afterAll() = {
+  override protected def afterAll(): Unit = {
     fs.delete(new Path(startPath), true)
     fs.delete(new Path(destPath), true)
     fs.delete(new Path(newPath), true)

@@ -1,53 +1,70 @@
 import com.pg.bigdata.octopufs.Promotor
 import org.apache.spark.sql.SparkSession
-import org.scalatest.{BeforeAndAfterAll, FlatSpec}
+import org.apache.spark.sql.functions._
+import org.scalatest.flatspec.AnyFlatSpec
+import testsupport.{AssertionsHelper, HadoopSimpleAuth, LocalSparkSuite, TempFsHelper}
 
-class TestCopyOverwriteNonpartitionedTable extends FlatSpec with BeforeAndAfterAll {
+class TestCopyOverwriteNonpartitionedTable
+  extends AnyFlatSpec
+    with LocalSparkSuite
+    with HadoopSimpleAuth
+    with TempFsHelper
+    with AssertionsHelper {
 
-  implicit val spark: SparkSession = SparkSession.builder().
-    appName("NAS_").
-    master("local[1]").
-    getOrCreate()
-//  spark.conf.set("spark.speculation", "false")
-  implicit val c = spark.sparkContext.hadoopConfiguration
-  val t = new TestUtils("TestCopyOverwriteNonpartitionedTable")
-  t.setupTestEnv()
+  private val db = "promotor_TestCopyOverwriteNonpartitionedTable"
+  private val d = db + "."
 
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
+    spark.sparkContext.setLogLevel("ERROR")
+    spark.sql(s"create database if not exists $db")
+    implicit val conf: org.apache.hadoop.conf.Configuration = spark.sparkContext.hadoopConfiguration
+    implicit val sparkSession: SparkSession = spark
+    import sparkSession.implicits._
 
-  println("Checking initial tables")
-  val pdcIni = spark.table(t.d+"PROD_DIM").select("pg_categ_txt").distinct
-  val pscIni = spark.table(t.d+"PROD_SDIM").select("pg_categ_txt").distinct
-  println("PROD_DIM initial categ distinct")
-  pdcIni.show()
-  println("PROD_SDIM initial categ distinct")
-  pscIni.show()
-  assert(pdcIni.count() > 1 && pscIni.count() == 1, "Initial versions of prod (s)dim check failed")
+    // Seed initial PROD_DIM with multiple categories
+    val prodDim = Seq(
+      (1L, "a"),
+      (2L, "b")
+    ).toDF("id", "pg_categ_txt")
+    prodDim.write.mode("overwrite").saveAsTable(d + "PROD_DIM")
 
-  Promotor.copyOverwriteTable(t.db, "PROD_SDIM", t.db, "PROD_DIM", 1)
+    // Seed PROD_SDIM with 200 rows and pg_categ_txt = 'updated'
+    val prodSdim = spark.range(0, 200).withColumn("pg_categ_txt", lit("updated")).select(col("id"), col("pg_categ_txt"))
+    prodSdim.write.mode("overwrite").saveAsTable(d + "PROD_SDIM")
 
+    // Sanity check initial distinct
+    val pdcIni = spark.table(d + "PROD_DIM").select("pg_categ_txt").distinct
+    val pscIni = spark.table(d + "PROD_SDIM").select("pg_categ_txt").distinct
+    assert(pdcIni.count() > 1 && pscIni.count() == 1, "Initial versions of prod (s)dim check failed")
 
-  "PROD_SDIM" should "not be modified after copy a it is the source" in {
-    val sdim = spark.table(t.d+"PROD_SDIM")
-    sdim.show()
-    println("Checking count of rows in PROD_SDIM after promotion (200 expected)")
-    assert(sdim.count() == 200, "Count of rows is not 200 - actual " + sdim.count())
+    // Perform copy/overwrite from SDIM -> DIM
+    Promotor.copyOverwriteTable(db, "PROD_SDIM", db, "PROD_DIM", 1)
   }
 
-   "PROD_DIM" should "contain 200 rows as the source table" in {
-    println("Checking count of rows in PROD_DIM after promotion (200 expected)")
-    val pd = spark.table(t.d+"PROD_DIM")
-    pd.show()
-    assert(pd.count() == 200, "Count of rows is not 200 - actual " + pd.count())
+  "PROD_SDIM" should "not be modified after copy as it is the source" in {
+    val sdim = spark.table(d + "PROD_SDIM")
+    assert(sdim.count() == 200, s"Count of rows is not 200 - actual ${sdim.count()}")
+  }
+
+  "PROD_DIM" should "contain 200 rows as the source table" in {
+    val pd = spark.table(d + "PROD_DIM")
+    assert(pd.count() == 200, s"Count of rows is not 200 - actual ${pd.count()}")
   }
 
   "PROD_DIM" should "contain data from SDIM (pg categ value should have string 'updated'" in {
-    println("Checking if pg_categ_txt in PROD_DIM has only one value \"updated\"")
-    val dc = spark.table(t.d+"PROD_DIM").select("pg_categ_txt").distinct
-    assert(dc.count() == 1, "Count distinct categs is not 1 - actual " + dc.count())
+    val dc = spark.table(d + "PROD_DIM").select("pg_categ_txt").distinct
+    assert(dc.count() == 1, s"Count distinct categs is not 1 - actual ${dc.count()}")
     assert(dc.collect().map(_.getAs[String]("pg_categ_txt")).head == "updated")
   }
 
-  override def afterAll() =  t.cleanup()
-
-
+  override protected def afterAll(): Unit = {
+    try {
+      spark.sql(s"drop table if exists $d" + "PROD_DIM")
+      spark.sql(s"drop table if exists $d" + "PROD_SDIM")
+      spark.sql(s"drop database if exists $db")
+    } finally {
+      super.afterAll()
+    }
+  }
 }

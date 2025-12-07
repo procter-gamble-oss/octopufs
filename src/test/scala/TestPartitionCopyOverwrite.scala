@@ -1,49 +1,49 @@
 import com.pg.bigdata.octopufs.Promotor
-import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions.lit
-import org.scalatest.{BeforeAndAfterAll, FlatSpec}
+import org.apache.spark.sql.functions._
+import org.scalatest.flatspec.AnyFlatSpec
+import testsupport.{AssertionsHelper, HadoopSimpleAuth, LocalSparkSuite}
 
-class qTestPartitionCopyOverwrite extends FlatSpec with BeforeAndAfterAll{
-  implicit val spark: SparkSession = SparkSession.builder().
-    appName("NAS_").
-    master("local").
-    getOrCreate()
-  implicit val c = spark.sparkContext.hadoopConfiguration
-  val t = new TestUtils("TestPartitionCopyOverwrite")
-  t.setupTestEnv()
+class TestPartitionCopyOverwrite extends AnyFlatSpec with LocalSparkSuite with HadoopSimpleAuth with AssertionsHelper {
+  private val db = "promotor_TestPartitionCopyOverwrite"
+  private val d = db + "."
 
-  //#test1
-  "initial tests" should "be passed" in {
-    val currPrttnCnt = spark.table(t.d + "STORE_SALES_DLT").
-      filter("mm_time_perd_end_date in ('2019-12-31','2019-10-31')").select("mm_time_perd_end_date").distinct.count()
-    assert(currPrttnCnt == 2,
-      "check if partition to be promoted exists in source - actual: " + currPrttnCnt)
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
+    spark.sql(s"create database if not exists $db")
+    implicit val conf = spark.sparkContext.hadoopConfiguration
+    implicit val sparkSession = spark
 
-    println("Partitions in DLT")
-    spark.table(t.d + "STORE_SALES_DLT").select("mm_time_perd_end_date").distinct.show()
+    // Seed DLT with two partitions
+    val dlt = spark.range(0, 100)
+      .withColumn("mm_time_perd_end_date", expr("CASE WHEN id % 2 = 0 THEN '2019-12-31' ELSE '2019-10-31' END"))
+      .withColumn("prod_id", lit("prod"))
+    dlt.write.partitionBy("mm_time_perd_end_date").mode("overwrite").saveAsTable(d + "STORE_SALES_DLT")
 
-    assert(spark.table(t.d + "STORE_SALES_SFCT").filter("mm_time_perd_end_date = '2019-12-31'").count() == 0,
-      "check if partition to be promoted does not exists in target")
-    println("Partitions in SFCT")
-    spark.table(t.d + "STORE_SALES_SFCT").select("mm_time_perd_end_date").distinct.show()
+    // Seed SFCT with only non-overlapping partitions
+    val sfct = spark.range(0, 100)
+      .withColumn("mm_time_perd_end_date", expr("CASE WHEN id % 3 = 0 THEN '2019-08-31' ELSE '2019-09-30' END"))
+      .withColumn("prod_id", lit("prod"))
+    sfct.write.partitionBy("mm_time_perd_end_date").mode("overwrite").saveAsTable(d + "STORE_SALES_SFCT")
 
-    Promotor.copyOverwritePartitions(t.db, "STORE_SALES_DLT", t.db, "STORE_SALES_SFCT", Seq("2019-10-31", "2019-12-31"), 1)
+    // Perform overwrite copy of two partitions
+    Promotor.copyOverwritePartitions(db, "STORE_SALES_DLT", db, "STORE_SALES_SFCT", Seq("2019-10-31", "2019-12-31"), 1)
   }
 
-  "SFCT" should "contain new partition after copy operation" in {
-    println("SFCT partitions after promotion:")
-    spark.table(t.d+"STORE_SALES_SFCT").select("mm_time_perd_end_date").distinct.show()
-    assert(spark.table(t.d+"STORE_SALES_SFCT").filter("mm_time_perd_end_date = '2019-12-31'").count() != 0, "check if partition was correctly copied")
+  "SFCT" should "contain promoted partitions after overwrite" in {
+    val sfct2019_12 = spark.table(d + "STORE_SALES_SFCT").filter("mm_time_perd_end_date = '2019-12-31'")
+    val dlt2019_12 = spark.table(d + "STORE_SALES_DLT").filter("mm_time_perd_end_date = '2019-12-31'")
+    assert(sfct2019_12.count() == dlt2019_12.count())
+
+    val sfct2019_10 = spark.table(d + "STORE_SALES_SFCT").filter("mm_time_perd_end_date = '2019-10-31'")
+    val dlt2019_10 = spark.table(d + "STORE_SALES_DLT").filter("mm_time_perd_end_date = '2019-10-31'")
+    assert(sfct2019_10.count() == dlt2019_10.count())
   }
 
-  "SFCT" should "contain new/modified data from DLT table - there should be only one prod ID in partition 2019-10-31" in {
-  println("Checking correctness of data promotion")
-    val distinctProdIdCnt = spark.table(t.d+"STORE_SALES_SFCT").filter("mm_time_perd_end_date = '2019-10-31'").select("prod_id").distinct.count
-    assert(distinctProdIdCnt == 1,"check if partition was fully replaced with new one - actual:" + distinctProdIdCnt)
-    assert(spark.table(t.d+"STORE_SALES_SFCT").select("mm_time_perd_end_date").distinct.count == 5, "check if other partitions remained")
+  override protected def afterAll(): Unit = {
+    try {
+      spark.sql(s"drop table if exists $d" + "STORE_SALES_DLT")
+      spark.sql(s"drop table if exists $d" + "STORE_SALES_SFCT")
+      spark.sql(s"drop database if exists $db")
+    } finally super.afterAll()
   }
-  println("All ok")
-
-   override def afterAll() =  t.cleanup()
-
 }

@@ -1,128 +1,99 @@
-
-import com.pg.bigdata.octopufs.helpers.implicits._
 import com.pg.bigdata.octopufs.fs._
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.fs.permission.{AclEntry, AclEntryScope, AclEntryType, FsAction}
-import org.apache.spark.sql.SparkSession
-import org.scalatest.{BeforeAndAfterAll, FlatSpec}
+import org.scalatest.flatspec.AnyFlatSpec
+import testsupport.{HadoopSimpleAuth, LocalSparkSuite, MiniHdfsSuite}
 
-import scala.collection.JavaConverters._
-import scala.util.Random
-
-class AclTest extends FlatSpec with BeforeAndAfterAll {
-
+class AclTest extends AnyFlatSpec with LocalSparkSuite with HadoopSimpleAuth with MiniHdfsSuite {
   import com.pg.bigdata.octopufs.acl.AclManager
+  import scala.jdk.CollectionConverters._
 
-  implicit val spark: SparkSession = SparkSession.builder().
-    appName("NAS_").
-    master("local").
-    getOrCreate()
+  private def acl(u: String, perm: String, scope: AclEntryScope): AclEntry =
+    new AclEntry.Builder().setType(AclEntryType.USER).setPermission(FsAction.getFsAction(perm)).setScope(scope).setName(u).build()
 
-  "This" should "never fail" in {
-    assert(1==1)
+  private def assertAclEqual(fs: org.apache.hadoop.fs.FileSystem, p1: Path, p2: Path): Unit = {
+    val a1 = fs.getAclStatus(p1)
+    val a2 = fs.getAclStatus(p2)
+    assert(a1.getEntries == a2.getEntries && a1.getOwner == a2.getOwner && a1.getGroup == a2.getGroup)
   }
 
-    val basePath = "hdfs://localhost:8020/"
-    implicit val conf = spark.sparkContext.hadoopConfiguration
-    val fs = getFileSystem(conf, basePath)
-    val toTakeAclsFrom = basePath + "pattern"
-    val toApplyOn = basePath + "hereIsTheNewOne"
+  "ACCESS ACL synchronization" should "match ACLs across trees" in {
+    implicit val conf = hdfsConf
+    val fs = hdfsFs
 
-    fs.delete(new Path(toTakeAclsFrom), true)
-    fs.delete(new Path(toApplyOn), true)
+    val src = new Path(hdfsUri + "/pattern")
+    val dst = new Path(hdfsUri + "/hereIsTheNewOne")
+    val srcA = new Path(src, "a")
+    val srcB = new Path(src, "b")
+    val dstA = new Path(dst, "a")
+    val dstB = new Path(dst, "b")
+    val srcAf1 = new Path(srcA, "f1.txt")
+    val srcAf2 = new Path(srcA, "f2.txt")
+    val srcBf1 = new Path(srcB, "f1.txt")
+    val dstAf1 = new Path(dstA, "f1.txt")
+    val dstAf2 = new Path(dstA, "f2.txt")
+    val dstBf1 = new Path(dstB, "f1.txt")
 
-    val aclsForBase = List(new AclEntry.Builder().
-      setType(AclEntryType.OTHER).
-      setPermission(FsAction.getFsAction("rwx")).
-      setScope(AclEntryScope.DEFAULT).build(),
-      new AclEntry.Builder().
-        setType(AclEntryType.GROUP).
-        setPermission(FsAction.getFsAction("rwx")).
-        setScope(AclEntryScope.DEFAULT).build(),
-      new AclEntry.Builder().
-        setType(AclEntryType.USER).
-        setPermission(FsAction.getFsAction("rwx")).
-        setScope(AclEntryScope.DEFAULT).
-        setName("jacektokar").build())
+    List(srcA, srcB, dstA, dstB).foreach(fs.mkdirs)
+    List(srcAf1, srcAf2, srcBf1, dstAf1, dstAf2, dstBf1).foreach(f => fs.createNewFile(f))
 
-    val aclForRoot = List(
-      new AclEntry.Builder().
-        setType(AclEntryType.OTHER).
-        setPermission(FsAction.getFsAction("rwx")).
-        setScope(AclEntryScope.DEFAULT).build(),
-      new AclEntry.Builder().
-        setType(AclEntryType.GROUP).
-        setPermission(FsAction.getFsAction("rwx")).
-        setScope(AclEntryScope.DEFAULT).build(),
-      new AclEntry.Builder().
-        setType(AclEntryType.USER).
-        setPermission(FsAction.getFsAction("r--")).
-        setScope(AclEntryScope.DEFAULT).
-        setName("grzyb").build())
+    val baseAccess = List(
+      new org.apache.hadoop.fs.permission.AclEntry.Builder().setType(AclEntryType.USER).setPermission(FsAction.ALL).setScope(AclEntryScope.ACCESS).build(),
+      new org.apache.hadoop.fs.permission.AclEntry.Builder().setType(AclEntryType.GROUP).setPermission(FsAction.READ_EXECUTE).setScope(AclEntryScope.ACCESS).build(),
+      new org.apache.hadoop.fs.permission.AclEntry.Builder().setType(AclEntryType.OTHER).setPermission(FsAction.READ_EXECUTE).setScope(AclEntryScope.ACCESS).build()
+    )
+    fs.setAcl(src, (baseAccess ++ List(acl("testuser", "r--", AclEntryScope.ACCESS))).asJava)
+    fs.setAcl(dst, (baseAccess ++ List(acl("anotheruser", "r--", AclEntryScope.ACCESS))).asJava)
 
-    val (files, folders) = TestUtils.createRandomFolderStructure(toTakeAclsFrom)
+    assert(fs.getAclStatus(src).getEntries != fs.getAclStatus(dst).getEntries)
 
-    //setting default acls for all childeren of root folder
-    fs.setAcl(new Path(basePath), aclsForBase.asJava)
+    AclManager.synchronizeAcls(dst.toString, src.toString)
 
-    fs.setAcl(new Path(toTakeAclsFrom), aclForRoot.asJava)
-    val toTakeAclsFromFiles = TestUtils.makeRandomCopyOfFiles(fs, files, toTakeAclsFrom, toApplyOn)
-    val toApplyAclsOnFiles = new Random().shuffle(toTakeAclsFromFiles).take((toTakeAclsFromFiles.length * 0.5).toInt).map(_.replace("pattern", "hereIsTheNewOne"))
-    val targetFolders = toApplyAclsOnFiles.map(x => new Path(x).getParent.toUri.toString)
-
-    def buildRandomAclForPath(path: String, scopeType: String = "ACCESS") = {
-      val scope = if (scopeType == "ACCESS") "ACCESS" else "DEFAULT"
-      val typeOfAccess = List("r", "-")(new Random().nextInt(2)) +
-        List("w", "-")(new Random().nextInt(2)) +
-        List("x", "-")(new Random().nextInt(2))
-      val p = AclManager.FsPermission("user", typeOfAccess, "ACCESS", "jacektokar") // path.split("/").last)
-      AclManager.getAclEntry(p)
-
-    }
-
-    println("target folders:")
-    println(targetFolders.mkString("\n"))
-
-
-    println("Setting folders ACLs")
-
-    import scala.util.Random
-    //new Random().shuffle(folders.toList).take((folders.length*0.8).toInt).map(x => fs.modifyAclEntries(new Path(x),List(buildRandomAclForPath(x, "DEFAULT")).asJava))
-    new Random().shuffle(folders.toList).take((folders.length * 0.8).toInt).map(x => fs.modifyAclEntries(new Path(x), List(buildRandomAclForPath(x, "ACCESS")).asJava))
-    new Random().shuffle(files.toList).take((files.length * 0.8).toInt).map(x => fs.modifyAclEntries(new Path(x), List(buildRandomAclForPath(x, "ACCESS")).asJava))
-    toApplyAclsOnFiles.map(x => fs.modifyAclEntries(new Path(x), List(buildRandomAclForPath(x, "ACCESS")).asJava))
-    targetFolders.map(x => fs.modifyAclEntries(new Path(x), List(buildRandomAclForPath(x, "ACCESS")).asJava))
-    // targetFolders.map(x => fs.modifyAclEntries(new Path(x),List(buildRandomAclForPath(x, "DEFAULT")).asJava))
-
-  "File trees" should "be the different before the test" in {
-    assert(listLevel(fs, new Path(toTakeAclsFrom)) != listLevel(fs, new Path(toApplyOn)))
+    assertAclEqual(fs, src, dst)
   }
 
-  "ACLs before test" should "be the different in both folder trees" in {
-    val initAcls = folders.sorted.map(x => fs.getAclStatus(new Path(x))).toList
-    val targetAcls = targetFolders.sorted.map(x => fs.getAclStatus(new Path(x)))
-    assert(initAcls != targetAcls)
+  "DEFAULT ACL synchronization" should "apply directory defaults" in {
+    implicit val conf = hdfsConf
+    val fs = hdfsFs
+
+    val src = new Path(hdfsUri + "/pattern")
+    val dst = new Path(hdfsUri + "/hereIsTheNewOne")
+    val child = new Path(dst, "child")
+    fs.mkdirs(src); fs.mkdirs(dst); fs.mkdirs(child)
+
+    val baseDefault = List(
+      new org.apache.hadoop.fs.permission.AclEntry.Builder().setType(AclEntryType.USER).setPermission(FsAction.ALL).setScope(AclEntryScope.DEFAULT).build(),
+      new org.apache.hadoop.fs.permission.AclEntry.Builder().setType(AclEntryType.GROUP).setPermission(FsAction.READ_EXECUTE).setScope(AclEntryScope.DEFAULT).build(),
+      new org.apache.hadoop.fs.permission.AclEntry.Builder().setType(AclEntryType.OTHER).setPermission(FsAction.READ_EXECUTE).setScope(AclEntryScope.DEFAULT).build()
+    )
+    fs.setAcl(src, (baseDefault ++ List(acl("testuser", "r--", AclEntryScope.DEFAULT))).asJava)
+    fs.setAcl(dst, baseDefault.asJava)
+
+    AclManager.synchronizeAcls(dst.toString, src.toString)
+
+    val sDef = fs.getAclStatus(src)
+    val dDef = fs.getAclStatus(dst)
+    assert(sDef.getEntries == dDef.getEntries)
   }
 
-  AclManager.synchronizeAcls(toApplyOn, toTakeAclsFrom)
+  "Idempotent synchronization" should "produce no further changes" in {
+    implicit val conf = hdfsConf
+    val fs = hdfsFs
 
-  "ACLs" should "be the same" in {
-    val initAcls = folders.sorted.map(x => fs.getAclStatus(new Path(x))).toList
-    val targetAcls = targetFolders.sorted.map(x => fs.getAclStatus(new Path(x)))
-    assert(initAcls != targetAcls)
+    val src = new Path(hdfsUri + "/pattern")
+    val dst = new Path(hdfsUri + "/hereIsTheNewOne")
+    fs.mkdirs(src); fs.mkdirs(dst)
+    val baseAccess = List(
+      new org.apache.hadoop.fs.permission.AclEntry.Builder().setType(AclEntryType.USER).setPermission(FsAction.ALL).setScope(AclEntryScope.ACCESS).build(),
+      new org.apache.hadoop.fs.permission.AclEntry.Builder().setType(AclEntryType.GROUP).setPermission(FsAction.READ_EXECUTE).setScope(AclEntryScope.ACCESS).build(),
+      new org.apache.hadoop.fs.permission.AclEntry.Builder().setType(AclEntryType.OTHER).setPermission(FsAction.READ_EXECUTE).setScope(AclEntryScope.ACCESS).build()
+    )
+    fs.setAcl(src, baseAccess.asJava)
+
+    AclManager.synchronizeAcls(dst.toString, src.toString)
+    val first = fs.getAclStatus(dst)
+    AclManager.synchronizeAcls(dst.toString, src.toString)
+    val second = fs.getAclStatus(dst)
+    assert(first.getEntries == second.getEntries)
   }
-
-  "ACLs of top folders" should "be the same" in {
-    assert(fs.getAclStatus(new Path(toTakeAclsFrom)) == fs.getAclStatus(new Path(toApplyOn)))
-    //assert(initAcls != targetAcls)
-  }
-  "File trees" should "be the different AFTER the test" in {
-    assert(listLevel(fs, new Path(toTakeAclsFrom)) != listLevel(fs, new Path(toApplyOn)))
-    println("cleanup")
-    folders.map(x => fs.delete(new Path(x), true))
-    folders.map(x => fs.delete(new Path(basePath + "hereIsTheNewOne"), true))
-  }
-
-
-
 }

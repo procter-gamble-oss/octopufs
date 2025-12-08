@@ -1,55 +1,51 @@
 import com.pg.bigdata.octopufs.Promotor
-import org.apache.spark.sql.SparkSession
-import org.scalatest.{BeforeAndAfterAll, FlatSpec}
+import org.apache.spark.sql.functions._
+import org.scalatest.flatspec.AnyFlatSpec
+import testsupport.{AssertionsHelper, HadoopSimpleAuth, LocalSparkSuite}
 
-class TestPartitionMoveFolders extends FlatSpec with BeforeAndAfterAll {
-  implicit val spark: SparkSession = SparkSession.builder().
-    appName("NAS_").
-    master("local[1]").
-    getOrCreate()
-//  spark.conf.set("spark.speculation", "false")
-  implicit val c = spark.sparkContext.hadoopConfiguration
+class TestPartitionMoveFolders extends AnyFlatSpec with LocalSparkSuite with HadoopSimpleAuth with AssertionsHelper {
+  private val db = "promotor_TestPartitionMoveFolders"
+  private val d = db + "."
 
-  val t = new TestUtils("TestPartitionMoveFolders")
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
+    spark.sql(s"create database if not exists $db")
+    implicit val conf = spark.sparkContext.hadoopConfiguration
+    implicit val sparkSession = spark
 
-  "initial checks" should "be passed" in {
-    t.setupTestEnv()
-    println("Partitions in DLT")
-    spark.table(t.d + "STORE_SALES_DLT").select("mm_time_perd_end_date").distinct.show()
-    val sfctInit = spark.table(t.d + "STORE_SALES_SFCT").
-      filter("mm_time_perd_end_date in ('2019-12-31','2019-10-31')").select("mm_time_perd_end_date").distinct
+    // Seed DLT with two partitions to be moved
+    val dlt = spark.range(0, 100)
+      .withColumn("mm_time_perd_end_date", expr("CASE WHEN id % 2 = 0 THEN '2019-12-31' ELSE '2019-10-31' END"))
+      .withColumn("prod_id", lit("prod"))
+    dlt.write.partitionBy("mm_time_perd_end_date").mode("overwrite").saveAsTable(d + "STORE_SALES_DLT")
 
-    println("Partitions in SFCT")
-    sfctInit.show
-    assert(sfctInit.count() == 1,
-      "check if partitions to be promoted exists in target (only one should exist)")
-    println("Partitions in SFCT")
-    spark.table(t.d + "STORE_SALES_SFCT").select("mm_time_perd_end_date").distinct.show()
+    // Seed SFCT with only one of the target partitions so precheck is 1
+    val sfct = spark.range(0, 100)
+      .withColumn("mm_time_perd_end_date", expr("CASE WHEN id % 3 = 0 THEN '2019-10-31' ELSE '2019-08-31' END"))
+      .withColumn("prod_id", lit("prod"))
+    sfct.write.partitionBy("mm_time_perd_end_date").mode("overwrite").saveAsTable(d + "STORE_SALES_SFCT")
 
-    Promotor.moveTablePartitions(t.db, "STORE_SALES_DLT", t.db, "STORE_SALES_SFCT", Seq("2019-10-31", "2019-12-31"))
-
-    println("SFCT partitions after promotion:")
-    spark.table(t.d + "STORE_SALES_SFCT").select("mm_time_perd_end_date").distinct.show()
+    Promotor.moveTablePartitions(db, "STORE_SALES_DLT", db, "STORE_SALES_SFCT", Seq("2019-10-31", "2019-12-31"))
   }
 
-  "SFCT" should "contain new partition" in {
-    assert(spark.table(t.d + "STORE_SALES_SFCT").filter("mm_time_perd_end_date = '2019-12-31'").count() != 0, "check if partition was correctly moved")
+  "SFCT" should "contain new partition 2019-12-31 after move" in {
+    assert(spark.table(d + "STORE_SALES_SFCT").filter("mm_time_perd_end_date = '2019-12-31'").count() != 0)
   }
 
-  "SFCT" should "contain data from DLT - only one prod_id" in {
-    val distinctProdIdCnt = spark.table(t.d + "STORE_SALES_SFCT").filter("mm_time_perd_end_date = '2019-10-31'").select("prod_id").distinct.count
-    assert(distinctProdIdCnt == 1, "check if partition was fully replaced with new one - actual:" + distinctProdIdCnt)
+  "SFCT" should "contain data from DLT - only one prod_id for 2019-10-31" in {
+    val distinctProdIdCnt = spark.table(d + "STORE_SALES_SFCT").filter("mm_time_perd_end_date = '2019-10-31'").select("prod_id").distinct.count
+    assert(distinctProdIdCnt == 1)
   }
 
-  "moveTablePartitions" should "retain all other partitions in the target table" in {
-    assert(spark.table(t.d + "STORE_SALES_SFCT").select("mm_time_perd_end_date").distinct.count == 5, "check if other partitions remained")
+  "moveTablePartitions" should "remove moved partitions from source DLT" in {
+    assert(spark.table(d + "STORE_SALES_DLT").filter("mm_time_perd_end_date in ('2019-12-31','2019-10-31')").select("mm_time_perd_end_date").distinct.count == 0)
   }
 
-  "moveTablePartitions" should "removed all data of moved partitions from source table" in {
-    assert(spark.table(t.d + "STORE_SALES_DLT").filter("mm_time_perd_end_date in ('2019-12-31',2019-10-31)").
-      select("mm_time_perd_end_date").distinct.count == 0, "check if partitions were removed from source")
+  override protected def afterAll(): Unit = {
+    try {
+      spark.sql(s"drop table if exists $d" + "STORE_SALES_DLT")
+      spark.sql(s"drop table if exists $d" + "STORE_SALES_SFCT")
+      spark.sql(s"drop database if exists $db")
+    } finally super.afterAll()
   }
-
-  override def afterAll() = t.cleanup()
-
 }

@@ -1,17 +1,16 @@
 package com.pg.bigdata.octopufs
 
-import com.pg.bigdata.octopufs.fs
-import com.pg.bigdata.octopufs.fs.{FsElement, Paths, getFileSystem}
+import com.pg.bigdata.octopufs.fs.{Paths, getFileSystem}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileStatus, FileSystem, Path}
 import org.apache.spark.sql.SparkSession
 
-import java.util.concurrent.Executors
+import java.util.concurrent.{ExecutorService, Executors}
 import scala.concurrent._
 
 
 class Coalesce(numOfThreads: Int = 10)(implicit spark: SparkSession) {
-  val exec = Executors.newFixedThreadPool(numOfThreads)
+  val exec: ExecutorService = Executors.newFixedThreadPool(numOfThreads)
   implicit val executionContext: ExecutionContextExecutor = ExecutionContext.fromExecutor(exec)
   implicit val conf: Configuration = spark.sparkContext.hadoopConfiguration
 
@@ -30,19 +29,19 @@ class Coalesce(numOfThreads: Int = 10)(implicit spark: SparkSession) {
     }
   }
 
-  def doAutoCoalesce(source: String, requestedSizeOfFileMB: Long) = {
+  def doAutoCoalesce(source: String, requestedSizeOfFileMB: Long): Unit = {
     implicit val conf: Configuration = spark.sparkContext.hadoopConfiguration
     val paths: Paths = prepareFolder(source)
     try {
       val df = spark.read.parquet(paths.sourcePath)
-      val numOfFiles = figureOutNumberOfPartition(source,requestedSizeOfFileMB)(spark.sparkContext.hadoopConfiguration)
+      val numOfFiles = figureOutNumberOfPartition(source, requestedSizeOfFileMB)(spark.sparkContext.hadoopConfiguration)
       println("Calculated coalesce count for " + source + " is " + numOfFiles)
       df.coalesce(numOfFiles).write.mode("overwrite").parquet(paths.targetPath)
       replaceFolder(paths.sourcePath, paths.targetPath)
     } catch {
-        case e: org.apache.spark.sql.AnalysisException =>
-         println(s"Doing nothing for ${source} as there is no data in the folder. Message: " + e.getMessage())
-       }
+      case e: org.apache.spark.sql.AnalysisException =>
+        println(s"Doing nothing for ${source} as there is no data in the folder. Message: " + e.getMessage())
+    }
   }
 
   def getLowestFoldersPaths(fs: FileSystem, topLevelPath: String): Array[String] = {
@@ -51,11 +50,12 @@ class Coalesce(numOfThreads: Int = 10)(implicit spark: SparkSession) {
       .filter(_.isDirectory).map(_.getPath)
     //check if there is another level of folders - if yes, run recursive call
     if (partitionFolders.nonEmpty) {
-      val subFolders = partitionFolders.par.flatMap(pf => fs.listStatus(pf).filter(_.isDirectory))
+      import scala.collection.parallel.CollectionConverters._
+      val subFolders = partitionFolders.toIndexedSeq.par.flatMap(pf => fs.listStatus(pf).filter(_.isDirectory))
       if (subFolders.isEmpty) //if there are no subfolders, it means we are at the lowest level of folder structure
         partitionFolders.map(_.toString)
       else
-        subFolders.par.flatMap(x => getLowestFoldersPaths(fs, x.getPath.toString)).toArray
+        subFolders.flatMap(x => getLowestFoldersPaths(fs, x.getPath.toString)).toArray
     }
     else Array(topLevelPath)
     //no need for tail recursion as there will be only few recursive calls (usually 1-2)

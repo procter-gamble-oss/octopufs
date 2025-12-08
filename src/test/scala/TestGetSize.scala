@@ -1,26 +1,23 @@
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
+import testsupport.{HadoopSimpleAuth, LocalSparkSuite, TempFsHelper}
 import com.pg.bigdata.octopufs.fs.getSize
-import org.apache.hadoop.fs.Path
-import org.apache.spark.sql.SparkSession
-class TestGetSize extends FlatSpec{
-  implicit val spark: SparkSession = SparkSession.builder().
-    appName("NAS_").
-    master("local").
-    getOrCreate()
-  val currentDirectory = new java.io.File(".").getCanonicalPath
-  val path = currentDirectory+"/data"
-  implicit val conf = spark.sparkContext.hadoopConfiguration
+import org.apache.hadoop.conf.Configuration
 
-  "getSize" should "return size of data folder" in {
+class TestGetSize extends AnyFlatSpec with LocalSparkSuite with HadoopSimpleAuth with TempFsHelper {
+  private val base = tempDir("getsize")
+  private val path = base.toString
+  implicit val conf: Configuration = spark.sparkContext.hadoopConfiguration
+
+  "getSize" should "return size of temp folder" in {
     getSize(path)
   }
 
-  "getSize" should "return actual number of elements and size of data folder" in {
+  "getSize" should "return elements and size of temp folder" in {
     getSize(path, false).sizes.foreach(println)
   }
 
-  "getSize" should "return the same size despite if files were collapsed or not" in {
-    val localPath = "file:"+path
+  "getSize" should "return the same size whether collapsed or not" in {
+    val localPath = base.toUri.toString
     assert(getSize(path, false).getSizeOfPath(localPath) == getSize(path, true).getSizeOfPath(localPath))
   }
 }

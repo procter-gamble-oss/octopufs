@@ -56,7 +56,7 @@ package object metastore {
   }
 
   def getFilesOnlyOfFolders(folderPathUris: Array[String])(implicit fs: FileSystem): Array[FsElement] = { //todo: test it and scaladoc
-    folderPathUris.map(x => listLevel(fs, new Path(x)).filter(!_.isDirectory)).reduce(_ union _) //get all files from the subfolders (remove folder paths)
+    folderPathUris.map(x => listLevel(fs, new Path(x)).filter(!_.isDirectory)).reduce(_ ++ _).toArray //get all files from the subfolders (remove folder paths)
 
   }
 

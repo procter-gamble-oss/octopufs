@@ -1,51 +1,52 @@
 import com.pg.bigdata.octopufs.Promotor
-import org.apache.spark.sql.SparkSession
-import org.scalatest.{BeforeAndAfterAll, FlatSpec}
+import org.apache.spark.sql.functions._
+import org.scalatest.flatspec.AnyFlatSpec
+import testsupport.{AssertionsHelper, HadoopSimpleAuth, LocalSparkSuite}
 
-class TestTableContentMove extends FlatSpec with BeforeAndAfterAll{
-  implicit val spark: SparkSession = SparkSession.builder().
-    appName("NAS_").
-    master("local[1]").
-    getOrCreate()
-//  spark.conf.set("spark.speculation", "false")
-  implicit val c = spark.sparkContext.hadoopConfiguration
-  val testName = "TestTableContentMove"
+class TestTableContentMove extends AnyFlatSpec with LocalSparkSuite with HadoopSimpleAuth with AssertionsHelper {
+  private val db = "promotor_TestTableContentMove"
+  private val d = db + "."
 
-  val t = new TestUtils(testName)
-  t.setupTestEnv()
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
+    spark.sql(s"create database if not exists $db")
+    implicit val conf = spark.sparkContext.hadoopConfiguration
+    implicit val sparkSession = spark
+    import sparkSession.implicits._
 
-  "Test data" should "be created ok" in {
-    println("Checking initial tables")
-    val pdcIni = spark.table(t.d+"PROD_DIM").select("pg_categ_txt").distinct
-    val pscIni = spark.table(t.d+"PROD_SDIM").select("pg_categ_txt").distinct
-    println("PROD_DIM initial categ distinct")
-    pdcIni.show()
-    println("PROD_SDIM initial categ distinct")
-    pscIni.show()
+    // Seed PROD_DIM with multiple categories
+    val prodDim = Seq((1L, "a"), (2L, "b")).toDF("id", "pg_categ_txt")
+    prodDim.write.mode("overwrite").saveAsTable(d + "PROD_DIM")
+
+    // Seed PROD_SDIM with 200 rows and pg_categ_txt = 'updated'
+    val prodSdim = spark.range(0, 200).withColumn("pg_categ_txt", lit("updated")).select(col("id"), col("pg_categ_txt"))
+    prodSdim.write.mode("overwrite").saveAsTable(d + "PROD_SDIM")
+
+    val pdcIni = spark.table(d + "PROD_DIM").select("pg_categ_txt").distinct
+    val pscIni = spark.table(d + "PROD_SDIM").select("pg_categ_txt").distinct
     assert(pdcIni.count() > 1 && pscIni.count() == 1, "Initial versions of prod (s)dim check failed")
-  }
 
-  "moveFilesBetweenTables" should "execute ok" in {
-    Promotor.moveFilesBetweenTables(t.db, "PROD_SDIM", t.db, "PROD_DIM")
+    Promotor.moveFilesBetweenTables(db, "PROD_SDIM", db, "PROD_DIM")
   }
 
   "moveFilesBetweenTables" should "remove content of source table" in {
-    val sdim = spark.table(t.d+"PROD_SDIM")
-    sdim.show()
-    println("Checking count of rows in PROD_SDIM after promotion (0 expected)")
-    assert(sdim.count() == 0, "Count of rows is not 0 - actual " + sdim.count())
+    val sdim = spark.table(d + "PROD_SDIM")
+    assert(sdim.count() == 0, s"Count of rows is not 0 - actual ${sdim.count()}")
   }
 
-  "moveFilesBetweenTables" should "move content of SDIM to Dim" in {
-    println("Checking count of rows in PROD_DIM after promotion (200 expected)")
-    val pd = spark.table(t.d+"PROD_DIM")
-    pd.show()
-    assert(pd.count() == 200, "Count of rows is not 200 - actual " + pd.count())
-    println("Checking if pg_categ_txt in PROD_DIM has only one value \"updated\"")
-    val dc = spark.table(t.d+"PROD_DIM").select("pg_categ_txt").distinct
-    assert(dc.count() == 1, "Count distinct categs is not 1 - actual " + dc.count())
+  "moveFilesBetweenTables" should "move content of SDIM to DIM" in {
+    val pd = spark.table(d + "PROD_DIM")
+    assert(pd.count() == 200, s"Count of rows is not 200 - actual ${pd.count()}")
+    val dc = spark.table(d + "PROD_DIM").select("pg_categ_txt").distinct
+    assert(dc.count() == 1, s"Count distinct categs is not 1 - actual ${dc.count()}")
+    assert(dc.collect().map(_.getAs[String]("pg_categ_txt")).head == "updated")
   }
 
-  override def afterAll() =  t.cleanup()
-
+  override protected def afterAll(): Unit = {
+    try {
+      spark.sql(s"drop table if exists $d" + "PROD_DIM")
+      spark.sql(s"drop table if exists $d" + "PROD_SDIM")
+      spark.sql(s"drop database if exists $db")
+    } finally super.afterAll()
+  }
 }

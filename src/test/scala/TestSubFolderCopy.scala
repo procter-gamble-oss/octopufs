@@ -2,25 +2,34 @@ import com.pg.bigdata.octopufs.Promotor
 import com.pg.bigdata.octopufs.fs._
 import org.apache.hadoop.fs.Path
 import org.apache.spark.sql.SparkSession
-import org.scalatest.{BeforeAndAfterAll, FlatSpec}
+import testsupport._
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class TestSubFolderCopy extends FlatSpec with BeforeAndAfterAll {
-  implicit val spark: SparkSession = SparkSession.builder().
-    appName("NAS_").
-    master("local").
-    getOrCreate()
-  spark.sparkContext.setLogLevel("ERROR")
-  implicit val c = spark.sparkContext.hadoopConfiguration
+class TestSubFolderCopy extends AnyFlatSpec with Matchers with LocalSparkSuite with HadoopSimpleAuth with TempFsHelper { self: org.scalatest.Suite =>
+  implicit def ss: SparkSession = spark
+  implicit def c: org.apache.hadoop.conf.Configuration = spark.sparkContext.hadoopConfiguration
 
-  val currentDirectory = new java.io.File(".").getCanonicalPath
-  val startPath = currentDirectory + "/data/FolderCopyTest"
-  val destPath = currentDirectory + "/data/copysubfolderstarget"
-  TestUtils.createRandomFolderStructure(startPath)
-  val fs = getFileSystem(spark.sparkContext.hadoopConfiguration, startPath)
+  private var base: String = _
+  private var startPath: String = _
+  private var destPath: String = _
+  private var fs: org.apache.hadoop.fs.FileSystem = _
+  private var subFoldersToBeCopied: Array[String] = _
 
-  val subFoldersToBeCopied = fs.listStatus(new Path(startPath)).filter(_.isDirectory).take(2).map(_.getPath.getName)
-  println(subFoldersToBeCopied.mkString(", "))
-  Promotor.copySelectedSubFoldersContent(startPath, destPath, subFoldersToBeCopied)
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
+    base = tempDir("subfolder-copy").toString
+    startPath = base + "/FolderCopyTest"
+    destPath = base + "/copysubfolderstarget"
+    TestUtils.createRandomFolderStructure(startPath)
+    fs = getFileSystem(spark.sparkContext.hadoopConfiguration, startPath)
+    subFoldersToBeCopied = fs.listStatus(new Path(startPath)).filter(_.isDirectory).take(2).map(_.getPath.getName)
+  }
+
+  it should "copy selected subfolders content" in {
+    Promotor.copySelectedSubFoldersContent(startPath, destPath, subFoldersToBeCopied)(spark)
+  }
 
   "Source folder" should "contain more than 2 subfolders (precheck)" in {
     assert(fs.listStatus(new Path(startPath)).length > 2, "If source does not have more than 2 sub-folders, than sub-folders filtering test is limited and may be false positive")
@@ -41,7 +50,7 @@ class TestSubFolderCopy extends FlatSpec with BeforeAndAfterAll {
     assert(x.sameElements(y))
   }
 
-  override def afterAll() = {
+  override protected def afterAll(): Unit = {
     fs.delete(new Path(startPath), true)
     fs.delete(new Path(destPath), true)
   }

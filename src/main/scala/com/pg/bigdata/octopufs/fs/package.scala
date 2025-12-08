@@ -7,7 +7,7 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileStatus, FileSystem, Path}
 
 import scala.concurrent.duration._
-import scala.concurrent.forkjoin.ForkJoinPool
+import java.util.concurrent.ForkJoinPool
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor, Future}
 
 
